@@ -598,9 +598,9 @@ Static Function ImpSub(cTipoEtq)
 	if  MSGYESNO("Deseja realmente imprimir etiqueta para o produto "+SB1->B1_DESC+"?", "Confirmação")
 
 		if _Motivo = 1
-			cMot := "E" //Estragada/Danificada
+			cMot := "R" //Rasgada/Reenfardamento
 		ElseIf _Motivo = 2
-			cMot := "D" //Devolução
+			cMot := "S" //Substituição
 		//ElseIf _Motivo = 3  //Retirada opção.Fardos sem etiqueta devem ser etiquetados como produto novo.
 		EndIf
 		
@@ -609,7 +609,7 @@ Static Function ImpSub(cTipoEtq)
 	
 		if Alltrim(cLoteSub) <> ""
 			IF Alltrim(cCodProd) <> ""
-				if cMot = "D"
+				if cMot = "S"
 					cOP := "55"+ strzero(val(cLoteSub),4) +"55" //alterado 16/07/18
 				Else
 					cOP := "99"+ strzero(val(cLoteSub),4) +"99" //alterado 11/04/16
@@ -719,9 +719,9 @@ Static Function ImpSub(cTipoEtq)
 			SZ3->Z3_DOCSD3 :=  _cDoc
 			SZ3->Z3_DATA   := dDatabase  //DATA DE APONTAMENTO DO FARDO - INCLUIR CAMPO
 			SZ3->Z3_LETRA  := cTurma
-			if cMot = "D"  //Registrar que fardo já foi carregado e tem etiqueta substituta de devolução.
-				SZ3->Z3_REG ='D'
-			EndIf
+		//	if cMot = "D"  //Registrar que fardo já foi carregado e tem etiqueta substituta de devolução.
+		//		SZ3->Z3_REG ='D'
+		//	EndIf
 			SZ3->(MsUnlock())
 		//Else
 //			MSGINFO("Fardo"+SZ3->Z3_NUMERAC+" já existe com documento "+SZ3->Z3_DOCSD3+". Favor informar responsavel pelo sistema.")
@@ -781,30 +781,6 @@ Static Function FormExcFardo()
 	DEFINE SBUTTON oBtnOK FROM 047, 192 TYPE 01 OF oDlg4 ENABLE ACTION (ExcFardo(oMSNewGe1:aCols[pos][1]+oMSNewGe1:aCols[pos][2],substr(cGetEtq1,1,4),substr(cGetEtq2,1,4)),oDlg4:End())
 	
 	ACTIVATE MSDIALOG oDlg4 CENTERED
-Return
-
-Static Function FormExcLote()
-
-	Static oDlg4
-	Static oBtnOK
-	Static oFont1 := TFont():New("MS Sans Serif",,018,,.F.,,,,,.F.,.F.)
-	Static oGetEtq1a
-	Static cGetEtq1a := space(12)
-	Static oGetEtq2a
-	Static cGetEtq2a := space(12)
-	Static oSay1
-
-
-	pos := oMSNewGe1:nAt
-
-	DEFINE MSDIALOG oDlg41 TITLE "Estorno de Etiquetas do estoque" FROM 000, 000  TO 130, 450 COLORS 0, 16777215 PIXEL
-	@ 012, 010 SAY oSay1 PROMPT "Etiqueta Inicio:" SIZE 060, 017 OF oDlg41 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 010, 070 MSGET oGetEtq1a VAR cGetEtq1a SIZE 089, 012 OF oDlg41 COLORS 0, 16777215 FONT oFont1 PIXEL PICTURE "@!"
-	@ 030, 010 SAY oSay1 PROMPT "Etiqueta Fim:" SIZE 060, 017 OF oDlg41 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 030, 070 MSGET oGetEtq2a VAR cGetEtq2a SIZE 089, 012 OF oDlg41 COLORS 0, 16777215 FONT oFont1 PIXEL PICTURE "@!"
-	DEFINE SBUTTON oBtnOK FROM 047, 192 TYPE 01 OF oDlg41 ENABLE ACTION (ExcFardo(substr(cGetEtq1a,1,8),substr(cGetEtq1a,9,4),substr(cGetEtq2a,9,4)),oDlg41:End())
-	
-	ACTIVATE MSDIALOG oDlg41 CENTERED
 Return
 
 /*
@@ -1156,7 +1132,6 @@ Return( Nil )
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
-//Static Function ExcFardo_OP(_array)
 Static Function ExcFardo_OP()
 
 //	Local aEtqOrd := _array
@@ -1164,8 +1139,6 @@ Static Function ExcFardo_OP()
 	Local cProd := ""
 	Local _cDoc :=""
 	Local _cDocNew :=""
-//	Local nFardoIni := Val(_nFardoIni2)
-//	Local nFardoFim := val(_nFardoFim2)
 	Local contCanc := 0
 	Local contErro := 0
 	Local nQtdEntreg := 0
@@ -1358,7 +1331,7 @@ User Function TABSZ3()
 	Pergunte(cPerg,.F.)
 	SetKey(123,{|| Pergunte(cPerg,.f.)}) // Seta a tecla F12 para acionamento dos parametros
 
-	AxCadastro(cString,"Cadastro de Romaneios",".t.",".t.")
+	AxCadastro(cString,"Cadastro de Fardos",".t.",".t.")
 
 
 	Set Key 123 To // Desativa a tecla F12 do acionamento dos parametros

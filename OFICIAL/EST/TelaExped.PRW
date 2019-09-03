@@ -21,7 +21,7 @@
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */ //antigo
-User Function SIGAESP1()
+User Function SIGAQIP()
 
 	Public cNumRom := ""
 	Static Hoje := dtos(ddatabase)
@@ -42,7 +42,7 @@ User Function SIGAESP1()
 	_nMostraFinaliz := Mv_Par01
 
 
-	DEFINE MSDIALOG oDlg1 TITLE "Carregamento 4.0 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
+	DEFINE MSDIALOG oDlg1 TITLE "Carregamento 6.0 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
 
     //@ 000, 253 BITMAP BmpLogo SIZE 143, 034 OF oDlg1 FILENAME "\\server\protheus10\protheus_data\logo.jpg" NOBORDER PIXEL
 	@ 025, 155 SAY oLblResp PROMPT "Separação da Carga: " SIZE 100, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -587,10 +587,12 @@ Static Function FinalizaRom()
 			SZ3->(MsUnlock())
 			SZ3->(dbskip())
 			
-			if SZ3->Z3_PRODUTO <> cProdCar
-			//*************************************************************
-			//** GERA MOVTO DE REQUISIÇÃO DE PRODUTO ACABADO EXPEDIDO  ****
-			//*************************************************************
+		//*************************************************************
+		//** GERA MOVTO DE REQUISIÇÃO DE PRODUTO ACABADO EXPEDIDO  ****
+		//*************************************************************
+		/*
+		if SZ3->Z3_PRODUTO <> cProdCar
+		
 			//Deve funcionar apenas quanto TES de Notas de Entrada e Devolução estiverem com Estoque=N.
 				lMsErroAuto := .F.
 					
@@ -609,8 +611,8 @@ Static Function FinalizaRom()
 				
 				cProdCar := SZ3->Z3_PRODUTO
 				nQtd := 0
-			EndIf
-			
+			EndIf */
+					
 		EndDo
 					
 		U_ENVMAILEXP('plinc.logistica@gmail.com',cAssunto ,cEmailErro)
@@ -906,12 +908,12 @@ Static Function FardosConf(nTipoFunc)
 				If  Trim(SZ3->Z3_ROMANEI) <> ""  .or. SZ3->Z3_REG='D' //VERIFICA SE ROMANEIO ESTÁ PREENCHIDO
 					conout("TELAEXPED: Rom. antes:"+SZ3->Z3_ROMANEI)
 					reclock("SZ3",.f.)
-					if SZ3->Z3_DATEXP < date()  //VERIFICA SE DATA DE DEVOLUÇÃO É MAIOR QUE DATA DA EXPEDIÇÃO
+					//if SZ3->Z3_DATEXP < date()  //VERIFICA SE DATA DE DEVOLUÇÃO É MAIOR QUE DATA DA EXPEDIÇÃO
 						cRomDev := SZ3->Z3_ROMANEI
 						SZ3->Z3_ROMDEV := cRomDev
 						SZ3->Z3_DTDEV := date()
 						SZ3->Z3_VEICDEV := cGetVeic  //Veículo de devolução
-					EndIf
+					//EndIf
 					SZ3->Z3_ROMANEI:=""
 					SZ3->Z3_HREXP:=""
 				//	SZ3->Z3_DATEXP:="" //INCLUIR FUNCAO PARA LIMPAR CAMPO.
@@ -961,7 +963,7 @@ Static Function FardosConf(nTipoFunc)
 			//************************************************************
 			//** GERA MOVTO DE DEVOLUÇÃO DE PRODUTO ACABADO EXPEDIDO  ****
 			//************************************************************
-			lMsErroAuto := .F.
+		/*	lMsErroAuto := .F.
 					
 			aVetorReq:={ {"D3_TM","002",NIL},;
 				{"D3_COD",_aFardDev[d][1],NIL},;
@@ -979,7 +981,7 @@ Static Function FardosConf(nTipoFunc)
 				conout("TELAEXPED: FIM - Erro ao realizar requisição.")
 			Else
 				conout("TELAEXPED: FIM - Registrado com sucesso.")
-			EndIf
+			EndIf */
 		Next
 		
 		MSGINFO("Excluídos do romaneio "+ Str(nQtdExclui) +" fardos registrados.")
