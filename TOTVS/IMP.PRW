@@ -6,7 +6,7 @@
 ‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±…ÕÕÕÕÕÕÕÕÕÕ—ÕÕÕÕÕÕÕÕÕÕÀÕÕÕÕÕÕÕ—ÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÀÕÕÕÕÕÕ—ÕÕÕÕÕÕÕÕÕÕÕÕÕª±±
-±±∫Programa  ≥IMP 4.0   ∫Autor  ≥ 					∫ Data ≥  15/04/16    ∫±±
+±±∫Programa  ≥IMP 5.0   ∫Autor  ≥ 					∫ Data ≥  15/04/16    ∫±±
 ±±ÃÕÕÕÕÕÕÕÕÕÕÿÕÕÕÕÕÕÕÕÕÕ ÕÕÕÕÕÕÕœÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕ ÕÕÕÕÕÕœÕÕÕÕÕÕÕÕÕÕÕÕÕπ±±
 ±±∫Desc.     ≥ IMPORTA DADOS DO OFICIAL PARA TOTVS	                     ∫±±
 ±±∫PROGRAMA  ≥                                                            ∫±±
@@ -49,27 +49,7 @@ Static Function conexao()
 	cHora := time()
 	Public DataHora := cData + " " + cHora
   
-	conout("iniciando importacao")
-//Abrindo Arquivos do Ambiente (Origem)
-    //Desativado para importar direto via consulta SQL
-
-/* TCCONTYPE("TCPIP")  
-	nCon2 := TCLink("MSSQL/DADOS12","192.168.2.1")  //BASE ENVIRONMENT
-	If nCon2 < 0
-		Alert("Nao Foi Possivel Realizar a Conexao com o SRVPP01/DADOSTOTVS.")
-		//Return
-	EndIf
-*/
-	//TCSETCONN(nCon2) //SETA CONEX√O COM ENVIRONMENT
-	
-/*	nCon1 := TCLink("MSSQL/TESTE11","192.168.2.1")  //BASE DADOSTOTVS11
-
-	If nCon1 < 0
-		Alert("Nao Foi Possivel Realizar a Conexao com o TESTE11.")
-		Return
-	EndIf
-	TCSETCONN(nCon1) //SETA CONEX√O COM TOTVS
-	*/
+	conout("iniciando importacao "+DataHora)
 Processa({|| gravaPedido()},"Aguarde...","Separando Pedidos...")	
 Processa({||AtualizaPedido()},"Aguarde...","Atualizando Pedidos...")
 
@@ -83,16 +63,11 @@ If MV_PAR05 == 1
 	Processa({||AtualizaProduto()},"Aguarde...","Atualizando Produtos...") //- Alterado para TOTVS2
 EndIf
 	
-	//TCSETCONN(nCon2) //SETA CONEX√O OFICIAL antes de separar pedidos do TOTVS.
-	
 	If MV_PAR06 == 1
 		Processa({|| gravaCliente()},"Aguarde...","Separando Clientes...")
 		Processa({||AtualizaCliente()},"Aguarde...","Atualizando Clientes...")
+		//Processa({||AtualizaRoman()},"Aguarde...","Atualizando num. romaneio...") 
 	EndIf
-
-	Processa({||AtualizaRoman()},"Aguarde...","Atualizando num. romaneio...") 
-//	TCUnlink(nCon1)
-	//TcUnlink(nCon2)
 
 Return
 
@@ -118,54 +93,36 @@ Static Function gravaPedido()
 	EndIf
 	
 	cQuery := "SELECT C5_FILIAL,C5_NUM,C5_TIPO,C5_CLIENTE,C5_LOJACLI,C5_CLIENT,C5_LOJAENT,C5_TIPOCLI,C5_CONDPAG,C5_TABELA,C5_VEND1,C5_COMIS1,"
-	cQuery += " C5_DESC1,C5_EMISSAO,C5_VOLUME1,C5_PBRUTO,C5_PESOL,C5_ESPECI1,C5_MENNOTA,C5_MENPAD,C5_TIPLIB,C5_DESCONT,C5_TXMOEDA,C5_TPCARGA,C5_NUMLDX,"
+	cQuery += " C5_DESC1,C5_EMISSAO,C5_VOLUME1,C5_PBRUTO,C5_PESOL,C5_ESPECI1,C5_OBS, C5_MENNOTA,C5_MENPAD,C5_TIPLIB,C5_DESCONT,C5_TXMOEDA,C5_TPCARGA,C5_NUMLDX,"
 	cQuery += " C5_ROMANEI, C5_ROMIT,C5_DTSAIDA,C5_TPFRETE,C5_IMPRESS FROM SRVPP01.DADOS12.dbo.SC5010 WHERE D_E_L_E_T_ = '' AND C5_NUM < '900000'  "
 	cQuery += "  AND C5_EMISSAO >= '"+ cDataIni +"' and C5_EMISSAO <= '"+ cDataFim +"' "
 	cQuery += "  AND C5_NUM >= '"+ cPedIni +"' and C5_NUM <= '"+ cPedFim +"' "
 	cQuery += " AND C5_EMISSAO >'"+ dtos(ddatabase-30) +"'"
 	cQuery += " 	AND C5_CLIENTE IN (SELECT A1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SA1010 WHERE D_E_L_E_T_ ='' )"
-	//cQuery += " AND LTRIM(C5_NOTA) = '' "
-	conout(cQuery)
+	cQuery += " ORDER BY C5_NUM "
+	
+	//conout(cQuery)
 	TCQuery cQuery Alias CABPED New
 	
+/*
 	If Select("ITENSPED") > 0
 		dbSelectArea("ITENSPED")
 		dbCloseArea()
 	EndIf
 
-cQuery := "  SELECT DA1_PRCVEN AS C6_PRUNIT, ISNULL(PER_DESCACRES,C6_DESCONT) AS C6_DESCONT,C6_FILIAL,C6_NUM,C6_ITEM,C6_PRODUTO,C6_UM,C6_QTDVEN, ISNULL(LI.VLR_VENDA, C6_PRCVEN) AS  C6_PRCVEN, "
-cQuery += " C6_VALOR,C6_SEGUM,C6_TES,C6_UNSVEN, C6_LOCAL,C6_CF,C6_QTDENT,C6_QTDENT2,C6_CLI,C6_VALDESC,C6_ENTREG,C6_LOJA,C6_COMIS1,C6_DESCRI,  "
+
+cQuery := "  SELECT VLR_TABELA AS C6_PRUNIT, ISNULL(PER_DESCACRES,C6_DESCONT) AS C6_DESCONT,C6_FILIAL,C6_NUM,C6_ITEM,C6_PRODUTO,C6_UM,C6_QTDVEN, ISNULL(LI.VLR_VENDA, C6_PRCVEN) AS  C6_PRCVEN, "
+cQuery += " C6_VALOR,C6_SEGUM,C6_TES,C6_UNSVEN, C6_LOCAL,C6_CF,C6_QTDENT,C6_QTDENT2,C6_CLI,C6_VALDESC,C6_ENTREG,C6_LOJA,C6_COMIS1,C6_DESCRI, C5_TABELA, "
 cQuery += " C6_CLASFIS, C6_NUMLDX, C6_SUGENTR FROM (SRVPP01.DADOS12.dbo.SC6010 A INNER JOIN SRVPP01.DADOS12.dbo.SC5010 B ON A.C6_NUM = B.C5_NUM) "
 cQuery += " LEFT OUTER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C6_CLI+A.C6_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
 cQuery += " LEFT OUTER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFITE LI ON LC.NUM_PEDIDO = LI.NUM_PEDIDO AND A.C6_PRODUTO = LI.COD_PRODUTO COLLATE Latin1_General_BIN "
-cQuery += " INNER JOIN SRVPP01.DADOS12.dbo.DA1010 TAB ON  LC.COD_TABPRE COLLATE Latin1_General_BIN = TAB.DA1_CODTAB AND A.C6_PRODUTO = TAB.DA1_CODPRO "
-cQuery += " WHERE A.D_E_L_E_T_ = '' AND  B.D_E_L_E_T_ = '' AND TAB.D_E_L_E_T_='' "
+cQuery += " WHERE A.D_E_L_E_T_ = '' AND  B.D_E_L_E_T_ = ''" // AND TAB.D_E_L_E_T_='' "
 cQuery += " AND C6_NUM < '900000' AND B.C5_EMISSAO >= '"+ cDataIni +"' and B.C5_EMISSAO <=  '"+ cDataFim +"' "
 cQuery += " AND B.C5_NUM >= '"+ cPedIni +"' and B.C5_NUM <=  '"+ cPedFim +"' AND C5_EMISSAO >'"+ dtos(ddatabase-30)  +"'"
-	
+cQuery += " ORDER BY C6_NUM "	
+
 conout(cQuery)
 	TCQuery cQuery Alias ITENSPED New
-
-
-/*	cQuery :=" SELECT LI.VLR_TABELA AS C6_PRUNIT,C6_FILIAL,C6_NUM,C6_ITEM,C6_PRODUTO,C6_UM,C6_QTDVEN,LI.VLR_VENDA AS  C6_PRCVEN,C6_VALOR,C6_SEGUM,C6_TES,C6_UNSVEN, "
-	cQuery += " C6_LOCAL,C6_CF,C6_QTDENT,C6_QTDENT2,C6_CLI,PER_DESCACRES AS C6_DESCONT,C6_VALDESC,C6_ENTREG,C6_LOJA,C6_COMIS1,C6_DESCRI,  "
-	cQuery += " C6_CLASFIS, C6_NUMLDX, C6_SUGENTR FROM (SRVPP01.DADOS12.dbo.SC6010 A INNER JOIN SRVPP01.DADOS12.dbo.SC5010 B ON A.C6_NUM = B.C5_NUM) "
-	cQuery += " INNER JOIN SRVPP03.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C6_CLI+A.C6_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
-	cQuery += " INNER JOIN SRVPP03.LANDIX_FLX.dbo.TAFITE LI ON LC.NUM_PEDIDO = LI.NUM_PEDIDO AND A.C6_PRODUTO = LI.COD_PRODUTO COLLATE Latin1_General_BIN "
-	cQuery += " WHERE (A.D_E_L_E_T_ = '' OR  B.D_E_L_E_T_ = '' ) "
-	cQuery += " AND C6_NUM < '900000' AND B.C5_EMISSAO >= '"+ cDataIni +"' and B.C5_EMISSAO <=  '"+ cDataFim +"' "
-	cQuery += " AND B.C5_NUM >= '"+ cPedIni +"' and B.C5_NUM <=  '"+ cPedFim +"' AND LTRIM(B.C5_NOTA) = ''"
-	cQuery += " AND C5_EMISSAO >"+ dtos(ddatabase-30)
-*/
-/*	cQuery := "  SELECT ISNULL(LI.VLR_TABELA, C6_PRUNIT) AS C6_PRUNIT,C6_FILIAL,C6_NUM,C6_ITEM,C6_PRODUTO,C6_UM,C6_QTDVEN,ISNULL(LI.VLR_VENDA, C6_PRCVEN) AS  C6_PRCVEN, "
-	cQuery += " C6_VALOR,C6_SEGUM,C6_TES,C6_UNSVEN, C6_LOCAL,C6_CF,C6_QTDENT,C6_QTDENT2,C6_CLI,ISNULL(PER_DESCACRES,C6_DESCONT) AS C6_DESCONT,C6_VALDESC,C6_ENTREG,C6_LOJA,C6_COMIS1,C6_DESCRI,  "
-	cQuery += " C6_CLASFIS, C6_NUMLDX, C6_SUGENTR FROM (SRVPP01.DADOS12.dbo.SC6010 A INNER JOIN SRVPP01.DADOS12.dbo.SC5010 B ON A.C6_NUM = B.C5_NUM) "
-	cQuery += " LEFT OUTER JOIN  SRVPP03.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C6_CLI+A.C6_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
-	cQuery += " LEFT OUTER JOIN  SRVPP03.LANDIX_FLX.dbo.TAFITE LI ON LC.NUM_PEDIDO = LI.NUM_PEDIDO AND A.C6_PRODUTO = LI.COD_PRODUTO COLLATE Latin1_General_BIN "
-	cQuery += " WHERE (A.D_E_L_E_T_ = '' OR  B.D_E_L_E_T_ = '' ) "
-	cQuery += " AND C6_NUM < '900000' AND B.C5_EMISSAO >= '"+ cDataIni +"' and B.C5_EMISSAO <=  '"+ cDataFim +"' "
-	cQuery += " AND B.C5_NUM >= '"+ cPedIni +"' and B.C5_NUM <=  '"+ cPedFim +"' AND C5_EMISSAO >"+ dtos(ddatabase-90)
-	//cQuery += "  AND LTRIM(B.C5_NOTA) = ''"
 */
 
 Return
@@ -195,7 +152,7 @@ Static Function gravaCliente()
 //Importa ou atualiza clientes n„o excluÌdos
 	cQuery := "SELECT A1_FILIAL,A1_COD,A1_LOJA,A1_NOME,A1_PESSOA,A1_TPJ, A1_IENCONT, A1_CONTRIB, A1_NREDUZ,A1_TIPO,A1_EST,A1_COD_MUN,A1_MUN,A1_NATUREZ,A1_END,A1_COND,"
 	cQuery += " A1_BAIRRO,A1_CEP, A1_DDD, A1_TEL,A1_PAIS,A1_CGC,A1_INSCR, A1_INSCRM,A1_VEND,A1_COMIS, A1_RISCO, A1_CNAE,A1_CONDPAG, "
-	cQuery +=" A1_MSBLQL,A1_DTINIV, A1_COMPLEM, A1_LOGRADO, A1_NR_END,A1_EMAIL, A1_HPAGE,A1_CONTA,A1_CEL,A1_CODPAIS FROM SRVPP01.DADOS12.dbo.SA1010"
+	cQuery +=" A1_MSBLQL,A1_DTINIV, A1_COMPLEM, A1_LOGRADO, A1_NR_END,A1_EMAIL, A1_HPAGE,A1_CONTA,A1_CEL,A1_CODPAIS, A1_OBS, A1_OBSVEND FROM SRVPP01.DADOS12.dbo.SA1010"
 	cQuery += " WHERE D_E_L_E_T_ = '' AND A1_CGC <> '' AND A1_CGC NOT LIKE '000000%' AND A1_MSBLQL<>'1'"
 
 	TCQuery cQuery Alias CLIENTES New
@@ -212,7 +169,7 @@ Static Function gravaProduto()
 
 //IMPORTA ou atualiza PRODUTOS N√O EXCLUIDOS E COM O CAMPO B1_IMPOR igual a SIM.
 	cQuery := "SELECT B1_FILIAL,B1_COD,B1_DESC,B1_TIPO,B1_UM,B1_LOCPAD,B1_GRUPO,B1_POSIPI,B1_TS,B1_PICMRET,B1_PICMENT,B1_SEGUM,  "
-	cQuery += " B1_CONV,B1_TIPCONV,B1_GRTRIB,B1_CC, B1_ORIGEM, B1_CONTA, B1_CODBAR FROM SRVPP01.DADOS12.dbo.SB1010
+	cQuery += " B1_CONV,B1_TIPCONV,B1_GRTRIB,B1_CC, B1_ORIGEM, B1_CONTA, B1_CODBAR FROM SRVPP01.DADOS12.dbo.SB1010 "
 	cQuery += " WHERE D_E_L_E_T_ = '' "
 	//cQuery += " AND B1_COD NOT IN (SELECT B1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SB1010 WHERE D_E_L_E_T_='')"
 
@@ -282,21 +239,21 @@ Static Function AtualizaPedido()
 
 	dbSelectArea("CABPED")
 	CABPED->(dbGotop())
-	ProcRegua(FCount())
+	//ProcRegua(FCount())
 
-	cIndexName := Criatrab(NIL,.F.)
-	cIndexKey := "C5_FILIAL+C5_NUM"
+	//cIndexName := Criatrab(NIL,.F.)
+	//cIndexKey := "C5_FILIAL+C5_NUM"
 
-	IndRegua("CABPED", cIndexName, cIndexKey,,,"Aguarde,incluindo pedido "+ TRIM(CABPED->C5_NUM)+ " ...")
+	//IndRegua("CABPED", cIndexName, cIndexKey,,,"Aguarde,incluindo pedido "+ TRIM(CABPED->C5_NUM)+ " ...")
 
 	Do While (!CABPED->(Eof()))
-
+		conout("While "+CABPED->C5_NUM+" - "+ time())
 		dbSelectArea("SC5")
 		dbsetorder(1)
 		dbseek(xfilial("SC5")+CABPED->C5_NUM)
 	
 		If ! SC5->(found())
-		
+		//	conout("Gravando " + Pedido + ":"+time())
 			RecLock("SC5",.t.)
 			SC5->C5_NUM:=CABPED->C5_NUM
 			SC5->C5_FILIAL:='01'
@@ -314,10 +271,12 @@ Static Function AtualizaPedido()
 			SC5->C5_EMISSAO:=STOD(CABPED->C5_EMISSAO)
 			SC5->C5_VOLUME1:=CABPED->C5_VOLUME1
 			IF CABPED->C5_CONDPAG = "001"
-				SC5->C5_MENNOTA:=  "A VISTA"
+				SC5->C5_MENNOTA:=  "A VISTA - "+SC5->C5_MENNOTA
+			ELSE
+				SC5->C5_MENNOTA:= SC5->C5_MENNOTA
 			ENDIF
-//		SC5->C5_OBS:=  CABPED->C5_MENNOTA
-			SC5->C5_MENPAD:=CABPED->C5_MENPAD
+   			SC5->C5_OBS:=  CABPED->C5_OBS
+   			SC5->C5_MENPAD:=CABPED->C5_MENPAD
 			SC5->C5_LIBEROK:= ""
 			SC5->C5_TIPLIB:=CABPED->C5_TIPLIB
 		//SC5->C5_DESCONT:=CABPED->C5_DESCONT
@@ -328,52 +287,62 @@ Static Function AtualizaPedido()
 			SC5->C5_DTSAIDA:=STOD(CABPED->C5_DTSAIDA)
 			SC5->C5_TPFRETE:=  "C"
 			SC5->C5_IMPRESS:=CABPED->C5_IMPRESS
-//  		SC5->C5_PBRUTO	:=CABPED->C5_PBRUTO
-  // 		SC5->C5_PESOL	:=CABPED->C5_PESOL
+	  		SC5->C5_PBRUTO	:=CABPED->C5_PBRUTO
+ 			SC5->C5_PESOL	:=CABPED->C5_PESOL
 			SC5->C5_ESPECI1:=CABPED->C5_ESPECI1
 			SC5->C5_VOLUME1:=CABPED->C5_VOLUME1
-			//SC5->C5_DTCRIA := DataHora
+			SC5->C5_HORIMP := cData := Dtoc(date())+" "+time()
 			SC5->C5_NUMLDX := CABPED->C5_NUMLDX
+			SC5->C5_TABELA := CABPED->C5_TABELA
 
-			dbSelectArea("SA1")
-			dbsetorder(1)
-			dbseek(xfilial("SA1")+SC5->C5_CLIENTE)
-
-			IF Trim(SA1->A1_TABELA)<>""
-				SC5->C5_TABELA := SA1->A1_TABELA
-			EndIf
 		
 			SC5->(MsUnlock())
+			
+		//	conout("CabeÁalho incluido "+time())
 		
 		//INCLUI ITENS DE PEDIDOS N√O IMPORTADOS
 			Pedido := CABPED->C5_NUM
 			contItPed := 0
-		
+	//**********************************************************
+	//***** BUSCA ITENS DO PEDIDO ATUAL PARA IMPORTAR   ********
+	//**********************************************************
+If Select("ITENSPED") > 0
+		dbSelectArea("ITENSPED")
+		dbCloseArea()
+	EndIf
+
+cQuery := "  SELECT VLR_TABELA AS C6_PRUNIT, ISNULL(PER_DESCACRES,C6_DESCONT) AS C6_DESCONT,C6_FILIAL,C6_NUM,C6_ITEM,C6_PRODUTO,C6_UM,C6_QTDVEN, ISNULL(LI.VLR_VENDA, C6_PRCVEN) AS  C6_PRCVEN, "
+cQuery += " C6_VALOR,C6_SEGUM,C6_TES,C6_UNSVEN, C6_LOCAL,C6_CF,C6_QTDENT,C6_QTDENT2,C6_CLI,C6_VALDESC,C6_ENTREG,C6_LOJA,C6_COMIS1,C6_DESCRI, C5_TABELA, "
+cQuery += " C6_CLASFIS, C6_NUMLDX, C6_SUGENTR FROM (SRVPP01.DADOS12.dbo.SC6010 A INNER JOIN SRVPP01.DADOS12.dbo.SC5010 B ON A.C6_NUM = B.C5_NUM) "
+cQuery += " LEFT OUTER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C6_CLI+A.C6_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
+cQuery += " LEFT OUTER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFITE LI ON LC.NUM_PEDIDO = LI.NUM_PEDIDO AND A.C6_PRODUTO = LI.COD_PRODUTO COLLATE Latin1_General_BIN "
+cQuery += " WHERE A.D_E_L_E_T_ = '' AND  B.D_E_L_E_T_ = '' AND C6_NUM = '"+ Pedido +"'
+
+//conout(cQuery)
+TCQuery cQuery Alias ITENSPED New
+conout("Consulta de dados concluida -"+time())
+
+			
 			dbSelectArea("ITENSPED")
 		//		ITENSPED->(dbGotop())
-		
-		
 		//FILTRA SOMENTE ITENS DO PEDIDO QUE ESTA SENDO INSERIDO  //PODE ESTAR FAZENDO O PROGRAMA DEMORAR MUITO
-			ITENSPED->(DbSetFilter({|| ITENSPED->C6_NUM == CABPED->C5_NUM}, "ITENSPED->C6_NUM == '" + CABPED->C5_NUM + "'"))
+/*			ITENSPED->(DbSetFilter({|| ITENSPED->C6_NUM == CABPED->C5_NUM}, "ITENSPED->C6_NUM == '" + CABPED->C5_NUM + "'"))
 			DbSelectArea("ITENSPED")
 			ITENSPED->(dbgotop())
-		
-		
+*/
+				
 			While ! ITENSPED->(Eof()) .and. ITENSPED->C6_NUM == CABPED->C5_NUM
-			
+	
+			//	conout("gravaÁ„o item "+ITENSPED->C6_ITEM+"-"+time())
 				dbSelectArea("SC6")
-				dbsetorder(1)
+	/*			dbsetorder(1)
 				dbseek(xfilial("SC6")+ITENSPED->C6_NUM+ITENSPED->C6_ITEM)
 
-			//	IF ITENSPED->DELETED()
-			//		SC6->DBDELETE()
-			//	ENDIF
-			
 				If ! SC6->(found())
-					dbSelectArea("DA1")
-					dbsetorder(1)
-					dbseek(xfilial("DA1")+SA1->A1_TABELA+ITENSPED->C6_PRODUTO)
-						
+		//			dbSelectArea("DA1")
+			//		dbsetorder(1)
+				//	dbseek(xfilial("DA1")+SA1->A1_TABELA+ITENSPED->C6_PRODUTO)
+		*/				
 					RecLock("SC6",.t.)
 					SC6->C6_NUM:=ITENSPED->C6_NUM
 					SC6->C6_ITEM:=ITENSPED->C6_ITEM
@@ -396,12 +365,14 @@ Static Function AtualizaPedido()
 					SC6->C6_COMIS1:=ITENSPED->C6_COMIS1
 					SC6->C6_DESCRI:=ITENSPED->C6_DESCRI
 					SC6->C6_CLASFIS:=ITENSPED->C6_CLASFIS
-					//SC6->C6_DTCRIA := DataHora
-				//	SC6->C6_NUMLDX := ITENSPED->C6_NUMLDX				
+					SC6->C6_NUMLDX := VAL(ITENSPED->C6_NUMLDX)		
+					SC6->C6_HORIMP := Dtoc(date())+" "+time()
+							
 				
 					SC6->(MsUnlock())
+				//	conout("Item gravado-"+time())
 					contItPed += 1
-				EndIf
+//				EndIf
 				dbSelectArea("ITENSPED")
 				ITENSPED->(dbskip())
 			EndDo
@@ -457,7 +428,7 @@ Static Function AtualizaProduto()
 			SB1->(MsUnlock())
 		EndIf
 		
-		conout("Importado produto " + Alltrim(SB1->B1_COD) + ".")
+	//	conout("Importado produto " + Alltrim(SB1->B1_COD) + ".")
 		PRODUTOS->(dbskip())
 	EndDo
 	dbCloseArea("PRODUTOS")
@@ -503,10 +474,10 @@ Static Function AtualizaMotorista()
 				
 			DA4->(MsUnlock())
 			MOTORISTA->(dbskip())
-			conout("atualizado motorista "+DA4->DA4_COD)
+		//	conout("atualizado motorista "+DA4->DA4_COD)
 		EndDo
 		dbCloseArea("MOTORISTA")
-		conout("Importado e atualizado todos os motoristas.")
+	//	conout("Importado e atualizado todos os motoristas.")
 
 Return
 
@@ -550,7 +521,7 @@ Static Function AtualizaVeiculo()
 		VEICULO->(dbskip())
 	EndDo
 	dbCloseArea("VEICULO")
-	conout("Importado e atualizado todos os veiculos.")
+	//conout("Importado e atualizado todos os veiculos.")
 
 Return
 */
@@ -630,6 +601,8 @@ Static Function AtualizaCliente()
 		SA1->A1_END  	:=CLIENTES->A1_END
 		SA1->A1_COND	:=CLIENTES->A1_COND
 		SA1->A1_CONTA	:=CLIENTES->A1_CONTA
+		SA1->A1_OBS		:= CLIENTES->A1_OBS
+		SA1->A1_OBSVEND	:=CLIENTES->A1_OBSVEND
 		
 //	SA1->A1_DTCRIA  := DataHora
 	
