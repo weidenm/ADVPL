@@ -1,5 +1,6 @@
 #include "rwmake.ch"
-
+#include "topconn.ch"
+#include "tbiconn.ch"
 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -159,6 +160,7 @@ Static Function CriaTraba()
 	Aadd(aTempStru,{"ValrTota","N",11,2})
 	Aadd(aTempStru,{"ValrDesc","N",11,2}) //Alterado/Incluï¿½do em 16/08/18
 	Aadd(aTempStru,{"PrecoTab","N",11,2})  //Alterado/Incluï¿½do em 16/08/18
+	Aadd(aTempStru,{"PercDescIt","N",05,2})
 
 	cArqTrab1 := CriaTrab(aTempStru,.T.)
 
@@ -254,7 +256,6 @@ Static Function GravTrab()
 	nPercICMS := Val(SubStr(GetMV("MV_ESTICM"),nPosiStr+2,2))
 */
 		aArraPedi := {}
-
 		DBSelectArea("SC6")
 		DBSetOrder(1)
 		DBSeek(xFilial("SC6")+SC5->C5_NUM)
@@ -264,33 +265,40 @@ Static Function GravTrab()
 				(SC6->C6_NUM    == SC5->C5_NUM)
 		
 		
+		
+			If Select("ITENSPED") > 0
+				dbSelectArea("ITENSPED")
+				dbCloseArea()
+			EndIf		
+				cQuery := "  SELECT PER_DESCACRES, VLR_VENDA  FROM  SRVPP01.LANDIX_FLX.dbo.TAFITE  WHERE NUM_PEDIDO = '" + STR(SC5->C5_NUMLDX) +"' AND COD_PRODUTO = '"+ SC6->C6_PRODUTO +"'"
+					//cQuery += "  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C6_CLI+A.C6_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
+				TCQuery cQuery Alias ITENSPED New
+		
+		
 			DBSelectArea("SB1")
 			dbSetOrder(1)
 			DBSeek(xFilial("SB1")+SC6->C6_PRODUTO)
-		
-	//	DBSelectArea("SF4")
-	//	DBSeek(xFilial("SF4")+SC6->C6_Tes)
+	
+			dbSelectArea("ITENSPED")	
 		
 			DBSelectArea("TRBI")
 			dbSetOrder(1)
 			RecLock("TRBI",.T.)
+
 		
-		
+			
 			Replace  Pedido    With  SC6->C6_NUM
 			Replace  ItemPed   With  SC6->C6_ITEM
-//		Replace  NumeNtFi  With  SC6->C6_NOTA//SD2->D2_Doc
-//		Replace  SeriNtFi  With  SC6->C6_SERIE//SD2->D2_Serie
-			Replace  CodiProd  With  SC6->C6_PRODUTO //SD2->D2_Cod
+			Replace  CodiProd  With  SC6->C6_PRODUTO 
 			Replace  DescProd  With  SC6->C6_DESCRI //IIf(SB1->B1_TIPO == "SP",SC6->C6_DESCRI,Left(Alltrim(SC6->C6_DESCRI),40))
 			Replace  CodiUnid  With  SC6->C6_UM
-//		Replace  CodiTes   With  SC6->C6_TES//SD2->D2_TES
-//		Replace  CodiFiOP  With  SC6->C6_CF //SD2->D2_CF
 			Replace  Tipo      With  SB1->B1_Tipo
-			Replace  QtdeProd  With  SC6->C6_QTDVEN//SD2->D2_Quant
-			Replace  ValrUnit  With  SC6->C6_PRCVEN  //Iif(SC6->C6_OPER=="04",0,SD2->D2_PrcVen)
-			Replace  ValrTota  With  SC6->C6_VALOR  //Iif(SC6->C6_OPER=="04",0,SD2->D2_Total)
-			Replace  ValrDesc  With  SC6->C6_VALDESC //Alterado/Incluï¿½do em 16/08/18
-			Replace  PrecoTab  With  Iif(SC6->C6_PRUNIT>SC6->C6_PRCVEN,SC6->C6_PRUNIT,SC6->C6_PRCVEN) // SC6->C6_PRUNIT //Alterado/Incluï¿½do em 16/08/18
+			Replace  QtdeProd  With  SC6->C6_QTDVEN
+			Replace  ValrUnit  With  ITENSPED->VLR_VENDA    //SC6->C6_PRCVEN 
+			Replace  ValrTota  With  SC6->C6_VALOR  
+			Replace  ValrDesc  With  SC6->C6_VALDESC  
+		//	Replace  PercDescIt  Whit  ITENSPED->PER_DESCACRES
+		//	Replace  PrecoTab  With  Iif(SC6->C6_PRUNIT>SC6->C6_PRCVEN,SC6->C6_PRUNIT,SC6->C6_PRCVEN) // SC6->C6_PRUNIT //Alterado/Incluï¿½do em 16/08/18
 			
 			MsUnlock()
 			
@@ -523,19 +531,19 @@ Static Function ImprItem()
 	//@ nLin, 067 PSAY TRBI->ValrTota  Picture "@E 999,999.99"  //Retornado em 04/12/18
 
 	nTotalBru := nTotalBru + nPrecoItem
-	nTotalPro := nTotalPro + TRBI->ValrTota
+	nTotalPro := nTotalPro + (TRBI->ValrUnit*TRBI->QtdeProd) //TRBI->ValrTota
 	nQuantPro := nQuantPro + TRBI->QtdeProd
 	IF TRBC->CondPaga $ "027/049"  //Verifica se condiï¿½ï¿½o tem desconto ï¿½ Vista 1%
-		nDescVist := nDescVist + (round(TRBI->PrecoTab*0.01,2)*TRBI->QtdeProd)
+		nDescVist := nDescVist + (round(nPrecoTabela*0.01,2)*TRBI->QtdeProd)
 	EndIF
 
 	IF TRBC->CondPaga $ "010"  //Verifica se condiï¿½ï¿½o tem desconto ï¿½ Vista 1%
-		nDescVist2 := nDescVist2 + (round(TRBI->PrecoTab*0.02,2)*TRBI->QtdeProd)
+		nDescVist2 := nDescVist2 + (round(nPrecoTabela*0.02,2)*TRBI->QtdeProd)
 	EndIF
-
-	nTotDesc  := nTotDesc + (((TRBI->PrecoTab-TRBI->ValrUnit)*TRBI->QtdeProd)-nDescVist-nDescVist2)  //Outros Descontos 
- 
-
+		//alert(str(TRBI->ValrUnit))
+	nTotDesc  := nTotDesc + ((nPrecoTabela-TRBI->ValrUnit)*TRBI->QtdeProd) //-nDescVist-nDescVist2)  //Outros Descontos 
+	//PercDescIt //Percentual de Desconto
+	Alert(str(nTotDesc))
 	DbSelectArea("SB5")
 	dbSeek(xFilial("SB5")+TRBI->CodiProd)
 	Volume 		:= TRBI->QtdeProd*SB5->B5_COMPRLC*SB5->B5_LARGLC*SB5->B5_ALTURLC
@@ -591,7 +599,7 @@ Static Function ImprRoda()
 		@ LI+46, 001 PSAY  "NAO EFETUAR PAGAMENTO EM DINHEIRO NA ENTREGA."
 		if nTotDesc > 0 
 			@ LI+47, 050 PSAY "OUTROS DESCONTOS:"
-			@ LI+47, 067 PSAY nTotDesc  Picture "@E 999,999.99"    //Desconto - Alterado Incluï¿½do 16/08/18
+			@ LI+47, 067 PSAY nTotDesc-nDescVist-nDescVist2  Picture "@E 999,999.99"    //Desconto - Alterado Incluï¿½do 16/08/18
 		EndIf
 		@ LI+49, 001  PSAY cCondPgto
 		@ LI+49, 030 PSAY  VolTotal   Picture "@E 99,999.99"
