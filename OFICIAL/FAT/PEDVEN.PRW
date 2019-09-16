@@ -294,7 +294,7 @@ Static Function GravTrab()
 			Replace  CodiUnid  With  SC6->C6_UM
 			Replace  Tipo      With  SB1->B1_Tipo
 			Replace  QtdeProd  With  SC6->C6_QTDVEN
-			Replace  ValrUnit  With  ITENSPED->VLR_VENDA    //SC6->C6_PRCVEN 
+			Replace  ValrUnit  With  Iif(ITENSPED->VLR_VENDA>0,ITENSPED->VLR_VENDA,SC6->C6_PRCVEN)  //ITENSPED->VLR_VENDA    //SC6->C6_PRCVEN 
 			Replace  ValrTota  With  SC6->C6_VALOR  
 			Replace  ValrDesc  With  SC6->C6_VALDESC  
 		//	Replace  PercDescIt  Whit  ITENSPED->PER_DESCACRES
@@ -540,10 +540,10 @@ Static Function ImprItem()
 	IF TRBC->CondPaga $ "010"  //Verifica se condi��o tem desconto � Vista 1%
 		nDescVist2 := nDescVist2 + (round(nPrecoTabela*0.02,2)*TRBI->QtdeProd)
 	EndIF
-		//alert(str(TRBI->ValrUnit))
+	//alert(str(TRBI->ValrUnit))
 	nTotDesc  := nTotDesc + ((nPrecoTabela-TRBI->ValrUnit)*TRBI->QtdeProd) //-nDescVist-nDescVist2)  //Outros Descontos 
 	//PercDescIt //Percentual de Desconto
-	Alert(str(nTotDesc))
+	//Alert(str(nTotDesc))
 	DbSelectArea("SB5")
 	dbSeek(xFilial("SB5")+TRBI->CodiProd)
 	Volume 		:= TRBI->QtdeProd*SB5->B5_COMPRLC*SB5->B5_LARGLC*SB5->B5_ALTURLC
