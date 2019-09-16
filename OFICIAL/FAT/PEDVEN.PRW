@@ -32,7 +32,7 @@
 
 User Function PEDVEN()
 
-	SetPrvt("ALFA,CBTXT,CBCONT,NORDEM,Z,M")
+	//SetPrvt("ALFA,CBTXT,CBCONT,NORDEM,Z,M")
 	SetPrvt("TAMANHO,LIMITE,NOMEPROG,NLASTKEY,NCONTLINH,CSTRING")
 	SetPrvt("WNREL,CPERG,TITULO,CDESC1,CDESC2,CDESC3")
 	SetPrvt("ARETURN,_IMPDSAIDA,cPedInic,cPedFina,CCARGAINI,CCARGAFIN,CSERINTFI,NTIPONTFI")
@@ -48,17 +48,17 @@ User Function PEDVEN()
 	SetPrvt("NTAMEXTE,NPOVAZ,NPOFIN,LTEST,CEXTENSO1,CEXTENSO2")
 	SetPrvt("A,LCONTITEM,NTAMPROD,NPOS,NLINCLAS,NCONT")
 
-	Alfa       := 0
-	CbTxt      := ""
-	CbCont     := ""
-	nOrdem     := 0
-	Z          := 0
-	M          := 0
+	//Alfa       := 0
+	//CbTxt      := ""
+	//CbCont     := ""
+	//nOrdem     := 0
+//	Z          := 0
+	//M          := 0
 	Tamanho    := "P"
-	Limite     := 50//132
+//	Limite     := 50//132
 	NomeProg   := "PedVenda" //"NFiscal"
 	nLastKey   := 0
-	nContLinh  := 0
+//	nContLinh  := 0
 	cString    := "SC5"   //"SF2"
 	wnrel      := "sigaped" //"siganf"
 	cPerg      := "PEDVEN" //"NFSIGW"
@@ -70,7 +70,7 @@ User Function PEDVEN()
 	cObsCli	   := "" //Receber a observacao do cadastro do cliente <TLM>
 
 // Inicializa pergunta "Data Sa�da da Nota" com a database
-	dataSaida := DtoC(ddatabase)
+	//dataSaida := DtoC(ddatabase)
 
 	Pergunte(cPerg,.F.)               // Pergunta no SX1
 
@@ -221,7 +221,7 @@ Static Function GravTrab()
 		I:=1
 		aClasFisc := {}
 		aArraPedi := {}
-		PedVenda  := ""
+	//	PedVenda  := ""
 	
 	   //Alterado por Weiden 25/03/2013
 		if SC5->C5_BLQ == "1"
