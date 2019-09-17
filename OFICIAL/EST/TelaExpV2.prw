@@ -547,6 +547,7 @@ Static Function GridCarga2()
       
    //oBtnResumo:disable()
 	oBrowse:lUseDefaultColors := .F.
+	Alert(oBrowse:nAt)
 	oBrowse:SetBlkBackColor({|| GETDCLR(aColsExCg,oBrowse:nAt)})
 		//ExibeFinaliz()
 	oGetCodBar:SetFocus()
@@ -737,7 +738,8 @@ Static Function atual()
 //	oBrowse:bRClicked    := { || fEdita(@aColsExCg, oLista, "@!", 9)}  //Irei editar a coluna 6
 	oBrowse:Refresh()
  	  
-   	oBrowse:lUseDefaultColors := .F.
+	   oBrowse:lUseDefaultColors := .F.
+	   alert(oBrowse:nAt)
 	oBrowse:SetBlkBackColor({|| GETDCLR(aColsExCg,oBrowse:nAt)})	
 	oGetCodBar:SetFocus()
 	oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}
