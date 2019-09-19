@@ -11,7 +11,7 @@
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³TELAEXP ver. 4.0ºAutor  ³ Weiden Mendes	 Data ³  03/10/11 º±±
+±±ºPrograma  ³TELAEXPV2 ver.5.0 ºAutor  ³ Weiden Mendes	 Data ³  03/10/11 º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºDesc.     ³ Programa para realizar expedição de produtos  e            º±±
 ±±º          ³  baixa de estoque simultaneamente.                         º±±
@@ -208,49 +208,13 @@ Static Function carregam()
 //MsObjSize( aInfo, aObjects, Mantem Proporção , Disposição Horizontal )
 	aPosObj := MsObjSize( aInfo, aObjects, .T. , .F. )
 
-
-
 ////Define MsDialog oDialog TITLE "Titulo" STYLE DS_MODALFRAME From aSize[7],0 To aSize[6],aSize[5] OF oMainWnd PIXEL
  //Se não utilizar o MsAdvSize, pode-se utilizar a propriedade lMaximized igual a T para maximizar a janela
  //oDialog:lMaximized := .T. //Maximiza a janela
  //Usando o estilo STYLE DS_MODALFRAME, remove o botão X
 
-
-//DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 000, 000  TO 550, 1200 COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
-
 	GridCarga2()
-/*
-DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM aSize[7], 0 TO aSize[6], aSize[5] COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
-	@ 006, 004 BUTTON oBtnFinaliz PROMPT "FINALIZAR CARGA" SIZE 060, 015 OF oDlg2 ACTION (finalizarom()) PIXEL
-	@ 030, 004 BUTTON oBtnApont PROMPT "PAUSAR CARGA" SIZE 060, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
-	@ 030, 070 BUTTON oBtnApont PROMPT "EXCLUIR FARDOS" SIZE 060, 015 OF oDlg2 ACTION (u_retfardos()) PIXEL
-	@ 006, 070 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 060, 015 OF oDlg2 ACTION u_LOGRES() PIXEL
-	@ 058, 004 GROUP oGroup1 TO 170, 136 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
-	@ 060, 010 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 060, 045 SAY oTxtVeic PROMPT 	cVeic SIZE 020, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 075, 010 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 075, 040 SAY oTxtSaida PROMPT cDtSaida SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 090, 010 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 090, 040 SAY oTxtRota PROMPT substr(cRota,1,20) SIZE 120, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
-	@ 100, 010 SAY oTxtRota1 PROMPT substr(cRota,21,25) SIZE 070, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
-	@ 115, 010 SAY oLblMot PROMPT "Motorista:" SIZE 049, 012 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 115, 040 SAY oTxtMot PROMPT cMotori SIZE 035, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 130, 010 SAY oLblResp PROMPT "Conferente: " SIZE 100, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 130, 060 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 145, 010 SAY oLblResp PROMPT "Início Separação: " SIZE 150, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 145, 085 SAY oLblResp PROMPT HrInicio SIZE 150, 011 OF oGroup1 FONT oFont3  COLORS 0, 16777215 PIXEL
-	@ 005, 400 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
-	@ 005, 450 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
-	u_GridCarga2()
-	@ 005,300 CHECKBOX oCbxFinalizados VAR lCbxFinalizados PROMPT "Mostra itens concluídos" SIZE 080, 010 OF oDlg2 COLORS 0, 16777215 ON CHANGE ExibeFinaliz() PIXEL
-	@ 260, 010 SAY oLblStatus1 PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 260, 070 SAY oTxtStatus PROMPT str(nQtdTotal) OF oDlg2 FONT oFont3 COLORS 0, 16777215 PIXEL
 
-//oBtnResumo:disable()
-	oGetCodBar:SetFocus()
-	ACTIVATE MSDIALOG oDlg2 CENTERED
-	//ACTIVATE MSDIALOG oDialog ON INIT EnchoiceBar(oDialog, bOk , bCancel) CENTERED
-*/
 
 Return
 
@@ -293,6 +257,7 @@ Static Function GridCarga2()
 	Static oFont2 := TFont():New("Arial",,020,,.T.,,,,,.F.,.F.)
 	Static oFont3 := TFont():New("Arial",,024,,.F.,,,,,.F.,.F.)
 	Static oFont4 := TFont():New("Arial",,026,,.T.,,,,,.F.,.F.)
+	Static oFont5 := TFont():New("Arial",,028,,.T.,,,,,.F.,.F.)
 	Static oFontGrid
 	Static nTamCod
 	Static nTamDesc
@@ -313,6 +278,7 @@ Static Function GridCarga2()
 	Public oOK := LoadBitmap(GetResources(),'br_verde')
 	Public oNO := LoadBitmap(GetResources(),'br_vermelho')
 	Public aColsExCg := {}
+	nItG := 0
 	aFieldsCg := {}
 	aHeader := {}
 	aLista := {}
@@ -354,10 +320,10 @@ Static Function GridCarga2()
 //aInfo := { 1=Linha inicial, 2=Coluna Inicial, 3=Linha Final, 4=Coluna Final, Separação X, Separação Y, Separação X da borda (Opcional), Separação Y da borda (Opcional) }
 	aInfo := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 5 , 5 , 5 , 5 }
 
-	//alert("LinIni:"+str(aSize[ 1 ])+"-ColIni:"+str(aSize[ 2 ])+"-LinhaFim:"+str(aSize[ 3 ])+"-ColFim:"+str(aSize[ 4 ]))
 
+	//DEFINE FONTE DE ACORDO COM TAMANHO DA TELA
 	if aSize[3] > 900 .and. aSize[4] > 400
-		oFontGrid := oFont4
+		oFontGrid := oFont5
 		nTamDesc := 300
 	Else
 		oFontGrid := oFont1
@@ -377,30 +343,30 @@ Static Function GridCarga2()
 //****************         MONTAGEM DA TELA            ************************
 //******************************************************************************
 	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM aSize[7], 0 TO aSize[6], aSize[5] COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
-	@ 006, 004 BUTTON oBtnFinaliz PROMPT "FINALIZAR CARGA" SIZE 060, 015 OF oDlg2 ACTION (finalizarom()) PIXEL
-	@ 030, 004 BUTTON oBtnApont PROMPT "PAUSAR CARGA" SIZE 060, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
-	@ 030, 070 BUTTON oBtnApont PROMPT "EXCLUIR FARDOS" SIZE 060, 015 OF oDlg2 ACTION (retfardos()) PIXEL
-	@ 006, 070 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 060, 015 OF oDlg2 ACTION LOGRES() PIXEL
-	@ 058, 004 GROUP oGroup1 TO 170, 136 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
-	@ 060, 010 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 060, 045 SAY oTxtVeic PROMPT 	cVeic SIZE 020, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 075, 010 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 075, 040 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 090, 010 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 090, 040 SAY oTxtRota PROMPT substr(cRota,1,20) SIZE 120, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
-	@ 100, 010 SAY oTxtRota1 PROMPT substr(cRota,21,25) SIZE 070, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
-	@ 115, 010 SAY oLblMot PROMPT "Motorista:" SIZE 049, 012 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 115, 040 SAY oTxtMot PROMPT cMotori SIZE 035, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 130, 010 SAY oLblResp PROMPT "Conferente: " SIZE 100, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 130, 060 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 145, 010 SAY oLblResp PROMPT "Início Separação: " SIZE 150, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 145, 085 SAY oLblResp PROMPT HrInicio SIZE 150, 011 OF oGroup1 FONT oFont3  COLORS 0, 16777215 PIXEL
-	@ 005, 400 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
-	@ 005, 450 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
+	@ 002, 002 BUTTON oBtnFinaliz PROMPT "FINALIZAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (finalizarom()) PIXEL
+	@ 025, 002 BUTTON oBtnApont PROMPT "PAUSAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
+	@ 002, 060 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 050, 015 OF oDlg2 ACTION LOGRES() PIXEL	
+	@ 025, 060 BUTTON oBtnApont PROMPT "EXCLUIR FARDOS" SIZE 050, 015 OF oDlg2 ACTION (retfardos()) PIXEL
+	@ 002, 130 GROUP oGroup1 TO 030, 350 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
+	@ 004, 135 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 004, 170 SAY oTxtVeic PROMPT 	cVeic SIZE 030, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	@ 015, 135 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 015, 170 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	@ 004, 240 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 004, 270 SAY oTxtRota PROMPT substr(cRota,1,20) SIZE 120, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
+	@ 004, 340 SAY oTxtRota1 PROMPT substr(cRota,21,25) SIZE 070, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
+	//@ 115, 010 SAY oLblMot PROMPT "Motorista:" SIZE 049, 012 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	//@ 115, 040 SAY oTxtMot PROMPT cMotori SIZE 035, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	//@ 130, 010 SAY oLblResp PROMPT "Conferente: " SIZE 100, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	//@ 130, 060 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	//@ 145, 010 SAY oLblResp PROMPT "Início Separação: " SIZE 150, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	//@ 145, 085 SAY oLblResp PROMPT HrInicio SIZE 150, 011 OF oGroup1 FONT oFont3  COLORS 0, 16777215 PIXEL
+	@ 005, 600 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
+	@ 005, 650 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
 	//u_GridCarga2()
-	@ 005,300 CHECKBOX oCbxFinalizados VAR lCbxFinalizados PROMPT "Mostra itens concluídos" SIZE 080, 010 OF oDlg2 COLORS 0, 16777215 ON CHANGE ExibeFinaliz() PIXEL
-	@ 260, 010 SAY oLblStatus1 PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 260, 070 SAY oTxtStatus PROMPT str(nQtdTotal) OF oDlg2 FONT oFont3 COLORS 0, 16777215 PIXEL
+	//@ 005,550 CHECKBOX oCbxFinalizados VAR lCbxFinalizados PROMPT "Mostra itens concluídos" SIZE 080, 010 OF oDlg2 COLORS 0, 16777215 ON CHANGE ExibeFinaliz() PIXEL
+	@ 1200, 010 SAY oLblStatus1 PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 1200, 070 SAY oTxtStatus PROMPT str(nQtdTotal) OF oDlg2 FONT oFont3 COLORS 0, 16777215 PIXEL
 
 //******************************************************************************
 //****************         MONTAGEM DOS DADOS           ************************
@@ -416,16 +382,7 @@ Static Function GridCarga2()
 	AADD(aFieldsCg,{"GRUPO" ,"GRUPO"    ,"" ,6 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	//AADD(aFieldsCg,{"CARREGAR LOTE"  ,"LOTECARR"   ,"" ,08 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	
-	/* --CONSULTA USADA ANTES DE ALTERAR AS VIEWS 
-	cQry := "SELECT ISNULL(D.B1_GRUPO,'') B1_GRUPO, ISNULL(C.C6_PRODUTO,'') C6_PRODUTO, ISNULL(E.Z3_PRODUTO,'') Z3_PRODUTO, ISNULL(D.B1_ORDEM,'') B1_ORDEM,"
-	cQry += " ISNULL(D.B1_PRVALID,0) B1_PRVALID,ISNULL(D.B1_DESC,'') B1_DESC, ISNULL(SUM(C.C6_QTDVEN),0) AS QTDVEN, ISNULL(QTDROM,0) QTDROM"
-	cQry += " FROM SC5010 AS B INNER JOIN SC6010 AS C ON B.C5_NUM = C.C6_NUM INNER JOIN"
-	cQry += " SB1010 AS D ON C.C6_PRODUTO = D.B1_COD FULL JOIN EXP_ROMFARDOS E ON B.C5_ROMANEI = E.Z3_ROMANEI AND C.C6_PRODUTO=E.Z3_PRODUTO"
-	cQry += " WHERE   (B.D_E_L_E_T_ = '' or B.D_E_L_E_T_ IS NULL) AND (C.D_E_L_E_T_ = '' OR C.D_E_L_E_T_ IS NULL) AND (D.D_E_L_E_T_ = '' OR D.D_E_L_E_T_ IS NULL)"
-	cQry += " AND (B.C5_ROMANEI='"+cNumRom+"' OR E.Z3_ROMANEI='"+cNumRom+"')"
-	cQry += " GROUP BY D.B1_GRUPO, C.C6_PRODUTO, E.Z3_PRODUTO,D.B1_ORDEM,D.B1_PRVALID,D.B1_DESC, QTDROM"
-	cQry += " ORDER BY B1_ORDEM,C6_PRODUTO"   */
-	
+		
 	cQry := " SELECT ISNULL(D.B1_GRUPO,'') B1_GRUPO, ISNULL(A.C6_PRODUTO,'') C6_PRODUTO, ISNULL(B.Z3_PRODUTO,'') Z3_PRODUTO, ISNULL(D.B1_ORDEM,'') B1_ORDEM "
 	cQry += " ,ISNULL(D.B1_PRVALID,0) B1_PRVALID,ISNULL(D.B1_DESC,'') B1_DESC, ISNULL(SUM(A.QTDPED),0) AS QTDVEN,  ISNULL(SUM(QTDROM),0) QTDROM "
 	cQry += " FROM EXP_ROMPEDIDO A LEFT JOIN EXP_ROMFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO "
@@ -485,9 +442,15 @@ Static Function GridCarga2()
 	TRC2->(DbCloseArea())
 	
 	aHeader := aclone (aFieldsCg)
+	
+	//if aSize[3] > 900 .and. aSize[4] > 400
+	//	AADD(aColsExCg,Array(Len(aFieldsCg)+1))
+	//	nItG += 1
+//	EndIf
 
 	For I:= 1 To Len(aDadosC)
 		AADD(aColsExCg,Array(Len(aFieldsCg)+1))
+		//nItG += 1
 		nLin := Len(aColsExCg)
 	
 		aColsExCg[nLin,01] := aDadosC[i][1]
@@ -498,61 +461,71 @@ Static Function GridCarga2()
 		aColsExCg[nLin,06] := Transform(aDadosC[i][6],"@E 9999")   //aColsExCg[nLin,06] := Transform(aDadosC[i][6],"@E 999,999,999")
 		aColsExCg[nLin,07] := aDadosC[i][7]
 		aColsExCg[nLin,08] := aDadosC[i][8]
-	
+		
+	//	if aSize[3] > 900 .and. aSize[4] > 400
+	//		AADD(aColsExCg,Array(Len(aFieldsCg)+1))
+			//nItG += 1
+	//	EndIf
+
 		aColsExCg[nLin,Len(aFieldsCg)+1] := .F.
 	Next
+	
+    // Cria Browse
+	//oBrowse := TCBrowse():New(020,140,aSize[6]-400,aSize[5]-900,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
+	oBrowse := TCBrowse():New(040,020,500,450,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
 
-        // Cria Browse
-	oBrowse := TCBrowse():New(020,140,aSize[6],aSize[5],,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,)
- 
      // Seta vetor para a browse
      //   oBrowse:SetArray(aBrowse)
 
 //oBrowse:AddColumn(TCColumn():New(" "       	, {|| If(aColsExCg[oBrowse:nAt,05]>0,oBmpSim,oBmpNao) },,,,,,.T.,.F.,,,,.F., ) )
 //oBrowse:AddColumn(TCColumn():New(" "       	, {|| If(aColsExCg[oBrowse:nAt,05]>0,oOk,oNo) },,,,,,.T.,.F.,,,,.F., ) )
-	oBrowse:AddColumn(TCColumn():New(" "       	, {|| If(.t.,oOk,oNo) },,,,,,.T.,.F.,,,,.F., ) )
+	//oBrowse:AddColumn(TCColumn():New(" "       	, {|| If(.t.,oOk,oNo) },,,,,,.T.,.F.,,,,.F., ) )
 	oBrowse:AddColumn(TCColumn():New("PRODUTO"	, {|| aColsExCg[oBrowse:nAt,01]},"@!",,,"CENTER", 040,.F.,.F.,,{|| .F. },,.F., ) )
 	oBrowse:AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsExCg[oBrowse:nAt,02]},"@!",,,"CENTER", nTamDesc,.F.,.F.,,{|| .F. },,.F., ) )
 	oBrowse:AddColumn(TCColumn():New("QUANTIDADE"	, {|| aColsExCg[oBrowse:nAt,03]},"@E 9999",,,"CENTER"  , 040,.F.,.F.,,,,.F., ) )
 	oBrowse:AddColumn(TCColumn():New("REGISTRADO"	, {|| aColsExCg[oBrowse:nAt,04]},"@E 9999",,,"CENTER", 040,.F.,.T.,,,,.F., ) )
 	oBrowse:AddColumn(TCColumn():New("RESTANTE" 	, {|| aColsExCg[oBrowse:nAt,05]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
 	oBrowse:AddColumn(TCColumn():New("EXCEDENTE" 	, {|| aColsExCg[oBrowse:nAt,06]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
-	oBrowse:AddColumn(TCColumn():New("MOTIVO FALTA" 	, {|| aColsExCg[oBrowse:nAt,07]},"@!",,,"LEFT"  , 100,.F.,.T.,,,,.F., ) )
-//oBrowse:AddColumn(TCColumn():New("GRUPO" 	, {|| aColsExCg[oBrowse:nAt,08]},"@!",,,"LEFT"  , 100,.F.,.T.,,,,.F., ) )
+	//oBrowse:AddColumn(TCColumn():New("MOTIVO FALTA" 	, {|| aColsExCg[oBrowse:nAt,07]},"@!",,,"LEFT"  , 100,.F.,.T.,,,,.F., ) )
 //A coluna 6 precisa está com a opção de editar .T.
+	oBrowse:nLinhas := 2
 	oBrowse:SetArray(aColsExCg)
 	oBrowse:bWhen        := { || Len(aColsExCg) > 0 }
-	oBrowse:bRClicked    := { || fEdita(@aColsExCg, oLista, "@!", 9)}  //Irei editar a coluna 6
+//	oBrowse:bRClicked    := { || fEdita(@aColsExCg, oLista, "@!", 9)}  //Irei editar a coluna 6
 	oBrowse:Refresh()
          
- 
   /*      // Evento de clique no cabeçalho da browse
         oBrowse:bHeaderClick := {|o, nCol| alert('bHeaderClick') }
         // Evento de duplo click na celula
         oBrowse:bLDblClick := {|| alert('bLDblClick') }
  */
         // Cria Botoes com metodos básicos
-	TButton():New( 172, 004, "Letra Pequena", oDlg2,{|| oBrowse:GoUp(), oBrowse:setFocus() },80,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	TButton():New( 184, 004, "Letra Média", oDlg2,{|| oBrowse:GoUp(), oBrowse:setFocus() },80,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	TButton():New( 196, 004, "Letra Grande", oDlg2,{|| oBrowse:GoUp(), oBrowse:setFocus() },80,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	/*	TButton():New( 160, 002, "GoUp()", oDlg2,{|| oBrowse:GoUp(), oBrowse:setFocus() },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-        TButton():New( 160, 052, "GoDown()" , oDlg2,{|| oBrowse:GoDown(), oBrowse:setFocus() },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-        TButton():New( 160, 102, "GoTop()" , oDlg2,{|| oBrowse:GoTop(),oBrowse:setFocus()}, 40, 010,,,.F.,.T.,.F.,,.F.,,,.F.)
-        TButton():New( 160, 152, "GoBottom()", oDlg2,{|| oBrowse:GoBottom(),oBrowse:setFocus() },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
-        TButton():New( 172, 002, "Linha atual", oDlg2,{|| alert(oBrowse:nAt) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-        TButton():New( 172, 052, "Nr Linhas", oDlg2,{|| alert(oBrowse:nLen) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-        TButton():New( 172, 102, "Linhas visiveis", oDlg2,{|| alert(oBrowse:nRowCount()) },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
-        TButton():New( 172, 152, "Alias", oDlg2,{|| alert(oBrowse:cAlias) },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
-      */
+	//TButton():New( 172, 004, "Letra Pequena", oDlg2,{|| oBrowse:GoUp(), oBrowse:setFocus() },80,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+	//TButton():New( 184, 004, "Letra Média", oDlg2,{|| oBrowse:GoUp(), oBrowse:setFocus() },80,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+	//TButton():New( 196, 004, "Letra Grande", oDlg2,{|| oBrowse:GoUp(), oBrowse:setFocus() },80,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+		TButton():New( 040, 530, "PgUp", oDlg2,{|| oBrowse:PageUp(30), oBrowse:setFocus() },30,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+        TButton():New( 055, 530, "PgDn" , oDlg2,{|| oBrowse:PageDown(30), oBrowse:setFocus() },30,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+        //TButton():New( 184, 002, "GoTop()" , oDlg2,{|| oBrowse:GoTop(),oBrowse:setFocus()}, 40, 010,,,.F.,.T.,.F.,,.F.,,,.F.)
+        //TButton():New( 184, 052, "GoBottom()", oDlg2,{|| oBrowse:GoBottom(),oBrowse:setFocus() },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
+        //TButton():New( 196, 002, "Linha atual", oDlg2,{|| alert(oBrowse:nAt) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+        //TButton():New( 208, 052, "Nr Linhas", oDlg2,{|| alert(oBrowse:nLen) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+        //TButton():New( 208, 002, "Linhas visiveis", oDlg2,{|| alert(oBrowse:nRowCount()) },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
+        //TButton():New( 220, 052, "Alias", oDlg2,{|| alert(oBrowse:cAlias) },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
+    
       
    //oBtnResumo:disable()
 	oBrowse:lUseDefaultColors := .F.
-	Alert(oBrowse:nAt)
-	oBrowse:SetBlkBackColor({|| GETDCLR(aColsExCg,oBrowse:nAt)})
-		//ExibeFinaliz()
+	//oBrowse:SetBlkBackColor({|| GETDCLR(aColsExCg,oBrowse:nAt)})
+	oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
+
+	//bColor := &("{|| if(mod(oBrowse:nAt,2)=0,"+Str(CLR_WHITE)+","+Str(CLR_BLACK)+")}")
+	//oBrowse:SetBlkColor(bColor)
+
+	//ExibeFinaliz()
 	oGetCodBar:SetFocus()
 	oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}
-	
+	oBrowse:Refresh()
+
 	ACTIVATE MSDIALOG oDlg2 CENTERED
 	
 Return
@@ -700,8 +673,8 @@ Static Function atual()
 				aColsExCg[nLin,06] := str(val(aColsExCg[nLin,06])+1)
 			EndIf
 			lExisteIt := .t.
-			Alert(aColsExCg[nLin,05])
-			Alert(aColsExCg[nLin,06])
+			//Alert(aColsExCg[nLin,05])
+			//Alert(aColsExCg[nLin,06])
 			exit
 		EndIf
 	Next
@@ -736,11 +709,13 @@ Static Function atual()
 	//oBrowse:bWhen        := { || Len(aColsExCg) > 0 }
 
 //	oBrowse:bRClicked    := { || fEdita(@aColsExCg, oLista, "@!", 9)}  //Irei editar a coluna 6
-	oBrowse:Refresh()
+	
  	  
 	   oBrowse:lUseDefaultColors := .F.
-	   alert(oBrowse:nAt)
-	oBrowse:SetBlkBackColor({|| GETDCLR(aColsExCg,oBrowse:nAt)})	
+	  // alert(oBrowse:nAt)
+	//oBrowse:SetBlkBackColor({|| GETDCLR(aColsExCg,oBrowse:nAt)})	
+	oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
+	oBrowse:Refresh()
 	oGetCodBar:SetFocus()
 	oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}
 	
@@ -1453,25 +1428,34 @@ Static Function LOGRES()
 Return
 
 // Função para tratamento das regras de cores para a grid da MsNewGetDados
-Static Function GETDCLR(aLinha,nLinha)
+//Static Function GETDCLR(aLinha,nLinha)
+Static Function GETDCLR(nLinha)
 	Local nRet := 0
-	Local nCor2 :=  14540253  // 16777215 // Branco - RGB(255,255,255)
-	Local nCor3 := 16776960 // Ciano - RGB(0,255,255)
+	Local nCor3 := 16776960 // Verde Claro - RGB(0,255,255)
 	Local nCor4 :=  5070329 //fVERMELHO
-//Local nCor3 := 65280 //VERDE
+	Local nCor2 
+	//Local nCor3 := 65280 //VERDE
+	
+	//if mod(nLinha,2)= 0
+		nCor2 := 16777215  //RGB(248,248,255) //14540253 //(cinza) //  //(Branco) - RGB(255,255,255)  //(79,79,79)  //
+	//else	
+	//	nCor2 := RGB(248,248,255)
+	//EndIf	
 
-	if Alltrim(aLinha[nLinha][5])<>""
-		If val(aLinha[nLinha][5])>0 //.AND. aLinha[nLinha][nUsado]
+
+	if Alltrim(aColsExCg[nLinha][5])<>""  //_nResta
+		If val(aColsExCg[nLinha][5])>0 //.AND. aLinha[nLinha][nUsado]
 			nRet := nCor2
-		ElseIf val(aLinha[nLinha][5])=0
+		ElseIf val(aColsExCg[nLinha][5])=0
 			nRet := nCor3
 		EndIf
-	
-		If val(aLinha[nLinha][6])>0
+
+		If val(aColsExCg[nLinha][6])>0  //_nExced
 			nRet := nCor4
 		Endif
 	Else
 		Return
+
 	EndIf
 
 Return nRet
