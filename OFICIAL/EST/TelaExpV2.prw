@@ -270,23 +270,9 @@ Static Function TelaCarga()
 	nQtdTotal := 0
 	#define DS_MODALFRAME 128 //Desabilita fechar tela pelo X
 
-	//Public oOK := LoadBitmap(GetResources(),'br_verde')
-	//Public oNO := LoadBitmap(GetResources(),'br_vermelho')
-	Public aColsExCg := {}
-	Public aColsConc := {}
-	//nItG := 0
-	aFieldsCg := {}
-	aHeader := {}
-	//aLista := {}
-	cQry := ""
-	aDadosC := {}
-	cProdGrid := ""
-	nQtdFardo:=0
-	_nResta := 0
-	_nExced := 0
-	_cMotFalta :=""
-	Static lInicioCarg
-	lInicioCarg := .f.
+
+//	Static lInicioCarg
+//	lInicioCarg := .f.
 	Public cEmailErro :=""
 	Public cAssunto :=""
 
@@ -354,7 +340,7 @@ Static Function TelaCarga()
 	//@ 130, 010 SAY oLblResp PROMPT "Conferente: " SIZE 100, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	//@ 130, 060 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
 	//@ 145, 010 SAY oLblResp PROMPT "Início Separação: " SIZE 150, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	//@ 145, 085 SAY oLblResp PROMPT HrInicio SIZE 150, 011 OF oGroup1 FONT oFont3  COLORS 0, 16777215 PIXEL
+	//@ 145, 085 SAY oLblResp PROMPT HrInicio SIZE 150, 011 OF oGroup1 FONT oFont3  CfOLORS 0, 16777215 PIXEL
 	@ 005, 600 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
 	@ 005, 650 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
 	@ 040, 600 SAY oLblSaida PROMPT "CONCLUÍDOS"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -369,9 +355,19 @@ Static Function TelaCarga()
 Return
 
 Static Function GridCarga()
-
-Static oBrowse
-Static OBrwFinaliz
+	
+Public aFieldsCg := {}
+Public aColsExCg := {}
+Public aColsConc := {}
+Static oBrowse := {}
+Static oBrwFinaliz := {}
+	cQry := ""
+	aDadosC := {}
+	cProdGrid := ""
+	nQtdFardo:=0
+	_nResta := 0
+	_nExced := 0
+	_cMotFalta :=""
 //******************************************************************************
 //****************         MONTAGEM DOS DADOS           ************************
 //******************************************************************************
@@ -425,9 +421,7 @@ While !TRC2->(Eof()) // versao 1.0
 		cDescGrid := SB1->B1_DESC
 		SB1->(DbCloseArea())
 	End If
-//VERIFICA SE PARAMETRO ESTÁ CONFIGURADO PARA MOSTRAR OU NÃO ITENS ENCERRADOS.
-	//if 	_nMostraFinaliz == 1 .or. (_nMostraFinaliz == 2 .and. TRC2->QTDVEN<>nQtdFardo)
-//		if lCbxFinalizados == .t.  .or. (lCbxFinalizados == .f. .and. TRC2->QTDVEN<>nQtdFardo)
+
 		
 	Aadd(aDadosC,{cProdGrid,;
 		cDescGrid,;
@@ -439,13 +433,11 @@ While !TRC2->(Eof()) // versao 1.0
 		TRC2->B1_GRUPO})
 		
 		//dDtLoteOk,; //incluir no vetor caso for informar proximo lote a carregar
-	//EndIf
+	
 	TRC2->(DbSkip())
 EndDo
 
 TRC2->(DbCloseArea())
-
-aHeader := aclone (aFieldsCg)
 
 //Preenche matrix de Itens a carregar
 For I:= 1 To Len(aDadosC)
@@ -483,9 +475,10 @@ For I:= 1 To Len(aDadosC)
 		aColsConc[nLin,07] := aDadosC[i][7]
 		aColsConc[nLin,08] := aDadosC[i][8]
 
-		aColsExCg[nLin,Len(aFieldsCg)+1] := .F.
+		aColsConc[nLin,Len(aFieldsCg)+1] := .F.
 	EndIf
 Next
+
 
 
 // Cria Browse
@@ -497,15 +490,12 @@ oBrowse:AddColumn(TCColumn():New("QUANTIDADE"	, {|| aColsExCg[oBrowse:nAt,03]},"
 oBrowse:AddColumn(TCColumn():New("REGISTRADO"	, {|| aColsExCg[oBrowse:nAt,04]},"@E 9999",,,"CENTER", 040,.F.,.T.,,,,.F., ) )
 oBrowse:AddColumn(TCColumn():New("RESTANTE" 	, {|| aColsExCg[oBrowse:nAt,05]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
 oBrowse:AddColumn(TCColumn():New("EXCEDENTE" 	, {|| aColsExCg[oBrowse:nAt,06]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
-//oBrowse:AddColumn(TCColumn():New("MOTIVO FALTA" 	, {|| aColsExCg[oBrowse:nAt,07]},"@!",,,"LEFT"  , 100,.F.,.T.,,,,.F., ) )
 
 //A coluna 6 precisa está com a opção de editar .T.
 oBrowse:nLinhas := 2
 oBrowse:SetArray(aColsExCg)
-oBrowse:bWhen        := { || Len(aColsExCg) > 0 }
+//oBrowse:bWhen        := { || Len(aColsExCg) > 0 }
 //	oBrowse:bRClicked    := { || fEdita(@aColsExCg, oLista, "@!", 9)}  //Irei editar a coluna 6
-oBrowse:Refresh()
-	 
 /*      // Evento de clique no cabeçalho da browse
 	oBrowse:bHeaderClick := {|o, nCol| alert('bHeaderClick') }
 	// Evento de duplo click na celula
@@ -519,9 +509,7 @@ oBrowse:Refresh()
 	//TButton():New( 208, 002, "Linhas visiveis", oDlg2,{|| alert(oBrowse:nRowCount()) },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
 oBrowse:lUseDefaultColors := .F.
 oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
-
-//bColor := &("{|| if(mod(oBrowse:nAt,2)=0,"+Str(CLR_WHITE)+","+Str(CLR_BLACK)+")}")
-//oBrowse:SetBlkColor(bColor)
+oBrowse:Refresh()
 
 oBrwFinaliz := TCBrowse():New(040,aSize[5]-1320,aSize[5]-1550,aSize[6]-600,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE'},{20,100,10},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
 oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", 050,.F.,.F.,,{|| .F. },,.F., ) )
@@ -532,11 +520,11 @@ oBrwFinaliz:nLinhas := 2
 oBrwFinaliz:SetArray(aColsConc)
 oBrwFinaliz:lUseDefaultColors := .F.
 oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
+oBrwFinaliz:Refresh()
 
-//ExibeFinaliz()
 oGetCodBar:SetFocus()
 oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}
-oBrowse:Refresh()
+
 oBrwFinaliz:bGotFocus :=  {||oGetCodBar:SetFocus()}
 
 
@@ -563,7 +551,8 @@ Static Function IncluiLeitor()
 	cHrApont := ""
 	Private oMSNewApont
 	nItens := oBrowse:nLen //nItens := len(oMSNewGe2:aCols)
-
+ 
+	
 	
 //verifica se edit de código de barras está com tamanho incorreto ou turma não existente
 	If	len(Alltrim(cGetCodBar)) <> 13 //.or. !substr(Alltrim(cGetCodBar),12,1) $ "123"    //Alltrim(cGetCodBar) <> ""
@@ -576,7 +565,6 @@ Static Function IncluiLeitor()
 	dbSelectArea("SZ3")
 	DbSetOrder(1)
 	dbGotop()
-	//dbseek(xfilial("SZ3")+substr(Alltrim(cGetCodBar),1,8)+substr(cGetCodBar,9,3)+" "+substr(cGetCodBar,12,1))
 	dbseek(xfilial("SZ3")+substr(Alltrim(cGetCodBar),1,12))
 	
 	if !SZ3->(found())
@@ -653,10 +641,11 @@ Static Function IncluiLeitor()
 	
 //		lInicioCarg := .t.
 //	EndIf
-	
+
 	nApontSucess += 1
-	atual()
-//	ExibeFinaliz()
+	//atual()
+	GridCarga()
+
 Return( Nil )
 
 
@@ -680,6 +669,9 @@ Static Function atual()
 	dbseek(xfilial("SZ3")+substr(Alltrim(cGetCodBar),1,8)+substr(cGetCodBar,9,4)) //ALTERADO 28/07/15
 
 	lExisteIt := .f.
+
+	alert("aColsCont="+str(Len(aColsConc)))
+	alert("aColsExCg="+str(Len(aColsExCg)))
 	
 	For nLin:= 1 To Len(aColsExCg)  //Array que guarda dados do Grid
 		
@@ -689,16 +681,32 @@ Static Function atual()
 			if val(aColsExCg[nLin,05])>0
 				aColsExCg[nLin,05] := str(val(aColsExCg[nLin,05])-1)
 				aColsExCg[nLin,06] := "0"
-				
+
 			else
 				aColsExCg[nLin,05] := "0"
 				aColsExCg[nLin,06] := str(val(aColsExCg[nLin,06])+1)
 			EndIf
 			lExisteIt := .t.
 			
-			if val(aColsExCg[nLin,05])=0 .and. val(aColsExCg[nLin,06]) = 0
-				GridCarga()
-				Return
+		//	if val(aColsExCg[nLin,05])=0 .and. val(aColsExCg[nLin,06]) = 0
+		//		GridCarga()
+		//		Return
+		//	EndIf
+			if  val(aColsExCg[nLin,05])=0 .and. val(aColsExCg[nLin,06])=0
+				AADD(aColsConc,Array(Len(aFieldsCg)+1))
+				Linew := Len(aColsConc)
+				aColsConc[Linew,01] := aColsExCg[nLin,01]
+				aColsConc[Linew,02] := aColsExCg[nLin,02]
+				aColsConc[Linew,03] := aColsExCg[nLin,03]
+				aColsConc[Linew,04] := aColsExCg[nLin,04]
+				aColsConc[Linew,05] := aColsExCg[nLin,05] 
+				aColsConc[Linew,06] := aColsExCg[nLin,06]
+				aColsConc[Linew,07] := aColsExCg[nLin,07]
+				aColsConc[Linew,08] := aColsExCg[nLin,08]
+				
+				ADEL(aColsExCg, nLin)
+				ASIZE(aColsExCg,Len(aColsExCg)-1)
+				//nLin := 1
 			EndIf
 			exit
 		EndIf
@@ -719,25 +727,53 @@ Static Function atual()
 			EndIf
 			lExisteIt := .t.
 			
-			if val(aColsConc[nLin,05])>0 .or. val(aColsConc[nLin,06]) > 0
-				GridCarga()
-				Return
+		//	if val(aColsConc[nLin,05])>0 .or. val(aColsConc[nLin,06]) > 0
+		//		GridCarga()
+		//		Return
+		//	EndIf
+			if  val(aColsConc[nLin,05])>0 .or. val(aColsConc[nLin,06])>0
+				AADD(aColsExCg,Array(Len(aFieldsCg)+1))
+				Linew := Len(aColsExCg)
+				aColsExCg[Linew,01] := aColsConc[nLin,01]
+				aColsExCg[Linew,02] := aColsConc[nLin,02]
+				aColsExCg[Linew,03] := aColsConc[nLin,03]
+				aColsExCg[Linew,04] := aColsConc[nLin,04]
+				aColsExCg[Linew,05] := aColsConc[nLin,05] 
+				aColsExCg[Linew,06] := aColsConc[nLin,06]
+				aColsExCg[Linew,07] := aColsConc[nLin,07]
+				aColsExCg[Linew,08] := aColsConc[nLin,08]
+				
+				ADEL(aColsConc, nLin)
+				ASIZE(aColsConc,Len(aColsConc)-1)
+				
 			EndIf
 			exit
 
 		EndIf
 	Next
+	alert("aColsCont="+str(Len(aColsConc)))
+	alert("aColsExCg="+str(Len(aColsExCg)))
 
-	obrowse:SetArray(aColsExCg)   //oMSNewGe2:aCols := aclone (aColsExCg)
+//	obrowse:SetArray(aColsExCg)   //oMSNewGe2:aCols := aclone (aColsExCg)
 
-	/*
-	aItensGrid := {}
-	aItensGrid := aclone (aColsExCg)
-	nLin:= 1
-	While nLin <= Len(aItensGrid)
-		if  val(aItensGrid[nLin,05])<=0 .and. val(aItensGrid[nLin,06])=0
-			ADEL(aItensGrid, nLin)
-			ASIZE(aItensGrid,Len(aItensGrid)-1)
+	//aItensGrid := {}
+	//aItensGrid := aclone (aColsExCg)
+/*	nLin:= 1
+	While nLin <= Len(aColsExCg)
+		if  val(aColsExCg[nLin,05])=0 .and. val(aColsExCg[nLin,06])=0
+			AADD(aColsConc,Array(Len(aFieldsCg)+1))
+			Linew := Len(aColsConc)
+			aColsConc[Linew,01] := aColsExCg[nLin,01]
+			aColsConc[Linew,02] := aColsExCg[nLin,02]
+			aColsConc[Linew,03] := aColsExCg[nLin,03]
+			aColsConc[Linew,04] := aColsExCg[nLin,04]
+			aColsConc[Linew,05] := aColsExCg[nLin,05] 
+			aColsConc[Linew,06] := aColsExCg[nLin,06]
+			aColsConc[Linew,07] := aColsExCg[nLin,07]
+			aColsConc[Linew,08] := aColsExCg[nLin,08]
+			
+			ADEL(aColsExCg, nLin)
+			ASIZE(aColsExCg,Len(aColsExCg)-1)
 			nLin := 1
 		EndIf
 		nLin +=1
@@ -745,12 +781,14 @@ Static Function atual()
 	*/
 
 	obrowse:SetArray(aColsExCg)   //oMSNewGe2:aCols := aclone (aColsExCg)
-	obrowse:bWhen          := { || Len(aColsExCg) > 0 }
+//	obrowse:bWhen          := { || Len(aColsExCg) > 0 }
+	oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
 	obrowse:Refresh()
+	//oBrowse:SetArray(aColsExCg)
 
 	
         // Cria Browse
-	oBrowse := TCBrowse():New(040,020,aSize[5]-1350,aSize[6]-600,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
+/*	oBrowse := TCBrowse():New(040,020,aSize[5]-1350,aSize[6]-600,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
 	oBrowse:AddColumn(TCColumn():New("PRODUTO"	, {|| aColsExCg[oBrowse:nAt,01]},"@!",,,"CENTER", 040,.F.,.F.,,{|| .F. },,.F., ) )
 	oBrowse:AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsExCg[oBrowse:nAt,02]},"@!",,,"CENTER", nTamDesc,.F.,.F.,,{|| .F. },,.F., ) )
 	oBrowse:AddColumn(TCColumn():New("QUANTIDADE"	, {|| aColsExCg[oBrowse:nAt,03]},"@E 9999",,,"CENTER"  , 040,.F.,.F.,,,,.F., ) )
@@ -759,27 +797,30 @@ Static Function atual()
 	oBrowse:AddColumn(TCColumn():New("EXCEDENTE" 	, {|| aColsExCg[oBrowse:nAt,06]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
 
 	oBrowse:nLinhas := 2
-	oBrowse:SetArray(aColsExCg)
 	//oBrowse:bWhen        := { || Len(aColsExCg) > 0 }
 	oBrowse:lUseDefaultColors := .F.
 	oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
 	oBrowse:Refresh()
+*/	
+	oBrwFinaliz:SetArray(aColsConc)
+	oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
+	oBrwFinaliz:Refresh()
 	
+
+	/*	
 	oBrwFinaliz := TCBrowse():New(040,aSize[5]-1320,aSize[5]-1550,aSize[6]-600,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE'},{20,100,10},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
 	oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", 050,.F.,.F.,,{|| .F. },,.F., ) )
 	oBrwFinaliz :AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsConc[oBrwFinaliz:nAt,02]},"@!",,,"CENTER", 150,.F.,.F.,,{|| .F. },,.F., ) )
 	oBrwFinaliz :AddColumn(TCColumn():New("QUANTIDADE"	, {|| aColsConc[oBrwFinaliz:nAt,03]},"@E 9999",,,"CENTER"  , 020,.F.,.F.,,,,.F., ) )
-	//oBrwFinaliz:SetArray(aColsConc)  
 
 	oBrwFinaliz:nLinhas := 2
-	oBrwFinaliz:SetArray(aColsConc)
+	//oBrwFinaliz:SetArray(aColsConc)
 	oBrwFinaliz:lUseDefaultColors := .F.
 	oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
-//	oBrwFinaliz:Refresh()
-		
+	oBrwFinaliz:Refresh()
+*/
 	oGetCodBar:SetFocus()
-	oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}
-	
+	oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}	
 Return
 
 /*
@@ -1446,20 +1487,22 @@ Static Function GETDCLR(nLinha)
 	Local nCor4 :=  5070329 //fVERMELHO
 	Local nCor2 := 16777215 
 	
-	if Alltrim(aColsExCg[nLinha][5])<>""  //_nResta
-		If val(aColsExCg[nLinha][5])>0 //.AND. aLinha[nLinha][nUsado]
-			nRet := nCor2
+	if len(aColsExCg) > 0
+		if Alltrim(aColsExCg[nLinha][5])<>""  //_nResta
+			If val(aColsExCg[nLinha][5])>0 //.AND. aLinha[nLinha][nUsado]
+				nRet := nCor2
+			Else
+				If val(aColsExCg[nLinha][5])=0
+					If val(aColsExCg[nLinha][6])>0  //_nExced
+						nRet := nCor4
+					Else 
+						nRet := nCor3
+					Endif
+				EndIf
+			EndIf	
 		Else
-			If val(aColsExCg[nLinha][5])=0
-				If val(aColsExCg[nLinha][6])>0  //_nExced
-					nRet := nCor4
-				Else 
-					nRet := nCor3
-				Endif
-			EndIf
-		EndIf	
-	Else
-		Return
+			Return
+		EndIf
 	EndIf
 
 Return nRet
@@ -1470,7 +1513,8 @@ Static Function GETDCLR2(nLinha)
 	Local nCor3 := 16776960 // Verde Claro - RGB(0,255,255) //Local nCor3 := 65280 //VERDE
 	Local nCor4 :=  5070329 //fVERMELHO
 	Local nCor2 := 16777215 
-	
+	 
+if len(aColsConc) > 0
 	if Alltrim(aColsConc[nLinha][5])<>""  //_nResta
 		If val(aColsConc[nLinha][5])>0 //.AND. aLinha[nLinha][nUsado]
 			nRet := nCor2
@@ -1486,6 +1530,7 @@ Static Function GETDCLR2(nLinha)
 	Else
 		Return
 	EndIf
+EndIf
 
 Return nRet
 
