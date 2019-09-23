@@ -279,7 +279,7 @@ Static Function GravTrab()
 			dbSetOrder(1)
 			DBSeek(xFilial("SB1")+SC6->C6_PRODUTO)
 	
-			dbSelectArea("ITENSPED")	
+		//	dbSelectArea("ITENSPED")	
 		
 			DBSelectArea("TRBI")
 			dbSetOrder(1)
