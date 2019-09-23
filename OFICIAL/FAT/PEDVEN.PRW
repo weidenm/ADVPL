@@ -266,14 +266,14 @@ Static Function GravTrab()
 		
 		
 		
-			If Select("ITENSPED") > 0
+		/*	If Select("ITENSPED") > 0
 				dbSelectArea("ITENSPED")
 				dbCloseArea()
 			EndIf		
 				cQuery := "  SELECT PER_DESCACRES, VLR_VENDA  FROM  SRVPP01.LANDIX_FLX.dbo.TAFITE  WHERE NUM_PEDIDO = '" + STR(SC5->C5_NUMLDX) +"' AND COD_PRODUTO = '"+ SC6->C6_PRODUTO +"'"
 					//cQuery += "  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C6_CLI+A.C6_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
 				TCQuery cQuery Alias ITENSPED New
-		
+		*/
 		
 			DBSelectArea("SB1")
 			dbSetOrder(1)
@@ -294,7 +294,7 @@ Static Function GravTrab()
 			Replace  CodiUnid  With  SC6->C6_UM
 			Replace  Tipo      With  SB1->B1_Tipo
 			Replace  QtdeProd  With  SC6->C6_QTDVEN
-			Replace  ValrUnit  With  Iif(ITENSPED->VLR_VENDA>0,ITENSPED->VLR_VENDA,SC6->C6_PRCVEN)  //ITENSPED->VLR_VENDA    //SC6->C6_PRCVEN 
+			Replace  ValrUnit  With  SC6->C6_PRCVEN //Iif(ITENSPED->VLR_VENDA>0,ITENSPED->VLR_VENDA,SC6->C6_PRCVEN)  //ITENSPED->VLR_VENDA    //SC6->C6_PRCVEN 
 			Replace  ValrTota  With  SC6->C6_VALOR  
 			Replace  ValrDesc  With  SC6->C6_VALDESC  
 		//	Replace  PercDescIt  Whit  ITENSPED->PER_DESCACRES
