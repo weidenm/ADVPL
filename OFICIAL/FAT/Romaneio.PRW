@@ -216,11 +216,11 @@ STATIC FUNCTION MontaRoman()
 
 				cIndexKey := "C5_ROMANEI+B1_ORDEM"
 			else
-				cQuery := "SELECT C5_ROMANEI,C5_ROMIT,B1_ORDEM,B1_DESC,C6_PRODUTO,C5_OBS, SUM(C6_QTDVEN)AS SOMA_QTD "
+				cQuery := "SELECT C5_ROMANEI,C5_ROMIT,B1_ORDEM,B1_DESC,C6_PRODUTO, SUM(C6_QTDVEN)AS SOMA_QTD "
 				cQuery += " FROM (" +  RetSqlName("SC5") + " A INNER JOIN " +  RetSqlName("SC6") + " B"
 				cQuery += " ON A.C5_NUM = B.C6_NUM )  INNER JOIN " +  RetSqlName("SB1") + " C ON B.C6_PRODUTO = C.B1_COD "
 				cQuery += "	WHERE A.D_E_L_E_T_ = '' AND B.D_E_L_E_T_ = '' AND C5_ROMANEI ='" + SZ1->Z1_NUM + "' AND C5_ROMIT = '" + SZ1->Z1_ITEM+ "'"
-				cQuery +=" GROUP BY C5_ROMANEI,C5_ROMIT,B1_ORDEM,B1_DESC,C6_PRODUTO, C5_OBS"
+				cQuery +=" GROUP BY C5_ROMANEI,C5_ROMIT,B1_ORDEM,B1_DESC,C6_PRODUTO"
 				cQuery+= " ORDER BY C5_ROMANEI,C5_ROMIT,B1_ORDEM"
 
 				cIndexKey := "C5_ROMANEI+C5_ROMIT+B1_ORDEM"
@@ -539,8 +539,6 @@ STATIC FUNCTION MontaRoman()
 					oPrn:Say(nLin+nLinObs+450,0100, PEDIDOS->C5_NUM + ": " +Trim(PEDIDOS->C5_OBS),	oFont10)
 					nLinObs += 50
 				EndIf
-				
-			
 				dbskip()
 			EndDo
 			dbCloseArea()

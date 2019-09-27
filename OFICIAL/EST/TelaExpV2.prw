@@ -396,7 +396,7 @@ TCQUERY cQry NEW ALIAS "TRC2"
 
 DBSelectArea("SZ3")
 nQtdTotal := 0
-While !TRC2->(Eof()) // versao 1.0
+While !TRC2->(Eof())  
 
 	nQtdFardo := TRC2->QTDROM
 	nQtdTotal +=1
@@ -479,7 +479,12 @@ For I:= 1 To Len(aDadosC)
 	EndIf
 Next
 
-
+	// Cria Botoes com metodos b·sicos
+	TButton():New( 025, 500, "PgUp", oDlg2,{|| oBrowse:PageUp(30), oBrowse:setFocus() },30,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+	TButton():New( 025, 530, "PgDn" , oDlg2,{|| oBrowse:PageDown(30), oBrowse:setFocus() },30,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+	//TButton():New( 196, 002, "Linha atual", oDlg2,{|| alert(oBrowse:nAt) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+	//TButton():New( 208, 052, "Nr Linhas", oDlg2,{|| alert(oBrowse:nLen) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+	//TButton():New( 208, 002, "Linhas visiveis", oDlg2,{|| alert(oBrowse:nRowCount()) },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
 
 // Cria Browse
 oBrowse := TCBrowse():New(040,020,aSize[5]-1350,aSize[6]-600,,{'','PRODUTO','DESCRI«√O','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
@@ -491,22 +496,8 @@ oBrowse:AddColumn(TCColumn():New("REGISTRADO"	, {|| aColsExCg[oBrowse:nAt,04]},"
 oBrowse:AddColumn(TCColumn():New("RESTANTE" 	, {|| aColsExCg[oBrowse:nAt,05]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
 oBrowse:AddColumn(TCColumn():New("EXCEDENTE" 	, {|| aColsExCg[oBrowse:nAt,06]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
 
-//A coluna 6 precisa est· com a opÁ„o de editar .T.
 oBrowse:nLinhas := 2
 oBrowse:SetArray(aColsExCg)
-//oBrowse:bWhen        := { || Len(aColsExCg) > 0 }
-//	oBrowse:bRClicked    := { || fEdita(@aColsExCg, oLista, "@!", 9)}  //Irei editar a coluna 6
-/*      // Evento de clique no cabeÁalho da browse
-	oBrowse:bHeaderClick := {|o, nCol| alert('bHeaderClick') }
-	// Evento de duplo click na celula
-	oBrowse:bLDblClick := {|| alert('bLDblClick') }
-*/
-	// Cria Botoes com metodos b·sicos
-	TButton():New( 025, 500, "PgUp", oDlg2,{|| oBrowse:PageUp(30), oBrowse:setFocus() },30,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	TButton():New( 025, 530, "PgDn" , oDlg2,{|| oBrowse:PageDown(30), oBrowse:setFocus() },30,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	//TButton():New( 196, 002, "Linha atual", oDlg2,{|| alert(oBrowse:nAt) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	//TButton():New( 208, 052, "Nr Linhas", oDlg2,{|| alert(oBrowse:nLen) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	//TButton():New( 208, 002, "Linhas visiveis", oDlg2,{|| alert(oBrowse:nRowCount()) },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
 oBrowse:lUseDefaultColors := .F.
 oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
 oBrowse:Refresh()
@@ -524,12 +515,9 @@ oBrwFinaliz:Refresh()
 
 oGetCodBar:SetFocus()
 oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}
-
 oBrwFinaliz:bGotFocus :=  {||oGetCodBar:SetFocus()}
 
-
 Return
-
 
 /*
 ‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
@@ -552,15 +540,12 @@ Static Function IncluiLeitor()
 	Private oMSNewApont
 	nItens := oBrowse:nLen //nItens := len(oMSNewGe2:aCols)
  
-	
-	
 //verifica se edit de cÛdigo de barras est· com tamanho incorreto ou turma n„o existente
 	If	len(Alltrim(cGetCodBar)) <> 13 //.or. !substr(Alltrim(cGetCodBar),12,1) $ "123"    //Alltrim(cGetCodBar) <> ""
 		MSGSTOP("O cÛdigo "+ cGetCodBar +" n„o esta no formato e tamanho correto.")
 		conout("TELAEXPED: O cÛdigo "+ cGetCodBar +" n„o esta no formato e tamanho correto.")
 		Return
 	EndIf
-
 
 	dbSelectArea("SZ3")
 	DbSetOrder(1)
@@ -627,7 +612,6 @@ Static Function IncluiLeitor()
 		dbseek(xfilial("SZ1")+cNumRom+"01")
 	
 		if SZ1->(found()) //verifica se romaneio foi encontrado
-			
 			if Trim(SZ1->Z1_HRINI)==""
 				RecLock("SZ1",.f.)
 				SZ1->Z1_EXPINI := date()
@@ -638,9 +622,6 @@ Static Function IncluiLeitor()
 			MSGINFO("Romaneio nao encontrado no inicio. Informar administrador.")
 			conout("TELAEXPED: Romaneio "+cNumRom+" nao encontrado no inicio. Informar administrador.")
 		EndIf
-	
-//		lInicioCarg := .t.
-//	EndIf
 
 	nApontSucess += 1
 	//atual()
@@ -681,7 +662,6 @@ Static Function atual()
 			if val(aColsExCg[nLin,05])>0
 				aColsExCg[nLin,05] := str(val(aColsExCg[nLin,05])-1)
 				aColsExCg[nLin,06] := "0"
-
 			else
 				aColsExCg[nLin,05] := "0"
 				aColsExCg[nLin,06] := str(val(aColsExCg[nLin,06])+1)
@@ -753,32 +733,6 @@ Static Function atual()
 	Next
 	alert("aColsCont="+str(Len(aColsConc)))
 	alert("aColsExCg="+str(Len(aColsExCg)))
-
-//	obrowse:SetArray(aColsExCg)   //oMSNewGe2:aCols := aclone (aColsExCg)
-
-	//aItensGrid := {}
-	//aItensGrid := aclone (aColsExCg)
-/*	nLin:= 1
-	While nLin <= Len(aColsExCg)
-		if  val(aColsExCg[nLin,05])=0 .and. val(aColsExCg[nLin,06])=0
-			AADD(aColsConc,Array(Len(aFieldsCg)+1))
-			Linew := Len(aColsConc)
-			aColsConc[Linew,01] := aColsExCg[nLin,01]
-			aColsConc[Linew,02] := aColsExCg[nLin,02]
-			aColsConc[Linew,03] := aColsExCg[nLin,03]
-			aColsConc[Linew,04] := aColsExCg[nLin,04]
-			aColsConc[Linew,05] := aColsExCg[nLin,05] 
-			aColsConc[Linew,06] := aColsExCg[nLin,06]
-			aColsConc[Linew,07] := aColsExCg[nLin,07]
-			aColsConc[Linew,08] := aColsExCg[nLin,08]
-			
-			ADEL(aColsExCg, nLin)
-			ASIZE(aColsExCg,Len(aColsExCg)-1)
-			nLin := 1
-		EndIf
-		nLin +=1
-	EndDo
-	*/
 
 	obrowse:SetArray(aColsExCg)   //oMSNewGe2:aCols := aclone (aColsExCg)
 //	obrowse:bWhen          := { || Len(aColsExCg) > 0 }
@@ -1162,14 +1116,12 @@ Static Function IncluiGridLeitor(nTipoRet)
 										
 						aColsExclui[nLin,Len(aFields)+1] := .F.
 					Next
-			//				nJaGrav := len(aFields)
 					oMSNewApont := MsNewGetDados():New( 057, 005, 250, 396,, "AllwaysTrue", "AllwaysTrue", "+Field1+Field2",,, 999, "AllwaysTrue", "", "AllwaysTrue", oDlg4, aFields, aColsExclui)
 					oMSNewApont:refresh()
 				Endif
 			Else
-				//MSGINFO("Etiqueta "+cEtiqueta+" n„o foi carregada.") 
 				
-				////   INCLUIR CONTADOR DE ETIQUETA N√O CARREGADA
+			////   INCLUIR CONTADOR DE ETIQUETA N√O CARREGADA
 			
 			EndIf
 		else
@@ -1364,8 +1316,7 @@ Static Function ENVMAILEXP( cTo, cAssunto, cMensagem )
 		Return .f.
 	EndIf
 	DISCONNECT SMTP SERVER
-
-
+	
 Return
 
 

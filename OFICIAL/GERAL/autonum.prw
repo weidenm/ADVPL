@@ -77,7 +77,8 @@ User Function SA2NUM()
 	//Endif 
 
 return(cUlt) 
-                 
+	
+
 User Function SC5NUM()
 
 	cUlt := ""
