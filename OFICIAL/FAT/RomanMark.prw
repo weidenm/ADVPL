@@ -10,19 +10,21 @@ tabela em MVC
 @version P10
 /*/
 //-------------------------------------------------------------------
-User Function FechaOP()
+User Function MontaRomMVC()
 
 Private oMark
 Private aRotina := MenuDef()
 
 oMark := FWMarkBrowse():New()
-oMark:SetAlias('SC2')
+oMark:SetAlias('SC5')
 oMark:SetSemaphore(.T.)
-oMark:SetDescription('Encerra Ordens de Producao')
-oMark:SetFieldMark( 'C2_OK' )
+oMark:SetDescription('Montagem de Romaneio')
+oMark:SetFieldMark( 'C5_OK' )
 oMark:SetAllMark( { || oMark:AllMark() } )
-oMark:AddLegend( "EMPTY(C2_DATRF)", "YELLOW", "Em Aberto" )
-oMark:AddLegend( "!EMPTY(C2_DATRF)", "RED" , "Encerrados" )
+oMark:AddLegend( "!EMPTY(C5_NOTA)", "RED" , "Faturado" )
+oMark:AddLegend( "EMPTY(C5_NOTA) .AND. EMPTY(C5_ROMANEI)", "GREEN", "Aberto" )
+oMark:AddLegend( "EMPTY(C5_NOTA) .AND. !EMPTY(C5_ROMANEI)", "YELLOW" , "Em Romaneio" )
+
 oMark:Activate()
 
 Return NIL
@@ -33,7 +35,7 @@ Static Function MenuDef()
 Local aRotina := {}
 
 ADD OPTION aRotina TITLE 'Visualizar' ACTION 'VIEWDEF.COMP025_MVC' OPERATION 2 ACCESS 0
-ADD OPTION aRotina TITLE 'Encerra OP' ACTION 'U_EncerraOp()' OPERATION 2 ACCESS 0
+ADD OPTION aRotina TITLE 'Incluir em Romaneio' ACTION 'U_incluirom()' OPERATION 2 ACCESS 0
 
 Return aRotina
 
@@ -51,7 +53,7 @@ Static Function ViewDef()
 Return FWLoadView( 'COMP011_MVC' )
 
 //-------------------------------------------------------------------
-User Function EncerraOp()
+User Function incluirom()
 
 Local aArea := GetArea()
 Local cMarca := oMark:Mark()
@@ -59,20 +61,21 @@ Local lInverte := oMark:IsInvert()
 
 Local nCt := 0
 
-SC2->( dbGoTop() )
-While !SC2->( EOF() )
+SC5->( dbGoTop() )
+While !SC5->( EOF() )
     If oMark:IsMark(cMarca)
-        If EMPTY(C2_DATRF)
-            reclock("SC2",.f.)
-            SC2->C2_DATRF := ddatabase  //Após testes definir campo e conteúdo definitivo
-            SC2->(MsUnlock())
+        If EMPTY(C5_ROMANEI) .and. EMPTY(C5_NOTA)
+           // reclock("SC5",.f.)
+          //  SC5->C5_ROMANEI :=   //Após testes definir campo e conteúdo definitivo
+           // SC5->C5_ROMIT:=  
+           // SC5->(MsUnlock())
             nCt++
         EndIf
     EndIf
-    SC2->( dbSkip() )
+    SC5->( dbSkip() )
 End
 
-    ApMsgInfo( 'Foram encerrados ' + AllTrim( Str( nCt ) ) + ' itens de Ordens de Produção.' )
+        ApMsgInfo( 'Foram relacionados ' + AllTrim( Str( nCt ) ) + ' pedidos ao romaneio.' )
 RestArea( aArea )
 
 Return NIL

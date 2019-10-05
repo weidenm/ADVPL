@@ -572,7 +572,7 @@ Static Function ImprRoda()
 
 	DBSelectArea("SA1")
 	DBSeek(xFilial("SA1")+TRBC->CodiClFo+TRBC->LojaClFo)
-	cObsCli := SUBSTR(SA1->A1_OBSERV + " - " + SC5->C5_OBS,1,80) //<TLM>
+	cObsCli := Alltrim(SA1->A1_OBSERV) + " - " + Alltrim(SC5->C5_OBS)  //SUBSTR(SA1->A1_OBSERV + " - " + SC5->C5_OBS,1,115) //<TLM>
 
 	IF (Alltrim(SA1->A1_ATUALIZ)="" .or. Alltrim(SA1->A1_ATUALIZ)="E")
 		cOBSAtu := "ENVIAR FICHA DE ATUALIZACAO"
@@ -609,7 +609,7 @@ Static Function ImprRoda()
 		@ LI+52, 068  PSAY nTotalPro  Picture "@E 9,999,999.99"    //Valor das mercadorias
 		@ LI+55, 001 PSAY  "CONFERIR O PEDIDO NA ENTREGA,NAO ACEITAMOS RECLAMACOES POSTERIORES"
 		if alltrim(cObsCli)<>""
-			@ LI+57, 001 PSAY  Alltrim(cObsCli) + " / " + cOBSAtu //Observacao do cliente
+			@ LI+57, 001 PSAY  substring(cObsCli,1,90) + " / " + cOBSAtu //Observacao do cliente
 		else
 			@ LI+57, 001 PSAY  Alltrim(cOBSAtu)
 		ENDIF

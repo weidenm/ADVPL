@@ -256,6 +256,15 @@ Static Function TelaCarga()
 	Static oFontGrid
 	Static nTamCod
 	Static nTamDesc
+	Static nColTela
+	Static nLinTela
+	Static nTamTela    //1= 15"  2=21" 3=32" 4=42"
+	Static nColG1
+	Static nLinG1
+	Static nColG2
+	Static nLinG2
+	Static nLinh
+	Static nTamProd
 
 //Parametros TFonte ("Tipo Fonte", ,Tamanho Fonte , , ,Italico (.T./.F.))
 //oFont1      := TFont():New("Arial",09,20,     ,.T.,,,,,.F.)
@@ -306,9 +315,28 @@ Static Function TelaCarga()
 	if aSize[3] > 900 .and. aSize[4] > 400
 		oFontGrid := oFont5
 		nTamDesc := 300
+		nTamTela := 1
+		nColTela := 1913  
+		nLinTela := 1043
+		nColG1	:= 563
+		nLinG1 	:= 443
+		nColG2	:= 363
+		nLinG2	:= 443
+		nLinh	:= 2
+		nTamProd := 270
+		
 	Else
 		oFontGrid := oFont1
 		nTamDesc := 200
+		nTamTela := 2
+		nColTela := 1359  //aSize[5]
+		nLinTela := 731   //aSize[6]
+		nColG1	:= 410
+		nLinG1 	:= 300
+		nColG2	:= 240
+		nLinG2	:= 300
+		nLinh	:= 1
+		nTamProd := 170
 	EndIf
 
 //Passamos agora todas as informações para o calculo das dimenções://MsObjSize( aInfo, aObjects, Mantem Proporção , Disposição Horizontal )
@@ -322,7 +350,7 @@ Static Function TelaCarga()
 //******************************************************************************
 //****************         MONTAGEM DA TELA            ************************
 //******************************************************************************
-	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM aSize[7], 0 TO aSize[6], aSize[5] COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
+	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 20, 0 TO nLinTela, nColTela COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
 	@ 002, 002 BUTTON oBtnFinaliz PROMPT "FINALIZAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (finalizarom()) PIXEL
 	@ 020, 002 BUTTON oBtnApont PROMPT "PAUSAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
 	@ 002, 060 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 050, 015 OF oDlg2 ACTION LOGRES() PIXEL	
@@ -341,8 +369,8 @@ Static Function TelaCarga()
 	//@ 130, 060 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
 	//@ 145, 010 SAY oLblResp PROMPT "Início Separação: " SIZE 150, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	//@ 145, 085 SAY oLblResp PROMPT HrInicio SIZE 150, 011 OF oGroup1 FONT oFont3  CfOLORS 0, 16777215 PIXEL
-	@ 005, 600 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
-	@ 005, 650 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
+	@ 005, nColG1+50 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
+	@ 005, nColG1+100 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
 	@ 040, 600 SAY oLblSaida PROMPT "CONCLUÍDOS"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	//@ 005,550 CHECKBOX oCbxFinalizados VAR lCbxFinalizados PROMPT "Mostra itens concluídos" SIZE 080, 010 OF oDlg2 COLORS 0, 16777215 ON CHANGE ExibeFinaliz() PIXEL
 	@ 1200, 010 SAY oLblStatus1 PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -480,14 +508,15 @@ For I:= 1 To Len(aDadosC)
 Next
 
 	// Cria Botoes com metodos básicos
-	TButton():New( 025, 500, "PgUp", oDlg2,{|| oBrowse:PageUp(30), oBrowse:setFocus() },30,010,,,.F.,.T.,.F.,,.F.,,,.F. )
-	TButton():New( 025, 530, "PgDn" , oDlg2,{|| oBrowse:PageDown(30), oBrowse:setFocus() },30,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+//	TButton():New( 025, 500, "PgUp", oDlg2,{|| oBrowse:PageUp(30), oBrowse:setFocus() },30,010,,,.F.,.T.,.F.,,.F.,,,.F. )
+//*************************************************************
+//	TButton():New( 025, 530, "PgDn" , oDlg2,{|| oBrowse:PageDown(30), oBrowse:setFocus() },30,010,,,.F.,.T.,.F.,,.F.,,,.F. )
 	//TButton():New( 196, 002, "Linha atual", oDlg2,{|| alert(oBrowse:nAt) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
 	//TButton():New( 208, 052, "Nr Linhas", oDlg2,{|| alert(oBrowse:nLen) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
 	//TButton():New( 208, 002, "Linhas visiveis", oDlg2,{|| alert(oBrowse:nRowCount()) },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
 
 // Cria Browse
-oBrowse := TCBrowse():New(040,020,aSize[5]-1350,aSize[6]-600,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
+oBrowse := TCBrowse():New(040,10,nColG1,nLinG1,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
 //oBrowse := TCBrowse():New(040,020,500,450,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
 oBrowse:AddColumn(TCColumn():New("PRODUTO"	, {|| aColsExCg[oBrowse:nAt,01]},"@!",,,"CENTER", 040,.F.,.F.,,{|| .F. },,.F., ) )
 oBrowse:AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsExCg[oBrowse:nAt,02]},"@!",,,"CENTER", nTamDesc,.F.,.F.,,{|| .F. },,.F., ) )
@@ -496,26 +525,27 @@ oBrowse:AddColumn(TCColumn():New("REGISTRADO"	, {|| aColsExCg[oBrowse:nAt,04]},"
 oBrowse:AddColumn(TCColumn():New("RESTANTE" 	, {|| aColsExCg[oBrowse:nAt,05]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
 oBrowse:AddColumn(TCColumn():New("EXCEDENTE" 	, {|| aColsExCg[oBrowse:nAt,06]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
 
-oBrowse:nLinhas := 2
+oBrowse:nLinhas := nLinh
 oBrowse:SetArray(aColsExCg)
 oBrowse:lUseDefaultColors := .F.
 oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
 oBrowse:Refresh()
 
-oBrwFinaliz := TCBrowse():New(040,aSize[5]-1320,aSize[5]-1550,aSize[6]-600,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE'},{20,100,10},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
-oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", 050,.F.,.F.,,{|| .F. },,.F., ) )
-oBrwFinaliz :AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsConc[oBrwFinaliz:nAt,02]},"@!",,,"CENTER", 150,.F.,.F.,,{|| .F. },,.F., ) )
-oBrwFinaliz :AddColumn(TCColumn():New("QUANTIDADE"	, {|| aColsConc[oBrwFinaliz:nAt,03]},"@E 9999",,,"CENTER"  , 020,.F.,.F.,,,,.F., ) )
+oBrwFinaliz := TCBrowse():New(040,nColG1+20,nColG2,nLinG2,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE'},{20,100,10},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
+oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", 020,.F.,.F.,,{|| .F. },,.F., ) )
+oBrwFinaliz :AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsConc[oBrwFinaliz:nAt,02]},"@!",,,"CENTER", nTamProd,.F.,.F.,,{|| .F. },,.F., ) )
+oBrwFinaliz :AddColumn(TCColumn():New("QUANT."	, {|| aColsConc[oBrwFinaliz:nAt,03]},"@E 9999",,,"CENTER"  , 010,.F.,.F.,,,,.F., ) )
 
-oBrwFinaliz:nLinhas := 2
+oBrwFinaliz:nLinhas := nLinh
 oBrwFinaliz:SetArray(aColsConc)
 oBrwFinaliz:lUseDefaultColors := .F.
 oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
 oBrwFinaliz:Refresh()
 
-oGetCodBar:SetFocus()
+
 oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}
 oBrwFinaliz:bGotFocus :=  {||oGetCodBar:SetFocus()}
+oGetCodBar:SetFocus()
 
 Return
 
@@ -624,8 +654,8 @@ Static Function IncluiLeitor()
 		EndIf
 
 	nApontSucess += 1
-	//atual()
-	GridCarga()
+	atual()
+	//GridCarga()
 
 Return( Nil )
 
