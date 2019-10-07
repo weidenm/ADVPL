@@ -24,10 +24,11 @@ oDamdfe:SetMargin(60,60,60,60)
 oDamdfe:lServer := oSetup:GetProperty(PD_DESTINATION)==AMB_SERVER
 
 // ----------------------------------------------
-// Define saida de impressão
+// Define saida de impressão ....
 // ----------------------------------------------
 
 If oSetup:GetProperty(PD_PRINTTYPE) == IMP_SPOOL
+	
 	oDamdfe:nDevice := IMP_SPOOL
 	// ----------------------------------------------
 	// Salva impressora selecionada

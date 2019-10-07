@@ -20,7 +20,7 @@ Regras para chamada do método remessa
 							  2-Cancelamento; 3- Encerramento		
 
 @return	cChvMDFe		- Chave do MDFe
-			cString		- String com XML Encodado
+			cString		- String com XML Encodado .
 /*/
 //-----------------------------------------------------------------------
 
