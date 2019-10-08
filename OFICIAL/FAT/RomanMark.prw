@@ -62,14 +62,20 @@ Local lInverte := oMark:IsInvert()
 Local nCt := 0
 
 SC5->( dbGoTop() )
+dbSelectArea("SC5")
+dbSetOrder(2)
+SC5->(dbSeek(xFilial("SC5")+DTOS(ddatabase-20),.T.)) 
+
 While !SC5->( EOF() )
     If oMark:IsMark(cMarca)
-        If EMPTY(C5_ROMANEI) .and. EMPTY(C5_NOTA)
-           // reclock("SC5",.f.)
-          //  SC5->C5_ROMANEI :=   //Após testes definir campo e conteúdo definitivo
-           // SC5->C5_ROMIT:=  
-           // SC5->(MsUnlock())
-            nCt++
+        if EMPTY(C5_NOTA)
+            If EMPTY(C5_ROMANEI) 
+            // reclock("SC5",.f.)
+            //  SC5->C5_ROMANEI :=   //Após testes definir campo e conteúdo definitivo
+            // SC5->C5_ROMIT:=  
+            // SC5->(MsUnlock())
+                nCt++
+            EndIf
         EndIf
     EndIf
     SC5->( dbSkip() )
