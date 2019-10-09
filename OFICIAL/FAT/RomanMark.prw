@@ -12,8 +12,14 @@ tabela em MVC
 //-------------------------------------------------------------------
 User Function MontaRomMVC()
 
+
+aPerg := {}
+cPerg := "MONROM"
 Private oMark
 Private aRotina := MenuDef()
+
+Pergunte(cPerg,.T.,"Selecao de Romaneio")
+
 
 oMark := FWMarkBrowse():New()
 oMark:SetAlias('SC5')
@@ -34,8 +40,11 @@ Static Function MenuDef()
 
 Local aRotina := {}
 
-ADD OPTION aRotina TITLE 'Visualizar' ACTION 'VIEWDEF.COMP025_MVC' OPERATION 2 ACCESS 0
-ADD OPTION aRotina TITLE 'Incluir em Romaneio' ACTION 'U_incluirom()' OPERATION 2 ACCESS 0
+ADD OPTION aRotina TITLE 'Gerar Romaneio' ACTION 'U_incluirom()' OPERATION 2 ACCESS 0
+ADD OPTION aRotina TITLE 'Parâmetros' ACTION 'U_ParamRom()' OPERATION 2 ACCESS 0
+ADD OPTION aRotina TITLE 'Excluir' ACTION 'u_excluirom()' OPERATION 2 ACCESS 0
+ADD OPTION aRotina TITLE 'Imprimir Romaneio' ACTION 'u_ROMAN()' OPERATION 2 ACCESS 0
+//ADD OPTION aRotina TITLE 'Visualizar' ACTION 'VIEWDEF.COMP025_MVC' OPERATION 2 ACCESS 0
 
 Return aRotina
 
@@ -61,28 +70,99 @@ Local lInverte := oMark:IsInvert()
 
 Local nCt := 0
 
+Local nSeconds    := 0 // Segundos que iniciou a
+Local nX          := 0 // Contador de Repeticoes
+
+aPerg := {}
+cPerg := "MONRON"
+
+	Pergunte(cPerg,.F.)
+
+    Public _cRomanei := MV_PAR01
+    Public _cItRom   := MV_PAR02
+    
 SC5->( dbGoTop() )
 dbSelectArea("SC5")
 dbSetOrder(2)
-SC5->(dbSeek(xFilial("SC5")+DTOS(ddatabase-20),.T.)) 
+//SC5->(dbSeek(xFilial("SC5")+DTOS(ddatabase-20),.T.)) 
+MsSeek(xFilial("SC5")+DTOS(ddatabase-90))
+conout("Data filtro"+dtos(ddatabase-90))
+nSeconds := Seconds()
 
 While !SC5->( EOF() )
     If oMark:IsMark(cMarca)
+        reclock("SC5",.f.)
         if EMPTY(C5_NOTA)
             If EMPTY(C5_ROMANEI) 
-            // reclock("SC5",.f.)
-            //  SC5->C5_ROMANEI :=   //Após testes definir campo e conteúdo definitivo
-            // SC5->C5_ROMIT:=  
-            // SC5->(MsUnlock())
+                SC5->C5_ROMANEI := _cRomanei  //Após testes definir campo e conteúdo definitivo
+                SC5->C5_ROMIT:=  _cItRom
                 nCt++
             EndIf
         EndIf
+        SC5->C5_OK := ""
+        SC5->(MsUnlock())
+        nX ++
     EndIf
     SC5->( dbSkip() )
 End
-
-        ApMsgInfo( 'Foram relacionados ' + AllTrim( Str( nCt ) ) + ' pedidos ao romaneio.' )
+        ConOut("Tempo: " + AllTrim(Str(Seconds() - nSeconds)) + " Repetiçoes:" + str(nX))
+        ApMsgInfo( 'Relacionados ' + AllTrim( Str( nCt ) ) + ' pedidos ao romaneio '+ _cRomanei+"-"+_cItRom )
 RestArea( aArea )
 
 Return NIL
+
+
+User Function excluirom()
+
+    Local aArea := GetArea()
+    Local cMarca := oMark:Mark()
+    Local lInverte := oMark:IsInvert()
+
+    Local nCt := 0
+
+    Local nSeconds    := 0 // Segundos que iniciou a
+    Local nX          := 0 // Contador de Repeticoes
+
+    SC5->( dbGoTop() )
+    dbSelectArea("SC5")
+    dbSetOrder(2)
+    //SC5->(dbSeek(xFilial("SC5")+DTOS(ddatabase-20),.T.)) 
+    MsSeek(xFilial("SC5")+DTOS(ddatabase-90))
+    nSeconds := Seconds()
+
+    While !SC5->( EOF() )
+        If oMark:IsMark(cMarca)
+            reclock("SC5",.f.)
+            if EMPTY(C5_NOTA)
+                If !EMPTY(C5_ROMANEI) 
+                    
+                    SC5->C5_ROMANEI := ""  //Após testes definir campo e conteúdo definitivo
+                    SC5->C5_ROMIT:=  ""
+                    nCt++
+                EndIf
+            EndIf
+            SC5->C5_OK := ""
+            SC5->(MsUnlock())
+            nX ++
+        EndIf
+        SC5->( dbSkip() )
+    End
+            ConOut("Tempo: " + AllTrim(Str(Seconds() - nSeconds)) + " Repetiçoes:" + str(nX))
+            ApMsgInfo( 'Foram removidos ' + AllTrim( Str( nCt ) ) + ' pedidos de romaneios.')
+    RestArea( aArea )
+
+Return NIL
+
+
+User Function ParamRom()
+
+aPerg := {}
+cPerg := "MONROM"
+
+Pergunte(cPerg,.T.,"Seleção de Romaneio")
+
+//Public _cRomanei := MV_PAR01
+//Public _cItRom   := MV_PAR02
+
+Return
 
