@@ -355,13 +355,13 @@ Static Function TelaCarga()
 	@ 020, 002 BUTTON oBtnApont PROMPT "PAUSAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
 	@ 002, 060 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 050, 015 OF oDlg2 ACTION LOGRES() PIXEL	
 	@ 020, 060 BUTTON oBtnApont PROMPT "EXCLUIR FARDOS" SIZE 050, 015 OF oDlg2 ACTION (retfardos()) PIXEL
-	@ 002, 130 GROUP oGroup1 TO 030, 450 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
-	@ 004, 135 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 004, 170 SAY oTxtVeic PROMPT 	cVeic SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 015, 135 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 015, 170 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 004, 240 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 003, 270 SAY oTxtRota PROMPT cRota SIZE 200, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
+	@ 002, 120 GROUP oGroup1 TO 025, 410 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
+	@ 004, 125 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 004, 160 SAY oTxtVeic PROMPT 	cVeic SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	@ 015, 125 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 015, 160 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	@ 004, 220 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 003, 245 SAY oTxtRota PROMPT cRota SIZE 200, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
 	//@ 003, 380 SAY oTxtRota1 PROMPT substr(cRota,21,25) SIZE 070, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
 	//@ 115, 010 SAY oLblMot PROMPT "Motorista:" SIZE 049, 012 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	//@ 115, 040 SAY oTxtMot PROMPT cMotori SIZE 035, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
@@ -371,10 +371,10 @@ Static Function TelaCarga()
 	//@ 145, 085 SAY oLblResp PROMPT HrInicio SIZE 150, 011 OF oGroup1 FONT oFont3  CfOLORS 0, 16777215 PIXEL
 	@ 005, nColG1+50 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
 	@ 005, nColG1+100 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
-	@ 040, 600 SAY oLblSaida PROMPT "CONCLUÍDOS"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	//@ 005,550 CHECKBOX oCbxFinalizados VAR lCbxFinalizados PROMPT "Mostra itens concluídos" SIZE 080, 010 OF oDlg2 COLORS 0, 16777215 ON CHANGE ExibeFinaliz() PIXEL
-	@ 1200, 010 SAY oLblStatus1 PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 1200, 070 SAY oTxtStatus PROMPT str(nQtdTotal) OF oDlg2 FONT oFont3 COLORS 0, 16777215 PIXEL
+	@ 030, 150 SAY oLblPend PROMPT "PENDENTES"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 030, nColG1+20 SAY oLblConc PROMPT "CONCLUÍDOS"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+//@ 030, nColG1-40 SAY oLblStatus1 PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	//@ 030, nColG1-20 SAY oTxtStatus PROMPT str(nQtdTotal) OF oDlg2 FONT oFont3 COLORS 0, 16777215 PIXEL
 
 	GridCarga()		
 
@@ -564,52 +564,83 @@ Return
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 Static Function IncluiLeitor()
-	cCodProd := ""
-	cDescProd := ""
+	Public cCodProdBar := ""
+	//cDescProd := ""
+	//Private oMSNewApont
 	cHrApont := ""
-	Private oMSNewApont
+	
 	nItens := oBrowse:nLen //nItens := len(oMSNewGe2:aCols)
  
-//verifica se edit de código de barras está com tamanho incorreto ou turma não existente
-	If	len(Alltrim(cGetCodBar)) <> 13 //.or. !substr(Alltrim(cGetCodBar),12,1) $ "123"    //Alltrim(cGetCodBar) <> ""
+	//Verifica se tamanho do código está correto
+	If	len(Alltrim(cGetCodBar)) = 13
+		
+		dbSelectArea("SZ3")
+		DbSetOrder(1)
+		dbGotop()
+		dbseek(xfilial("SZ3")+substr(Alltrim(cGetCodBar),1,12))
+		//Verifica se fardo foi encontrado
+		if SZ3->(found())
+			//VERIFICA SE FARDO JÁ FOI REGISTRADO			
+			IF Trim(SZ3->Z3_ROMANEI)=""
+				
+				cCodProdBar := SZ3->Z3_PRODUTO
+				/*	dbSelectArea("SB1")
+					DbSetOrder(1)
+					dbseek(xfilial("SB1")+SZ3->Z3_PRODUTO)
+					cDescProd := SB1->B1_DESC  
+				*/
+				RecLock("SZ3",.f.)
+				SZ3->Z3_ROMANEI 	:= cNumRom   //CRIAR OUTRO CAMPO CHAMADO Z3_ROMANEIO PARA SUBSTITUIR
+				SZ3->Z3_HREXP  		:= time()
+				SZ3->Z3_DATEXP  	:= dDatabase  //DATA DE APONTAMENTO DO FARDO - INCLUIR CAMPO
+				SZ3->(MsUnlock())
+				atual()
+				nLeituras += 1
+				nApontSucess += 1
+				
+	
+			else
+				if Trim(SZ3->Z3_ROMANEI)<>Trim(cNumRom)  //Caso número registrado for diferente do romaneio atual.
+					MSGSTOP("Fardo registrado em outro romaneio. Informar gerência.")
+					conout("TELAEXPED: O fardo "+ cGetCodBar +" já está registrado no romaneio "+SZ3->Z3_ROMANEI)
+					Aadd(aFdOutrRom,{Alltrim(cGetCodBar),;
+						SZ3->Z3_PRODUTO,;
+						SZ3->Z3_ROMANEI})
+					nLeituras += 1
+				EndIf
+				Return
+			EndIf
+		else
+			MSGSTOP("Fardo não encontrado. Informe o administrador do sistema ou gerência.")
+			conout("TELAEXPED: O fardo "+ cGetCodBar +" não foi encontrado no SZ3.")
+			AADD(aFdNotExist,cGetCodBar)
+			nLeituras += 1
+			Return
+		EndIf
+	Else
 		MSGSTOP("O código "+ cGetCodBar +" não esta no formato e tamanho correto.")
 		conout("TELAEXPED: O código "+ cGetCodBar +" não esta no formato e tamanho correto.")
 		Return
 	EndIf
 
-	dbSelectArea("SZ3")
-	DbSetOrder(1)
-	dbGotop()
-	dbseek(xfilial("SZ3")+substr(Alltrim(cGetCodBar),1,12))
+	if nLeituras = 1		
+		dbSelectArea("SZ1")
+		dbGotop()
+		dbseek(xfilial("SZ1")+cNumRom+"01")
 	
-	if !SZ3->(found())
-		MSGSTOP("Fardo não encontrado. Informe o administrador do sistema ou gerência.")
-		conout("TELAEXPED: O fardo "+ cGetCodBar +" não foi encontrado no SZ3.")
-		AADD(aFdNotExist,cGetCodBar)
-		nLeituras += 1
-		Return
-	EndIf
-		
-	dbSelectArea("SB1")
-	DbSetOrder(1)
-	dbseek(xfilial("SB1")+SZ3->Z3_PRODUTO)
-	cDescProd := SB1->B1_DESC
-		
-	//VERIFICA SE FARDO JÁ FOI REGISTRADO			
-	IF Trim(SZ3->Z3_ROMANEI)<>""
-		if Trim(SZ3->Z3_ROMANEI)<>Trim(cNumRom)
-			MSGSTOP("Fardo registrado em outro romaneio. Informar gerência.")
-			conout("TELAEXPED: O fardo "+ cGetCodBar +" já está registrado no romaneio "+SZ3->Z3_ROMANEI)
-			Aadd(aFdOutrRom,{Alltrim(cGetCodBar),;
-				SZ3->Z3_PRODUTO,;
-				SZ3->Z3_ROMANEI})
-			nLeituras += 1
+		if SZ1->(found())   //verifica se romaneio foi encontrado
+			if Trim(SZ1->Z1_HRINI)==""
+				RecLock("SZ1",.f.)
+				SZ1->Z1_EXPINI := date()
+				SZ1->Z1_HRINI := time()
+				SZ1->(MsUnlock())
+			End If
+		Else
+			MSGINFO("Romaneio nao encontrado no inicio. Informar administrador.")
+			conout("TELAEXPED: Romaneio "+cNumRom+" nao encontrado no inicio. Informar administrador.")
 		EndIf
-		Return
 	EndIf
 
-	cCodProd := SZ3->Z3_PRODUTO
-	
 	//VERIFICA SE PRODUTO ESTÁ VENCIDO		
 	/*
 	IF ddatabase-SZ3->Z3_DATA > SB1->B1_PRVALID .and. SB1->B1_PRVALID>0
@@ -629,34 +660,6 @@ Static Function IncluiLeitor()
 		Return
 	EndIf
 	*/	
-	
-	RecLock("SZ3",.f.)
-	SZ3->Z3_ROMANEI := cNumRom   //CRIAR OUTRO CAMPO CHAMADO Z3_ROMANEIO PARA SUBSTITUIR
-	SZ3->Z3_HREXP  := time()
-	SZ3->Z3_DATEXP  	:= dDatabase  //DATA DE APONTAMENTO DO FARDO - INCLUIR CAMPO
-	SZ3->(MsUnlock())
-	nLeituras += 1
-	
-		dbSelectArea("SZ1")
-		dbGotop()
-		dbseek(xfilial("SZ1")+cNumRom+"01")
-	
-		if SZ1->(found()) //verifica se romaneio foi encontrado
-			if Trim(SZ1->Z1_HRINI)==""
-				RecLock("SZ1",.f.)
-				SZ1->Z1_EXPINI := date()
-				SZ1->Z1_HRINI := time()
-				SZ1->(MsUnlock())
-			End If
-		Else
-			MSGINFO("Romaneio nao encontrado no inicio. Informar administrador.")
-			conout("TELAEXPED: Romaneio "+cNumRom+" nao encontrado no inicio. Informar administrador.")
-		EndIf
-
-	nApontSucess += 1
-	atual()
-	//GridCarga()
-
 Return( Nil )
 
 
@@ -675,33 +678,26 @@ Return( Nil )
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 Static Function atual()
-	dbSelectArea("SZ3")
-	dbGotop()
-	dbseek(xfilial("SZ3")+substr(Alltrim(cGetCodBar),1,8)+substr(cGetCodBar,9,4)) //ALTERADO 28/07/15
 
-	lExisteIt := .f.
+	//dbSelectArea("SZ3")
+	//dbGotop()
+	//dbseek(xfilial("SZ3")+substr(Alltrim(cGetCodBar),1,8)+substr(cGetCodBar,9,4)) //ALTERADO 28/07/15
 
-	alert("aColsCont="+str(Len(aColsConc)))
-	alert("aColsExCg="+str(Len(aColsExCg)))
-	
+	lGrid1 := .f.
+
+//Atualiza Grid 1 - Itens Pendentes
 	For nLin:= 1 To Len(aColsExCg)  //Array que guarda dados do Grid
 		
-		if	Trim(aColsExCg[nLin,01]) == Trim(SZ3->Z3_PRODUTO) //Se DadosGrid for igual ao produto registrado no momento
-			aColsExCg[nLin,04] := str(val(aColsExCg[nLin,04])+1)
+		if	Trim(aColsExCg[nLin,01]) == Trim(cCodProdBar) 
+			lGrid1 = .t.
+			aColsExCg[nLin,04] :=  Transform(val(aColsExCg[nLin,04])+1,"@E 9999") //str(val(aColsExCg[nLin,04])+1)
 			
-			if val(aColsExCg[nLin,05])>0
-				aColsExCg[nLin,05] := str(val(aColsExCg[nLin,05])-1)
-				aColsExCg[nLin,06] := "0"
+			if val(aColsExCg[nLin,04])<=val(aColsExCg[nLin,03])
+				aColsExCg[nLin,05] :=  Transform(val(aColsExCg[nLin,05])-1,"@E 9999")  //str(val(aColsExCg[nLin,05])-1)				
 			else
-				aColsExCg[nLin,05] := "0"
-				aColsExCg[nLin,06] := str(val(aColsExCg[nLin,06])+1)
+				aColsExCg[nLin,06] := Transform(val(aColsExCg[nLin,06])+1,"@E 9999")  //str(val(aColsExCg[nLin,06])+1)
 			EndIf
-			lExisteIt := .t.
 			
-		//	if val(aColsExCg[nLin,05])=0 .and. val(aColsExCg[nLin,06]) = 0
-		//		GridCarga()
-		//		Return
-		//	EndIf
 			if  val(aColsExCg[nLin,05])=0 .and. val(aColsExCg[nLin,06])=0
 				AADD(aColsConc,Array(Len(aFieldsCg)+1))
 				Linew := Len(aColsConc)
@@ -713,96 +709,74 @@ Static Function atual()
 				aColsConc[Linew,06] := aColsExCg[nLin,06]
 				aColsConc[Linew,07] := aColsExCg[nLin,07]
 				aColsConc[Linew,08] := aColsExCg[nLin,08]
-				
-				ADEL(aColsExCg, nLin)
-				ASIZE(aColsExCg,Len(aColsExCg)-1)
-				//nLin := 1
+				lConcAtu := .t.
 			EndIf
 			exit
 		EndIf
 	Next
 
-	For nLin:= 1 To Len(aColsConc)  //Array que guarda dados do Grid
-			
-		if	Trim(aColsConc[nLin,01]) == Trim(SZ3->Z3_PRODUTO) //Se DadosGrid for igual ao produto registrado no momento
-			aColsConc[nLin,04] := str(val(aColsConc[nLin,04])+1)
-			
-			if val(aColsConc[nLin,05])>0
-				aColsConc[nLin,05] := str(val(aColsConc[nLin,05])-1)
-				aColsConc[nLin,06] := "0"
+	//Atualiza Grid 2 - Itens Concluídos, caso produto não estiver no Grid 1.
+	if lGrid1 = .f. //Caso produto não esteja no primeiro grid, procurar o mesmo no segundo grid (concluídos)
+		For nLin:= 1 To Len(aColsConc)   //Array que guarda dados do Grid
 				
-			else
-				aColsConc[nLin,05] := "0"
-				aColsConc[nLin,06] := str(val(aColsConc[nLin,06])+1)
+			if	Trim(aColsConc[nLin,01]) == Trim(cCodProdBar) 
+				aColsConc[nLin,04] := Transform(val(aColsConc[nLin,04])+1,"@E 9999")  //str(val(aColsConc[nLin,04])+1)
+				
+				if val(aColsConc[nLin,04])<= val(aColsConc[nLin,03])
+					aColsConc[nLin,05] :=  Transform(val(aColsConc[nLin,05])-1,"@E 9999") //  str(val(aColsConc[nLin,05])-1)				
+				else
+					aColsConc[nLin,06] :=   Transform(val(aColsConc[nLin,06])+1,"@E 9999") //str(val(aColsConc[nLin,06])+1)
+				EndIf
+				lExisteIt := .t.
+				
+				if  val(aColsConc[nLin,04])>val(aColsConc[nLin,03])
+					AADD(aColsExCg,Array(Len(aFieldsCg)+1))
+					Linew := Len(aColsExCg)
+					aColsExCg[Linew,01] := aColsConc[nLin,01]
+					aColsExCg[Linew,02] := aColsConc[nLin,02]
+					aColsExCg[Linew,03] := aColsConc[nLin,03]
+					aColsExCg[Linew,04] := aColsConc[nLin,04]
+					aColsExCg[Linew,05] := aColsConc[nLin,05] 
+					aColsExCg[Linew,06] := aColsConc[nLin,06]
+					aColsExCg[Linew,07] := aColsConc[nLin,07]
+					aColsExCg[Linew,08] := aColsConc[nLin,08]
+				End If
+				//exit
 			EndIf
-			lExisteIt := .t.
-			
-		//	if val(aColsConc[nLin,05])>0 .or. val(aColsConc[nLin,06]) > 0
-		//		GridCarga()
-		//		Return
-		//	EndIf
-			if  val(aColsConc[nLin,05])>0 .or. val(aColsConc[nLin,06])>0
-				AADD(aColsExCg,Array(Len(aFieldsCg)+1))
-				Linew := Len(aColsExCg)
-				aColsExCg[Linew,01] := aColsConc[nLin,01]
-				aColsExCg[Linew,02] := aColsConc[nLin,02]
-				aColsExCg[Linew,03] := aColsConc[nLin,03]
-				aColsExCg[Linew,04] := aColsConc[nLin,04]
-				aColsExCg[Linew,05] := aColsConc[nLin,05] 
-				aColsExCg[Linew,06] := aColsConc[nLin,06]
-				aColsExCg[Linew,07] := aColsConc[nLin,07]
-				aColsExCg[Linew,08] := aColsConc[nLin,08]
-				
-				ADEL(aColsConc, nLin)
-				ASIZE(aColsConc,Len(aColsConc)-1)
-				
-			EndIf
-			exit
+		Next   
+	EndIf
 
+	//Exclui registros de arrays dos grids
+	nLin := 1			
+	While nLin <= Len(aColsExCg) 
+		if	Trim(aColsExCg[nLin,03]) == Trim(aColsExCg[nLin,04])
+			ADEL(aColsExCg, nLin)
+			ASIZE(aColsExCg,Len(aColsExCg)-1)
+			nLin := 1 
+			Loop
 		EndIf
-	Next
-	alert("aColsCont="+str(Len(aColsConc)))
-	alert("aColsExCg="+str(Len(aColsExCg)))
+		nLin++
+	EndDo
 
-	obrowse:SetArray(aColsExCg)   //oMSNewGe2:aCols := aclone (aColsExCg)
-//	obrowse:bWhen          := { || Len(aColsExCg) > 0 }
-	oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
+	nLin := 1
+	While nLin <= Len(aColsConc)  //Exclui registros do array
+		if	Trim(aColsConc[nLin,03]) <> Trim(aColsConc[nLin,04])
+			ADEL(aColsConc, nLin)
+			ASIZE(aColsConc,Len(aColsConc)-1)
+			nLin := 1
+			Loop 
+		EndIf
+		nLin++
+	EndDo
+
+	obrowse:SetArray(aColsExCg)  
 	obrowse:Refresh()
-	//oBrowse:SetArray(aColsExCg)
-
-	
-        // Cria Browse
-/*	oBrowse := TCBrowse():New(040,020,aSize[5]-1350,aSize[6]-600,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
-	oBrowse:AddColumn(TCColumn():New("PRODUTO"	, {|| aColsExCg[oBrowse:nAt,01]},"@!",,,"CENTER", 040,.F.,.F.,,{|| .F. },,.F., ) )
-	oBrowse:AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsExCg[oBrowse:nAt,02]},"@!",,,"CENTER", nTamDesc,.F.,.F.,,{|| .F. },,.F., ) )
-	oBrowse:AddColumn(TCColumn():New("QUANTIDADE"	, {|| aColsExCg[oBrowse:nAt,03]},"@E 9999",,,"CENTER"  , 040,.F.,.F.,,,,.F., ) )
-	oBrowse:AddColumn(TCColumn():New("REGISTRADO"	, {|| aColsExCg[oBrowse:nAt,04]},"@E 9999",,,"CENTER", 040,.F.,.T.,,,,.F., ) )
-	oBrowse:AddColumn(TCColumn():New("RESTANTE" 	, {|| aColsExCg[oBrowse:nAt,05]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
-	oBrowse:AddColumn(TCColumn():New("EXCEDENTE" 	, {|| aColsExCg[oBrowse:nAt,06]},"@E 9999",,,"CENTER"  , 040,.F.,.T.,,,,.F., ) )
-
-	oBrowse:nLinhas := 2
-	//oBrowse:bWhen        := { || Len(aColsExCg) > 0 }
-	oBrowse:lUseDefaultColors := .F.
 	oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
-	oBrowse:Refresh()
-*/	
-	oBrwFinaliz:SetArray(aColsConc)
-	oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
-	oBrwFinaliz:Refresh()
 	
-
-	/*	
-	oBrwFinaliz := TCBrowse():New(040,aSize[5]-1320,aSize[5]-1550,aSize[6]-600,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE'},{20,100,10},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
-	oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", 050,.F.,.F.,,{|| .F. },,.F., ) )
-	oBrwFinaliz :AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsConc[oBrwFinaliz:nAt,02]},"@!",,,"CENTER", 150,.F.,.F.,,{|| .F. },,.F., ) )
-	oBrwFinaliz :AddColumn(TCColumn():New("QUANTIDADE"	, {|| aColsConc[oBrwFinaliz:nAt,03]},"@E 9999",,,"CENTER"  , 020,.F.,.F.,,,,.F., ) )
-
-	oBrwFinaliz:nLinhas := 2
-	//oBrwFinaliz:SetArray(aColsConc)
-	oBrwFinaliz:lUseDefaultColors := .F.
-	oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
+	oBrwFinaliz:SetArray(aColsConc)
 	oBrwFinaliz:Refresh()
-*/
+	oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
+	
 	oGetCodBar:SetFocus()
 	oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}	
 Return
@@ -1466,7 +1440,7 @@ Static Function GETDCLR(nLinha)
 	Local nRet := 0
 	Local nCor3 := 16776960 // Verde Claro - RGB(0,255,255) //Local nCor3 := 65280 //VERDE
 	Local nCor4 :=  5070329 //fVERMELHO
-	Local nCor2 := 16777215 
+	Local nCor2 := 16777215 //branco
 	
 	if len(aColsExCg) > 0
 		if Alltrim(aColsExCg[nLinha][5])<>""  //_nResta
@@ -1495,8 +1469,10 @@ Static Function GETDCLR2(nLinha)
 	Local nCor4 :=  5070329 //fVERMELHO
 	Local nCor2 := 16777215 
 	 
+	nRet := nCor3
+/*	
 if len(aColsConc) > 0
-	if Alltrim(aColsConc[nLinha][5])<>""  //_nResta
+ 	if Alltrim(aColsConc[nLinha][5])<>""  //_nResta
 		If val(aColsConc[nLinha][5])>0 //.AND. aLinha[nLinha][nUsado]
 			nRet := nCor2
 		Else
@@ -1508,10 +1484,11 @@ if len(aColsConc) > 0
 				Endif
 			EndIf
 		EndIf	
+
 	Else
 		Return
 	EndIf
-EndIf
+EndIf  */
 
 Return nRet
 

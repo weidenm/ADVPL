@@ -555,13 +555,13 @@ Static Function ImprItem()
 
 Return
 
-
+//*****************************************************************************
+//* Imprime a Nota Fiscal de Entrada e de Saida (Rodape)
+//*
+//***
 Static Function ImprRoda()
-*****************************************************************************
-* Imprime a Nota Fiscal de Entrada e de Saida (Rodape)
-*
-***
-
+	
+	cObsAtu := ""
 	cVolume := TRBC->QtdeVolu
 	//nDesc := IIF(nTotDesc-nDescVist<>0,nTotDesc-nDescVist,0)
 	//nDescAV := IIF(nDescVist<>0,nDescVist,0)
@@ -576,9 +576,7 @@ Static Function ImprRoda()
 
 	IF (Alltrim(SA1->A1_ATUALIZ)="" .or. Alltrim(SA1->A1_ATUALIZ)="E")
 		cOBSAtu := "ENVIAR FICHA DE ATUALIZACAO"
-	Else
-		cOBSAtu := ""
-	END IF 
+	ENDIF 
 	
 	DBSelectArea("SE4")
 	DBSeek(xFilial("SE4")+TRBC->CondPaga)

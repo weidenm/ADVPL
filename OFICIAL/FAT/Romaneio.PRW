@@ -154,7 +154,7 @@ STATIC FUNCTION MontaRoman()
 
 	Local cCodUser := RetCodUsr() //Retorna o Codigo do Usuario
 	Local cNamUser := UsrRetName( cCodUser )//Retorna o nome do usuario
-
+	cObsFardo:= ""
 
 //cDia := SubStr(DtoS(dDataBase),7,2)
 //cMes := SubStr(DtoS(dDataBase),5,2)
@@ -178,11 +178,11 @@ STATIC FUNCTION MontaRoman()
 	
 		
 		if nVia == 1  //1ª via =  Geral da Carga
-			cQuery:= "SELECT C5_ROMANEI,C5_ROMIT,C5_CLIENTE, C5_NUM,C5_EMISSAO,A1_NOME,A1_COD,A1_END,A1_MUN,A1_EST,C5_OBS, SUM(C6_VALOR) AS VALOR"
+			cQuery:= "SELECT C5_ROMANEI,C5_ROMIT,C5_CLIENTE, C5_NUM,C5_EMISSAO,A1_NOME,A1_COD,A1_END,A1_MUN,A1_EST,C5_OBS,A1_CODSEG, SUM(C6_VALOR) AS VALOR"
 			cQuery+= " FROM (" +  RetSqlName("SC5") + " A INNER JOIN " +  RetSqlName("SA1") + " B ON A.C5_CLIENTE = B.A1_COD) "
 			cQuery+= " INNER JOIN " +  RetSqlName("SC6") + " C ON A.C5_NUM = C.C6_NUM"
 			cQuery+= " WHERE A.D_E_L_E_T_ = '' AND B.D_E_L_E_T_ = '' AND C.D_E_L_E_T_ = '' AND C5_ROMANEI  ='" + SZ1->Z1_NUM + "'"
-			cQuery+= " GROUP BY C5_ROMANEI,C5_ROMIT, A1_NOME,C5_CLIENTE, C5_NUM,C5_EMISSAO,A1_COD,A1_END,A1_MUN,A1_EST, C5_OBS"
+			cQuery+= " GROUP BY C5_ROMANEI,C5_ROMIT, A1_NOME,C5_CLIENTE, C5_NUM,C5_EMISSAO,A1_COD,A1_END,A1_MUN,A1_EST, C5_OBS, A1_CODSEG"
 			cQuery+= " ORDER BY C5_ROMANEI,C5_ROMIT"
 		
 			cDestino := SZ1->Z1_DESCRI
@@ -320,8 +320,12 @@ STATIC FUNCTION MontaRoman()
 				oPrn:Say(nLin,2150,OemToAnsi(ROMITENS->C5_ROMIT),			   oFont12N)
 				oPrn:Say(nLin+50,0100,OemToAnsi(trim(ROMITENS->A1_END))+" - "+ OemToAnsi(trim(ROMITENS->A1_MUN))+" - "+ OemToAnsi(trim(ROMITENS->A1_EST)), oFont10)
 				
+				IF ROMITENS->A1_CODSEG ='000006' .OR. ROMITENS->A1_CODSEG ='000007'
+					cObsFardo:= "FARDO CODIGO DE BARRAS / "
+				ENDIF
+
 				if len(Trim(ROMITENS->C5_OBS))>0 
-					oPrn:Say(nLin+100,0100,"OBS: "+OemToAnsi(trim(ROMITENS->C5_OBS)), oFont10N)
+					oPrn:Say(nLin+100,0100,"OBS: "+OemToAnsi(cObsFardo+ctrim(ROMITENS->C5_OBS)), oFont10N)
 					oPrn:Line(nLin+140,00100,nLin+140,2300)
 					nLin+=150
 				Else
