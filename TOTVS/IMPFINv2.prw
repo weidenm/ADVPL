@@ -99,7 +99,7 @@ Static Function conexao()
 	cDataIni := dtos(MV_PAR01)
 	cDataFim := dtos(MV_PAR02)
 
-	cData := Dtoc(date())
+	cData := Dtoc(date())	
 	cHora := time()
 
 	Public DataHora := cData + " " + cHora
@@ -112,7 +112,7 @@ Static Function conexao()
 	//Processa({||AtualizaTitulos()},"Aguarde...","Atualizando títulos...")
 	//Processa({||MovBancarios()},"Aguarde...","Importando baixa de NF com Cheque...")
 //	Processa({||ImpBaixaLiq()},"Aguarde...","Importando exclusão e baixas de cheque...")
-	Processa({||AtualizTitBol()},"Aguarde...","Atualizando historico de titulos...")
+	//Processa({||AtualizTitBol()},"Aguarde...","Atualizando historico de titulos...")
 	Processa({||AtualizaRoman()},"Aguarde...","Atualizando historico de titulos...")
 	
 

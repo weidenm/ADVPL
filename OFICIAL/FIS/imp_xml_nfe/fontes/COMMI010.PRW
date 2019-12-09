@@ -347,7 +347,7 @@ Static Function MontaBrw()
 // | TW BROWSE - NOTAS  |
 // 읕컴컴컴컴컴컴컴컴컴켸
 	&cTCFilterEX.("",1)
-	olLBox := TwBrowse():New(nlTl1+10,nlTl2-2,nlTl3-75,nlTl4-620,,alHdCps,alHdSize,_opDlgPcp,,,,,{|| Iif(!Empty(olLBox:aArray),Eval(opBtVis:BACTION),) } ,,,,,,,.F.,,.T.,,.F.,,,)
+	olLBox := TwBrowse():New(nlTl1+10,nlTl2-10,nlTl3-85,nlTl4-640,,alHdCps,alHdSize,_opDlgPcp,,,,,{|| Iif(!Empty(olLBox:aArray),Eval(opBtVis:BACTION),) } ,,,,,,,.F.,,.T.,,.F.,,,)
 	olLBox := AtuBrw(olLBox,alItBx,clLine,alCpos,alParam)
 	olLBox:BChange:= Iif(!Empty(olLBox:aArray), {|| AtuBtn(olLBox:aArray[olLBox:nAt,1]) } , {|| olLBox:Refresh()  } )
 	ACTIVATE DIALOG _opDlgPcp CENTERED

@@ -479,7 +479,13 @@ While SRA->( !Eof() .And. &cInicio <= cFim )
 			      // Alert("saiu 2")
 			       dbSkip()
 			       Loop
-			    EndIf
+				EndIf
+				
+				if  SRC->RC_ROTEIR <> "FOL" .and. SRC->RC_ROTEIR <> "ADI"
+					dbSkip()
+					Loop
+				EndIf
+				
 				If (Esc == 1) .And. (Src->Rc_Pd == aCodFol[7,1])      // Desconto de Adto
 					fSomaPd("P",aCodFol[6,1],SRC->RC_HORAS,SRC->RC_VALOR)
 					TOTVENC += Src->Rc_Valor
@@ -491,7 +497,7 @@ While SRA->( !Eof() .And. &cInicio <= cFim )
 					TOTVENC += SRC->RC_VALOR
 				Else
 					//alert("entrou else")
-					If PosSrv( Src->Rc_Pd , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "1"
+					If PosSrv( Src->Rc_Pd , SRA->RA_FILIAL , "RV_TIPOCOD" ) == "1" 
 						If (Esc # 1) .Or. (Esc == 1 .And. SRV->RV_ADIANTA == "S")
 							If cPaisLoc == "PAR" .and. SRC->RC_HORAS == 30
 						       LocGHabRea(Ctod("01/"+SubStr(DTOC(dDataRef),4)), Ctod(StrZero(F_ULTDIA(dDataRef),2)+"/"+Strzero(Month(dDataRef),2)+"/"+right(str(Year(dDataRef)),2),"ddmmyy"),@nHoras)
@@ -546,13 +552,13 @@ While SRA->( !Eof() .And. &cInicio <= cFim )
 			       dbSkip()
 			       Loop
 			    EndIf
-				If SRC->RC_PD == aCodFol[22,1]
+				If SRC->RC_PD == aCodFol[22,1] .or. SRC->RC_PD == aCodFol[26,1] .or. SRC->RC_PD == aCodFol[1630,1] .or. SRC->RC_PD == aCodFol[1634,1] .or. SRC->RC_PD == aCodFol[1632,1] 
 					fSomaPd("P",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
 					TOTVENC += SRC->RC_VALOR
 				Elseif Ascan(aCodBenef, { |x| x[1] == SRC->RC_PD }) > 0
 					fSomaPd("D",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
 					TOTDESC += SRC->RC_VALOR
-				Elseif SRC->RC_PD == aCodFol[108,1] .Or. SRC->RC_PD == aCodFol[109,1] .Or. SRC->RC_PD == aCodFol[173,1] 
+				Elseif SRC->RC_PD == aCodFol[108,1] .Or. SRC->RC_PD == aCodFol[109,1] .Or. SRC->RC_PD == aCodFol[173,1] .Or. SRC->RC_PD == aCodFol[678,1]
 					fSomaPd("B",SRC->RC_PD,SRC->RC_HORAS,SRC->RC_VALOR)
 				Endif
 				
