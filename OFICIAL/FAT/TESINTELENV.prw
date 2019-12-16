@@ -6,7 +6,6 @@ User Function TesInteligente
 	cCF := "" //<TLM - 23/10/2010 - adicionado porque esta causando erro de variável não existente)
 	cSitTrib := ""
 	
-	conout(SC6->C6_NUM+"-"+SC6->C6_ITEM)
 	CodFi := Alltrim(SC6->C6_CF)
 	tes := Alltrim(SC6->C6_TES)
 
@@ -46,7 +45,6 @@ User Function TesInteligente
 			DbSkip()
 		EndDo
 */
-		conout("Cliente:"+SA1->A1_COD+"-Tipo:"+SA1->A1_TIPO+"-"+SA1->A1_EST+"-Gr:"+SA1->A1_GRPTRIB+"Gr.Prod:"+SB1->B1_GRTRIB)
 		if trim(SB1->B1_GRTRIB) <> ""
 
 //	   cTes := TesIntel(2,"01",SC6->C6_CLI,SC6->C6_LOJA,"C",SC6->C6_PRODUTO,"C6_TES")	
@@ -54,35 +52,27 @@ User Function TesInteligente
 			if (Alltrim(SA1->A1_EST) $ "BA/ES/GO/PE/SE") .or. (Alltrim(SA1->A1_EST) $ ("DF/RJ/MG") .and. Alltrim(SA1->A1_GRPTRIB) $ "001/002") .or.;
 					(Alltrim(SA1->A1_EST)="AL" .and.  Alltrim(SB1->B1_GRTRIB) $ ("008/020"))
 				cTes := "501"
-		//		conout("Entrou 1")
 			Else
 				IF (SA1->A1_EST="MG" .and. Alltrim(SA1->A1_GRPTRIB)="" .AND. Alltrim(SB1->B1_GRTRIB)<>"008")
 					cTes := "503"
-			//		conout("Entrou 2")
 				Else
 					IF (Alltrim(SA1->A1_EST)="MG" .and. Alltrim(SA1->A1_GRPTRIB="") .and. Alltrim(SB1->B1_GRTRIB)="008")
 						cTes:="506"
-				//		conout("Entrou 3")
 					Else
 						IF (Alltrim(SA1->A1_EST)="DF" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)<>"008") .or.;
 								(Alltrim(SA1->A1_EST)="RJ" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)="020")
 							cTes := "504"
-					//		conout("Entrou 4")
 						Else
 							IF (Alltrim(SA1->A1_EST)="DF" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)="008")
 								cTes:="507"
-						//		conout("Entrou 5")
 							Else
 								IF (Alltrim(SA1->A1_EST)="RJ" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB) <> "020")
 									cTes:="508"
-							//		conout("Entrou 6")
 								Else
 									IF (Alltrim(SA1->A1_EST)="AL" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB) $ "001/002/003/004/005/006/007")
 										cTes:="509"
-								//		conout("Entrou 7")
 									Else
-										conout("Não encontrou nenhuma condição para o cliente")
-										//cTes:="510"
+										//conout("Não encontrou nenhuma condição para o cliente")
 									EndIf
 								EndIf
 							EndIf
@@ -91,7 +81,7 @@ User Function TesInteligente
 				EndIf
 			EndIf
 			
-			conout("TES:"+cTes)
+			//conout("TES:"+cTes)
 	
 		else
 			if trim(SB1->B1_TS) <> ""
@@ -131,7 +121,7 @@ User Function TesInteligente
 			//EndIf
 		Else
 			Alert("Não foi encontrado TES para preencher o pedido "+SC6->C6_NUM)
-			conout("Não foi encontrado TES para preencher o pedido "+SC6->C6_NUM)
+			//conout("Não foi encontrado TES para preencher o pedido "+SC6->C6_NUM)
 		EndIf
 	
 	EndIf
@@ -320,8 +310,6 @@ Return(cTesRet)
 
 User Function corrigeTES()
 
-CONOUT("CorrigeTES")
-
 cQuery :="SELECT C6_FILIAL, A1_EST, A1_GRPTRIB, A1_TIPO, C6_NUM, C6_ITEM, C6_PRODUTO, C6_TES, B1_GRTRIB "
 cQuery += " FROM (SC6010 A INNER JOIN SA1010 B ON A.C6_CLI = B.A1_COD) inner join SB1010 C on A.C6_PRODUTO=C.B1_COD"
 cQuery += " WHERE A.D_E_L_E_T_='' AND B.D_E_L_E_T_='' AND C6_NOTA=''"
@@ -345,7 +333,7 @@ cQuery += " AND (C6_TES = '510' OR C6_TES='' OR C6_TES='999') "
 		dbseek(xfilial("SC6")+ATUTES->C6_NUM+ATUTES->C6_ITEM+ATUTES->C6_PRODUTO)
 	
 		If SC6->(found())
-			conout("CorrigeTES:"+SC6->C6_NUM)
+			//conout("CorrigeTES:"+SC6->C6_NUM)
 			u_tesinteligente()	
 		EndIF
 		dbSelectArea("ATUTES")

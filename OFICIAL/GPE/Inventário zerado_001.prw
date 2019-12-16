@@ -5,7 +5,7 @@ User Function InventZero()
 SetPrvt("NOPCA,")
 //cPerg := "GERINV"
 
-//*
+//* Versão 12.1.25
 //*
 //*** Ajusta
 //*

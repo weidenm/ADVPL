@@ -7,7 +7,7 @@
 |Descricao | Ponto de Entrada para incluir botão com a função do Boleto Bancá- |
 |          | rio na rotina SPEDNFE.                                            |        
 +----------+-------------------------------------------------------------------+
-| USO      | Faturamento/OMS                                                   |
+| USO      | Faturamento/OMS                   		 -   Versão: 12.1.25       |
 +----------+-------------------------------------------------------------------+
 |                    ALTERACOES FEITAS DESDE A CRIACAO                         |
 +----------+-----------+-------------------------------------------------------+

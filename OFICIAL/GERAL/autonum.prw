@@ -12,7 +12,7 @@
 ฑฑบDescricao ณ Autonumera็ใo para cadastros com registros irregulares.     ฑฑ
 ฑฑบ                                                                 	  บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบ Retorno  ณ Numero do c๓digo que o arquivo irแ utilizar.               บฑฑ
+ฑฑบ 12.1.25  ณ Numero do c๓digo que o arquivo irแ utilizar.               บฑฑ
 ฑฑบ          ณ                                                      	  บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ

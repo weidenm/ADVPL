@@ -12,7 +12,7 @@
 ±±ºDescricao ³ Baixa Mensagens De NFE                                     º±±
 ±±º          ³                                                            º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºUso       ³ AP6 IDE                                                    º±±
+±±º12.1.25   ³ AP6 IDE                                                    º±±
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
@@ -89,18 +89,13 @@ For zX:=1 To Len(aContas)
   	POP MESSAGE COUNT nMessages
 	
 if ! lRet
-		conout(" ")
-		conout(Replicate("=",80))
-		conout(OemtoAnsi("Nao foi possivel conectar.") ) //###
-		conout(Replicate("=",80))
+		
+		FwLogMsg("INFO", /*cTransactionId*/, "CFGMI003", FunName(), "", "01", "Nao foi possivel conectar.", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
 else
 	If nMessages > 0 .And. lRet
 		
-		conout(" ")
-		conout(Replicate("=",80))
-		conout(OemtoAnsi("A conta NFE contem "+StrZero(nMessages,8)+" mensagem(s)") ) //###
-		conout(Replicate("=",80))
-		
+		FwLogMsg("INFO", /*cTransactionId*/, "CFGMI003", FunName(), "", "01", "A conta NFE contem "+StrZero(nMessages,8)+" mensagem(s)", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
+
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 		//³Recebe as mensagens e grava os arquivos XML           ³
 		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -113,10 +108,8 @@ else
 			For nY := 1 to Len(aFileAtch)
 				If ".XML" $ Upper(aFileAtch[nY][1])
 					nXml++
-					ConOut(" ")
-					ConOut(Replicate("=",80))
-					ConOut("Recebido o arquivo " + aFileAtch[nY][1]) //
-					ConOut(Replicate("=",80))
+
+					FwLogMsg("INFO", /*cTransactionId*/, "CFGMI003", FunName(), "", "01","Recebido o arquivo " + aFileAtch[nY][1], 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
 					
 					cStrAtch := Memoread(aFileAtch[nY][1])
 					
@@ -136,9 +129,7 @@ else
 		Next nX
 		
 	Else
-		Conout(Replicate("=",80))
-		ConOut( Time()+" - Nao existem arquivos a serem recebidos" )
-		Conout(Replicate("=",80))
+		FwLogMsg("INFO", /*cTransactionId*/, "CFGMI003", FunName(), "", "01", Time()+" - Nao existem arquivos a serem recebidos" , 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
 	Endif
 EndIf
 	

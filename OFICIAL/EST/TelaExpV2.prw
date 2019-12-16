@@ -11,13 +11,13 @@
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฑฑษออออออออออัออออออออออหอออออออัออออออออออออออออออออหออออออัอออออออออออออปฑฑ
-ฑฑบPrograma  ณTELAEXPV2 ver.5.0 บAutor  ณ Weiden Mendes	 Data ณ  03/10/11 บฑฑ
+ฑฑบPrograma  ณTELAEXPV2 ver. 7.0 บAutor  ณ Weiden Mendes + Dataณ 03/10/11 บฑฑ
 ฑฑฬออออออออออุออออออออออสอออออออฯออออออออออออออออออออสออออออฯอออออออออออออนฑฑ
 ฑฑบDesc.     ณ Programa para realizar expedi็ใo de produtos  e            บฑฑ
 ฑฑบ          ณ  baixa de estoque simultaneamente.                         บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบVersใo    ณ  3.0 - Incluํda fun็ใo de gerar requisi็ใo e devolu็ใo	  บฑฑ
-ฑฑ 				de produtos para do estoque.     			              บฑฑ
+ฑฑบVersใo    ณ  Nova tela e layout para itens concluํdos.  				  บฑฑ
+ฑฑ 12.1.25	 ณ	Tamanho e fonte dos textos melhorados		              บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿
@@ -46,7 +46,7 @@ User Function SIGAQIP()
 	_nMostraFinaliz := Mv_Par01
 
 
-	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 5.0 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
+	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 7.0 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
 
     @ 000, 004 BITMAP BmpLogo SIZE 143, 045 OF oDlg1 FILENAME "\\srvpp02\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
 	@ 025, 155 SAY oLblResp PROMPT "Separa็ใo da Carga: " SIZE 100, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL

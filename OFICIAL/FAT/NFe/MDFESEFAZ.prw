@@ -20,17 +20,20 @@ Regras para chamada do método remessa
 							  2-Cancelamento; 3- Encerramento		
 
 @return	cChvMDFe		- Chave do MDFe
-			cString		- String com XML Encodado .
+			cString		- String com XML Encodado
 /*/
 //-----------------------------------------------------------------------
 
 User Function XmlMDFeSef(cFil)
-	Local cString	:= ""
-	Local cChvMDFe	:= ""
-	Local aNota	:= {}
-	Private aUF	:= {}
+	Local cString		:= ""
+	Local cChvMDFe		:= ""
+	Local aNota			:= {}
+	Local lRespTec  	:= iif(findFunction("getRespTec"),getRespTec("2"),.T.) //0-Todos, 1-NFe, 2-MDFe
+	Local lTagProduc	:= date() > CTOD("15/06/2019") 
+	Local lPosterior	:= Type("cPoster") == "C" .And. SubStr(cPoster,1,1) == "1"
 	
-	
+	Private aUF		:= {}
+
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³Preenchimento do Array de UF                                            ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -52,7 +55,7 @@ User Function XmlMDFeSef(cFil)
 	aadd(aUF,{"ES","32"})
 	aadd(aUF,{"RJ","33"})
 	aadd(aUF,{"SP","35"})
-	aadd(aUF,{"PR","41"})
+	aadd(aUF,{"PR","41"}) 
 	aadd(aUF,{"SC","42"})
 	aadd(aUF,{"RS","43"})
 	aadd(aUF,{"MS","50"})
@@ -69,23 +72,29 @@ User Function XmlMDFeSef(cFil)
 	aadd(aNota,cTime)
 	aadd(aNota,cUFCarr)
 	aadd(aNota,cUFDesc)
+	aadd(aNota,alltrim(TRB->TRB_CODMUN))
+	aadd(aNota,alltrim(TRB->TRB_NOMMUN))
+	aadd(aNota,alltrim(TRB->TRB_EST))
+	aadd(aNota,alltrim(iif( lPosterior,"1","0")))
 
 	If !Empty(aNota)
 		cString := ""
 		cString += MDFeIde(@cChvMDFe,aNota,cVeiculo)
 		cString += MDFeEmit()
-		cString += MDFeModal(cVeiculo)
-		cString += MDFeInfDoc()
+		cString += MDFeModal(cVeiculo,aNota)
+		cString += MDFeInfDoc(aNota)
 		cString += MDFeTotais()
 		cString += MDFeLacres()
-		//cString += MDFeRespTec() IMPLEMENTAÇÃO FUTURA
 		cString += MDFeAutoriz()
 		cString += MDFeInfAdic()
-				
+		if lRespTec .and. lTagProduc .and. existFunc("NfeRespTec")
+			cString += NfeRespTec(,58) //Responsavel Tecnico
+		endif
+			
 		cString += '</infMDFe>'
+		cString += MDFeInfMDFeSupl()
 		cString += '</MDFe>'
 	EndIf
-
 
 Return ({cChvMDFe, EncodeUTF8(cString)})
 
@@ -164,6 +173,9 @@ cString += '<UFFim>' + aNota[06] + '</UFFim>'
 //InfMunCarrega
 cString += MDFeCarrega() 
 
+If len(aNota) >= 10 .And. aNota[10] == "1"
+	cString +=	"<indCarregaPosterior>1</indCarregaPosterior>"
+EndIf
 //InfPercurso
 cString += MDFePercu(aNota) 
 
@@ -324,19 +336,22 @@ Montagem do elemento InfModal do XML
 @Return	cString
 /*/
 //-----------------------------------------------------------------------
-Static Function MDFeModal (cVeiculo)
+Static Function MDFeModal (cVeiculo,aNota)
 
 Local aVeiSF2		:= {}
 Local aVeiculo		:= {}
 Local aMotorista	:= {}
-Local aProp		:= {}
+Local aProp			:= {}
 Local aNFRef		:= {}
-
 Local cString 		:= ""
 Local ctpProp		:= ""
-
 Local nCapcM3		:= 0
 Local nX			:= 0
+Local lPosterior	:= .F.
+
+Default aNota		:= {}
+
+lPosterior	:= Len(aNota) >= 10 .And. aNota[10] == "1"
 
 cString += '<infModal versaoModal="'/*+cVersao*/+'">'
 cString += '<rodo>'
@@ -385,6 +400,10 @@ If !Empty(cVeiculo)
 		
 		TRB->(dbSkip())
 	EndDo
+
+	If Type("cPoster") == "C" .And. SubStr(cPoster,1,1) == "1" .and. Len(aVeiSF2) == 0 //"1-Sim" Vincula posterior
+		aadd(aVeiSF2,cVeiculo)
+	EndIf
 
 	For nX := 1 To Len(aVeiSF2)
 		If HasTemplate("DCLEST")	//ExistTemplate("OMSA200P")
@@ -678,17 +697,18 @@ Montagem do elemento InfDoc do XML
 @Return	cString
 /*/
 //-----------------------------------------------------------------------
-Static Function MDFeInfDoc()
+Static Function MDFeInfDoc(aNota)
 	Local cString	:= ""
 	Local cCodMun	:= ""
-	Local cUfCode := ""
+	Local cUfCode 	:= ""
 	Local cSerieNFe	:= ""
 	Local cNumNFe	:= ""
 	Local cXmlRet	:= ""
 	Local cChvCTG	:= ""
-	
 	Local aXmlRet	:= {}
-	
+
+	Default aNota	:= {}
+
 	Private oNFeRet
 	
 	dbSelectArea('TRB')
@@ -744,6 +764,15 @@ Static Function MDFeInfDoc()
 			TRB->(dbSkip())
 		EndIf
 	EndDo
+
+	If Len(aNota) >= 10 .And. aNota[10] == "1"
+		cUfCode := GetUfCode(aNota[9])
+		cString += '<infMunDescarga>'
+		cString += '<cMunDescarga>'+ alltrim(cUfCode) + alltrim(aNota[7]) +'</cMunDescarga>'   
+		cString += '<xMunDescarga>'+ alltrim(aNota[8]) +'</xMunDescarga>'
+		cString += '</infMunDescarga>'
+	EndIF
+
 	cString += '</infDoc>'
 	
 	TRBSetIndex(1)
@@ -802,33 +831,6 @@ Static Function MDFeLacres()
 	
 	
 Return cString
-
-
-//----------------------------------------------------------------------
-/*/{Protheus.doc} MDFeRespTec
-Tag infRespTec
-
-@author Valter da Silva
-@since 04/10/2018
-@version P12
-
-@param      
-@Return	cString
-/*/
-//-----------------------------------------------------------------------
-Static Function MDFeRespTec()
-Local cString 		:= ""
-
-cString += "<infRespTec>"
-cString += "<CNPJ>53113791000122</CNPJ>"
-cString += "<xContato>Contato Teste</xContato>"
-cString += "<email>contato@teste.com.br</email>"
-cString += "<fone>9999999999</fone>"
-cString += "<idCSRT>AAA</idCSRT>"
-cString += "<hashCSRT>QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQQ==</hashCSRT>"
-cString += "</infRespTec>"
-Return cString
-
 
 //----------------------------------------------------------------------
 /*/{Protheus.doc} MDFeAutoriz
@@ -889,6 +891,30 @@ Static Function MDFeInfAdic()
 		EndIf		
 		cString += "</infAdic>"
 	EndIf
+	
+Return cString
+
+
+//----------------------------------------------------------------------
+/*/{Protheus.doc} MDFeMDFeSupl
+Tag MDFeSupl
+
+@author Valter Da Silva
+@since 17/07/2019
+@version P12
+
+@param      
+@Return	cString
+/*/
+//-----------------------------------------------------------------------
+Static Function MDFeInfMDFeSupl()
+	Local cString := ""
+	
+	cString += '<infMDFeSupl>'
+	cString += '<qrCodMDFe>'
+	cString += 'https://dfe-portal.svrs.rs.gov.br/mdfe/QRCode?chMDFe='
+	cString += '</qrCodMDFe>'
+	cString += '</infMDFeSupl>'	
 	
 Return cString
 

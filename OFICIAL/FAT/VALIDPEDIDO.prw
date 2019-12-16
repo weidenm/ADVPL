@@ -4,7 +4,7 @@
 
 //----------------------------------------------------------------------------
 // PONTO DE ENTRADA PARA SUGERIR QUANTIDADE LIBERADA AUTOMATICAMENTE NO
-// DE PEDIDOS DE VENDA
+// DE PEDIDOS DE VENDA  -  12.1.25
 //----------------------------------------------------------------------------
 
 User Function MTA410()        

@@ -15,8 +15,8 @@
 ฑฑบDesc.     ณ Programa para realizar expedi็ใo de produtos  e            บฑฑ
 ฑฑบ          ณ  baixa de estoque simultaneamente.                         บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
-ฑฑบVersใo    ณ  3.0 - Incluํda fun็ใo de gerar requisi็ใo e devolu็ใo	  บฑฑ
-ฑฑ 				de produtos para do estoque.     			              บฑฑ
+ฑฑบVersใo       + 6.0 - Incluํda fun็ใo de gerar requisi็ใo e devolu็ใo	  บฑฑ
+ฑฑ LG 12.1.25	+ de produtos para do estoque.     			              บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 ฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿฿

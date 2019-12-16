@@ -14,7 +14,7 @@
 ฑฑบ          ณ  apontamento de produ็ใo.                                  บฑฑ
 ฑฑฬออออออออออุออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออนฑฑ
 ฑฑบVersใo    ณ  3.14 - Alterada posi็๕es dos textos devido restaura็ใo	  บฑฑ
-ฑฑ 				de fแbrica da impressora t้rmica.						  บฑฑ
+ฑฑ 12.1.25		de fแbrica da impressora t้rmica.						  บฑฑ
 				5.0 - Inclusใo de etiqueta de devolu็ใo                   บฑฑ
 ฑฑศออออออออออฯออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออผฑฑ
 ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ

@@ -7,7 +7,7 @@ Exemplo de montagem da modelo e interface de marcacao para uma
 tabela em MVC
 @author Ernani Forastieri e Rodrigo Antonio Godinho
 @since 05/10/2009
-@version P10
+@version 12.1.25
 /*/
 //-------------------------------------------------------------------
 User Function MontaRomMVC()
