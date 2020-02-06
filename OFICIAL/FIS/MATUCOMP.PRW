@@ -57,4 +57,6 @@ Else
         CDF->CDF_CLIFOR	:= cClieFor
         CDF->CDF_LOJA	:= cLoja
         CDF->CDF_IFCOMP := "000001"
+ENDIF
+
 Return

@@ -412,6 +412,7 @@ Private cIdDest		:= ""
 Private cIndFinal	:= ""
 Private cIndIEDest 	:= ""
 Private cTPNota	    := ""	
+Private dDataSai 	:= "" //ALTERADO <TLM> Gravar data de saida da nota
 //Declaração de numéricos
 Private nTotNota	:= 0
 Private nTotalCrg	:= 0
@@ -2016,6 +2017,9 @@ If cTipo == "1"
 						dbSetOrder(1)
 						MsSeek(xFilial("SC6")+(cAliasSD2)->D2_PEDIDO+(cAliasSD2)->D2_ITEMPV+(cAliasSD2)->D2_COD)
 						
+//<TLM> Campo para gravar a data de saída da NF - ALTERADO EM 13/10/10 - Weiden
+						dDataSai := SC5->C5_DTSAIDA
+
 						cTpCliente:= Alltrim(SF2->F2_TIPOCLI)
 						//Para nota sobre cupom deve ser 
 						//impresso os valores da lei da transparência.					
@@ -5884,10 +5888,12 @@ cString += '<nNF>'+ConvType(Val(aNota[02]),9)+'</nNF>'
 //Nota Técnica 2013/005 - Data e Hora no formato UTC
 If cVeramb >= "3.10"
 	cString += '<dhEmi>'+ConvType(aNota[03])+"T"+Iif(Len(AllTrim(aNota[06])) > 5,ConvType(aNota[06]),ConvType(aNota[06])+":00")+'</dhEmi>'
-	cString += NfeTag('<dhSaiEnt>',Iif(lDSaiEnt,"",ConvType(aNota[03])+"T"+Iif(Len(AllTrim(aNota[06])) > 5,ConvType(aNota[06]),ConvType(aNota[06])+":00")))
+	//cString += NfeTag('<dhSaiEnt>',Iif(lDSaiEnt,"",ConvType(aNota[03])+"T"+Iif(Len(AllTrim(aNota[06])) > 5,ConvType(aNota[06]),ConvType(aNota[06])+":00")))
+	cString += NfeTag('<dhSaiEnt>',Iif((lDSaiEnt .or. Empty(dDataSai)), "",iif(dDataSai<dDatabase,ConvType(dDataBase),ConvType(dDataSai))+"T"+Iif(Len(aNota[06]) > 5,ConvType(aNota[06]),ConvType(aNota[06])+":00"))) //< ALTERADO WEIDEN>	*
 Else	
 	cString += '<dEmi>'+ConvType(aNota[03])+'</dEmi>'
-	cString += NfeTag('<dSaiEnt>',Iif(lDSaiEnt, "", ConvType(aNota[03])))
+	//cString += NfeTag('<dSaiEnt>',Iif(lDSaiEnt, "", ConvType(aNota[03])))
+	cString += NfeTag('<dSaiEnt>',Iif((lDSaiEnt .or. Empty(dDataSai)), "",iif(dDataSai<dDatabase,ConvType(dDataBase),ConvType(dDataSai)))) //< ALTERADO WEIDEN>
 	If !lDSaiEnt .And. !Empty(aNota[06])
 		if len(aNota[06]) > 5
 			cString += '<hSaiEnt>'+ConvType(aNota[06])+'</hSaiEnt>'

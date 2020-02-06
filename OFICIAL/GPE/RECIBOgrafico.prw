@@ -1,4 +1,4 @@
-#INCLUDE "recibo.ch"
+//#INCLUDE "recibo.ch"
 #INCLUDE "RWMAKE.CH"
 //#INCLUDE "INKEY.CH"
 
@@ -42,22 +42,22 @@
 ±±³ Natie      ³12/12/01³009963³Acerto na Impressao TEste                 ³±±
 ±±³            ³11/12/01³011547³Quebra pag.qdo func. tem mais de 2 recibos³±±
 ±±³ Silvia     ³20/02/02³013293³Acerto nos Dias Trabalhados para Paraguai ³±±
-±±³ Natie      ³05/04/02³------³Inicializa lTerminal                      ³±±
+±±³ Natie      ³05/04/02³------³Inicializa lTermin                      ³±±
 ±±³ aEmerson    ³06/01/03³------³Buscar o codigo CBO no cadastro de funcoes³±±
 ±±³            ³        ³------³de acordo com os novos codigos CBO/2002.  ³±±
 ±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
-User Function ReciboGrafico(lTerminal,cFilTerminal,cMatTerminal,cMesAnoRef,nRecTipo,cSemanaTerminal)
+User Function ReciboGrafico(lTermin,cFilTermin,cMatTerminal,cMesAnoRef,nRecTipo,cSemanaTerminal)
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Define Variaveis Locais (Basicas)                            ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 Local cString:="SRA"        // alias do arquivo principal (Base)
-Local aOrd   := {STR0001,STR0002,STR0003,STR0004,STR0005} //"Matricula"###"C.Custo"###"Nome"###"Chapa"###"C.Custo + Nome"
-Local cDesc1 := STR0006		//"Emiss„o de Recibos de Pagamento."
-Local cDesc2 := STR0007		//"Ser  impresso de acordo com os parametros solicitados pelo"
-Local cDesc3 := STR0008		//"usu rio."             
+Local aOrd   := {"Matricula","C.Custo","Nome","Chapa","C.Custo + Nome"} //"Matricula"###"C.Custo"###"Nome"###"Chapa"###"C.Custo + Nome"
+Local cDesc1 := "Emissäo de Recibos de Pagamento."		//"Emiss„o de Recibos de Pagamento."
+Local cDesc2 := "Será impresso de acordo com os parametros solicitados pelo"		//"Ser  impresso de acordo com os parametros solicitados pelo"
+Local cDesc3 := "usuário."	//"usu rio."             
 
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -70,7 +70,7 @@ Local cHtml := ""
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Define Variaveis Private(Basicas)                            ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-Private aReturn  := {STR0009, 1,STR0010, 2, 2, 1, "",1 }	//"Zebrado"###"Administra‡„o"
+Private aReturn  := {"Zebrado", 1,"Administraçäo", 2, 2, 1, "",1 }	//"Zebrado"###"Administra‡„o"
 Private nomeprog :="GPER030"
 Private aLinha   := { },nLastKey := 0
 Private cPerg    :="GPR030"
@@ -88,7 +88,7 @@ Private aBases := {}
 Private aInfo  := {}
 Private aCodFol:= {}
 Private li     := 0
-Private Titulo := STR0011		//"EMISSO DE RECIBOS DE PAGAMENTOS"
+Private Titulo := "EMISSÄO DE RECIBOS DE PAGAMENTOS"		//"EMISSO DE RECIBOS DE PAGAMENTOS"
 Private lEnvioOk := .F.
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -126,10 +126,10 @@ oPrn       := TMSPrinter():New()
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Verifica se o programa foi chamado do terminal - TCF         ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-lTerminal := If( lTerminal == Nil, .F., lTerminal )
+lTermin := If( lTermin == Nil, .F., lTermin )
 
 
-IF !lTerminal
+IF !lTermin
 	wnrel:=SetPrint(cString,wnrel,cPerg,Titulo,cDesc1,cDesc2,cDesc3,.F.,aOrd)
 EndIF	
 
@@ -137,7 +137,7 @@ EndIF
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Define a Ordem do Relatorio                                  ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-nOrdem := IF( !lTerminal, aReturn[8] , 1 )
+nOrdem := IF( !lTermin, aReturn[8] , 1 )
 
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Verifica as perguntas selecionadas                           ³
@@ -148,28 +148,28 @@ Pergunte("GPR030",.F.)
 //³ Carregando variaveis mv_par?? para Variaveis do Sistema.     ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 cSemanaTerminal := IF( Empty( cSemanaTerminal ) , Space( Len( SRC->RC_SEMANA ) ) , cSemanaTerminal )
-dDataRef   := IF( !lTerminal, mv_par01 , Stod(Substr(cMesAnoRef,-4)+SubStr(cMesAnoRef,1,2)+"01"))//Data de Referencia para a impressao
-nTipRel    := IF( !lTerminal, mv_par02 , 3					)	//Tipo de Recibo (Pre/Zebrado/EMail)
-Esc        := IF( !lTerminal, mv_par03 , nRecTipo			)	//Emitir Recibos(Adto/Folha/1¦/2¦/V.Extra)
-Semana     := IF( !lTerminal, mv_par04 , cSemanaTerminal	)	//Numero da Semana
-cFilDe     := IF( !lTerminal,mv_par05,cFilTerminal			)	//Filial De
-cFilAte    := IF( !lTerminal,mv_par06,cFilTerminal			)	//Filial Ate
-cCcDe      := IF( !lTerminal,mv_par07,SRA->RA_CC			)	//Centro de Custo De
-cCcAte     := IF( !lTerminal,mv_par08,SRA->RA_CC			)	//Centro de Custo Ate
-cMatDe     := IF( !lTerminal,mv_par09,cMatTerminal			)	//Matricula Des
-cMatAte    := IF( !lTerminal,mv_par10,cMatTerminal			)	//Matricula Ate
-cNomDe     := IF( !lTerminal,mv_par11,SRA->RA_NOME			)	//Nome De
-cNomAte    := IF( !lTerminal,mv_par12,SRA->RA_NOME			)	//Nome Ate
-ChapaDe    := IF( !lTerminal,mv_par13,SRA->RA_CHAPA 		)	//Chapa De
-ChapaAte   := IF( !lTerminal,mv_par14,SRA->RA_CHAPA 		)	//Chapa Ate
+dDataRef   := IF( !lTermin, mv_par01 , Stod(Substr(cMesAnoRef,-4)+SubStr(cMesAnoRef,1,2)+"01"))//Data de Referencia para a impressao
+nTipRel    := IF( !lTermin, mv_par02 , 3					)	//Tipo de Recibo (Pre/Zebrado/EMail)
+Esc        := IF( !lTermin, mv_par03 , nRecTipo			)	//Emitir Recibos(Adto/Folha/1¦/2¦/V.Extra)
+Semana     := IF( !lTermin, mv_par04 , cSemanaTerminal	)	//Numero da Semana
+cFilDe     := IF( !lTermin,mv_par05,cFilTermin			)	//Filial De
+cFilAte    := IF( !lTermin,mv_par06,cFilTermin			)	//Filial Ate
+cCcDe      := IF( !lTermin,mv_par07,SRA->RA_CC			)	//Centro de Custo De
+cCcAte     := IF( !lTermin,mv_par08,SRA->RA_CC			)	//Centro de Custo Ate
+cMatDe     := IF( !lTermin,mv_par09,cMatTerminal			)	//Matricula Des
+cMatAte    := IF( !lTermin,mv_par10,cMatTerminal			)	//Matricula Ate
+cNomDe     := IF( !lTermin,mv_par11,SRA->RA_NOME			)	//Nome De
+cNomAte    := IF( !lTermin,mv_par12,SRA->RA_NOME			)	//Nome Ate
+ChapaDe    := IF( !lTermin,mv_par13,SRA->RA_CHAPA 		)	//Chapa De
+ChapaAte   := IF( !lTermin,mv_par14,SRA->RA_CHAPA 		)	//Chapa Ate
 Mensag1    := mv_par15										 	//Mensagem 1
 Mensag2    := mv_par16											//Mensagem 2
 Mensag3    := mv_par17											//Mensagem 3
-cSituacao  := IF( !lTerminal,mv_par18, fSituacao( NIL , .F. ) )	//Situacoes a Imprimir
-cCategoria := IF( !lTErminal,mv_par19, fCategoria( NIL , .F. ))	//Categorias a Imprimir
+cSituacao1  := IF( !lTermin,mv_par18, fSituacao( NIL , .F. ) )	//Situacoes a Imprimir
+cCategoria1 := IF( !lTermin,mv_par19, fCategoria( NIL , .F. ))	//Categorias a Imprimir
 cBaseAux   := If(mv_par20 == 1,"S","N")							//Imprimir Bases
 
-IF !lTerminal
+IF !lTermin
 
 	cMesAnoRef := StrZero(Month(dDataRef),2) + StrZero(Year(dDataRef),4)
 	
@@ -188,8 +188,8 @@ IF !lTerminal
 EndIF
 
 IF nTipRel==3
-	IF lTerminal
-		cHtml := R030ImpCust(.F.,wnRel,cString,cMesAnoRef,lTerminal)
+	IF lTermin
+		cHtml := R030ImpCust(.F.,wnRel,cString,cMesAnoRef,lTermin)
 	Else
 		ProcGPE({|lEnd| R030IMPCust(@lEnd,wnRel,cString,cMesAnoRef)},,,.T.)  // Chamada do Processamento
 	EndIF
@@ -197,7 +197,7 @@ Else
 	RptStatus({|lEnd| R030ImpCust(@lEnd,wnRel,cString,cMesAnoRef)},Titulo)  // Chamada do Relatorio
 EndIF
 
-Return( IF( lTerminal , cHtml, NIL  ) )
+Return( IF( lTermin , cHtml, NIL  ) )
 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -207,7 +207,7 @@ Return( IF( lTerminal , cHtml, NIL  ) )
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
 ±±³Descri‡…o ³ Processamento Para emissao do Recibo                       ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
-±±³Sintaxe   ³ R030Imp(lEnd,WnRel,cString,cMesAnoRef,lTerminal)			  ³±±
+±±³Sintaxe   ³ R030Imp(lEnd,WnRel,cString,cMesAnoRef,lTermin)			  ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
 ±±³Parametros³                                                            ³±±
 ±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
@@ -215,7 +215,7 @@ Return( IF( lTerminal , cHtml, NIL  ) )
 ±±ÃÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
-Static Function R030ImpCust(lEnd,WnRel,cString,cMesAnoRef,lTerminal)
+Static Function R030ImpCust(lEnd,WnRel,cString,cMesAnoRef,lTermin)
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Define Variaveis Locais (Basicas)                            ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -238,8 +238,8 @@ Private cAliasMov := ""
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //| Verifica se existe o arquivo de fechamento do mes informado  |
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-//If !OpenSrc( cMesArqRef, @cAliasMov, @aOrdBag, @cArqMov, @dDataRef , NIL ,lTerminal )
-	//Return( IF( lTerminal , cHtml , NIL ) )
+//If !OpenSrc( cMesArqRef, @cAliasMov, @aOrdBag, @cArqMov, @dDataRef , NIL ,lTermin )
+	//Return( IF( lTermin , cHtml , NIL ) )
 //Endif
 
 
@@ -248,7 +248,7 @@ Private cAliasMov := ""
 //³ Selecionando a Ordem de impressao escolhida no parametro.    ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 dbSelectArea( "SRA")
-IF !lTerminal
+IF !lTermin
 	If nOrdem == 1
 		dbSetOrder(1)
 	ElseIf nOrdem == 2
@@ -258,7 +258,7 @@ IF !lTerminal
 	Elseif nOrdem == 4
 		cArqNtx  := CriaTrab(NIL,.f.)
 		cIndCond :="RA_Filial + RA_Chapa + RA_Mat"
-		IndRegua("SRA",cArqNtx,cIndCond,,,STR0012)		//"Selecionando Registros..."
+		IndRegua("SRA",cArqNtx,cIndCond,,,"Selecionando Registros...")		//"Selecionando Registros..."
 	ElseIf nOrdem == 5
 		dbSetOrder(8)
 	Endif
@@ -276,9 +276,9 @@ EndIF
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Selecionando o Primeiro Registro e montando Filtro.          ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-If nOrdem == 1 .or. lTerminal
+If nOrdem == 1 .or. lTermin
 	cInicio := "SRA->RA_FILIAL + SRA->RA_MAT"
-	IF !lTerminal
+	IF !lTermin
 		dbSeek(cFilDe + cMatDe,.T.)
 		cFim    := cFilAte + cMatAte
 	Else
@@ -309,7 +309,7 @@ dbSelectArea("SRA")
 IF nTipRel # 3
 	SetRegua(RecCount())	// Total de elementos da regua
 Else
-	IF !lTerminal
+	IF !lTermin
 		GPProcRegua(RecCount())// Total de elementos da regua
 	EndIF
 EndIF
@@ -332,11 +332,11 @@ While SRA->( !Eof() .And. &cInicio <= cFim )
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Movimenta Regua Processamento                                ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	IF !lTerminal
+	IF !lTermin
 	
 		IF nTipRel # 3
 			IncRegua()  // Anda a regua
-		ElseIF !lTerminal
+		ElseIF !lTermin
 			GPIncProc(SRA->RA_FILIAL+" - "+SRA->RA_MAT+" - "+SRA->RA_NOME)
 		EndIF
 	
@@ -369,22 +369,17 @@ While SRA->( !Eof() .And. &cInicio <= cFim )
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Verifica Data Demissao         ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	cSitFunc := SRA->RA_SITFOLH
+	cSitFunc1 := SRA->RA_SITFOLH
 	dDtPesqAf:= CTOD("01/" + Left(cMesAnoRef,2) + "/" + Right(cMesAnoRef,4),"DDMMYY")
-	If cSitFunc == "D" .And. (!Empty(SRA->RA_DEMISSA) .And. MesAno(SRA->RA_DEMISSA) > MesAno(dDtPesqAf))
-		cSitFunc := " "
+	If cSitFunc1 == "D" .And. (!Empty(SRA->RA_DEMISSA) .And. MesAno(SRA->RA_DEMISSA) > MesAno(dDtPesqAf))
+		cSitFunc1 := " "
 	Endif	
-
-    IF !lTerminal
-
-		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-		//³ Consiste situacao e categoria dos funcionarios			     |
-		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-		If !( cSitFunc $ cSituacao ) .OR.  ! ( SRA->RA_CATFUNC $ cCategoria )
+		// Consiste situacao e categoria dos funcionarios			     |
+		If !( cSitFunc1 $ cSituacao1 ) .OR.  ! ( SRA->RA_CATFUNC $ cCategoria1 )
 			dbSkip()
 			Loop
 		Endif
-		If cSitFunc $ "D" .And. Mesano(SRA->RA_DEMISSA) # Mesano(dDataRef)
+		If cSitFunc1 $ "D" .And. Mesano(SRA->RA_DEMISSA) # Mesano(dDataRef)
 			dbSkip()
 			Loop
 		Endif
@@ -397,7 +392,7 @@ While SRA->( !Eof() .And. &cInicio <= cFim )
 	       Loop
     	EndIf
     
-    EndIF	
+
 	
 	If SRA->RA_CODFUNC # cFuncaoAnt           // Descricao da Funcao
 		DescFun(Sra->Ra_Codfunc,Sra->Ra_Filial)
@@ -642,7 +637,7 @@ While SRA->( !Eof() .And. &cInicio <= cFim )
 		PerSemana() // Carrega Datas referentes a Semana.
 	EndIf
 	
-	If nTipRel == 1 .and. !lTerminal
+	If nTipRel == 1 .and. !lTermin
 		fImpressao()   // Impressao do Recibo de Pagamento
 		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 		//³ Efetua Teste de Impressao                                    ³
@@ -657,10 +652,10 @@ While SRA->( !Eof() .And. &cInicio <= cFim )
 				Loop
 			Endif	
 		EndIf
-	ElseIf nTipRel == 2 .and. !lTerminal 
+	ElseIf nTipRel == 2 .and. !lTermin 
 		fImpreZebr()
-	ElseIf nTipRel==3 .or. lTerminal 
-		cHtml	:= fSendDPgto(lTerminal)		//Monta o corpo do e-mail e envia-o		
+	ElseIf nTipRel==3 .or. lTermin 
+		cHtml	:= fSendDPgto(lTermin)		//Monta o corpo do e-mail e envia-o		
 	Endif
 		
 	dbSelectArea("SRA")
@@ -675,7 +670,7 @@ If !Empty( cAliasMov )
 	fFimArqMov( cAliasMov , aOrdBag , cArqMov )
 EndIf
 
-IF !lTerminal
+IF !lTermin
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Termino do relatorio                                         ³
@@ -695,9 +690,9 @@ IF !lTerminal
 	Set Device To Screen
 	
 	If lEnvioOK
-		APMSGINFO(STR0042)	
+		APMSGINFO("Email enviado com Sucesso ")	
 	ElseIf nTipRel== 3
-		APMSGINFO(STR0043)
+		APMSGINFO("Email nao pode ser enviado ")
 	EndIf	      
 	/*/                                                        
 	If aReturn[5] = 1 .and. nTipRel # 3
@@ -817,7 +812,7 @@ LI ++
 @ LI,01 PSAY DESC_CGC
 
 If !Empty(Semana) .And. Semana # '99' .And.  Upper(SRA->RA_TIPOPGT) == 'S'
-	@ Li,37 pSay STR0013 + Semana + ' (' + cSem_De + STR0014 + ;	//'Semana '###' a '
+	@ Li,37 pSay "Semana " + Semana + ' (' + cSem_De + " a " + ;	//'Semana '###' a '
 	cSem_Ate + ')'
 Else
 	@ LI,55 PSAY MesExtenso(MONTH(dDataRef))+"/"+STR(YEAR(dDataRef),4)
@@ -1185,7 +1180,7 @@ LI ++
 LI ++
 cMesComp := IIF(MONTH(dDataRef) + 1 > 12,01,MONTH(dDataRef))
 IF cMesComp == MONTH(SRA->RA_NASC)
-    @ LI, 02 PSAY STR0038		//"F E L I Z   A N I V E R S A R I O  ! !"
+    @ LI, 02 PSAY "F E L I Z   A N I V E R S A R I O  ! !"		//"F E L I Z   A N I V E R S A R I O  ! !"
 ENDIF
  
 @ LI,56 PSAY TOTVENC - TOTDESC PICTURE "@E 999,999,999.99"
@@ -1236,7 +1231,7 @@ Endif
 Li ++
 IF SRA->RA_BCDEPSAL # SPACE(8)
 	Desc_Bco := DescBco(Sra->Ra_BcDepSal,Sra->Ra_Filial)
-    @ LI,01 PSAY STR0039	//"CRED:"
+    @ LI,01 PSAY "CRED:"	//"CRED:"
     @ LI,06 PSAY SRA->RA_BCDEPSAL
     @ LI,14 PSAY " "
     @ LI,15 PSAY DESC_BCO
@@ -1345,12 +1340,12 @@ Return(StrZero(Day(dData),2) +"/"+ StrZero(Month(dData),2) +"/"+ Right(Str(Year(
 ±±ÀÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
-Static Function fSendDPgto(lTerminal)
+Static Function fSendDPgto(lTermin)
 
 Local aFiles  	:= {}
 Local cEmail		:= If(SRA->RA_RECMAIL=="S",SRA->RA_EMAIL,"    ")  
 Local cHtml		:= ""
-Local cSubject	:= STR0044	//" DEMONSTRATIVO DE PAGAMENTO "
+Local cSubject	:= " DEMONSTRATIVO DE PAGAMENTO " //STR0044	//
 Local cAlias  	:= Alias()
 Local cMesComp	:= IF( Month(dDataRef) + 1 > 12 , 01 , Month(dDataRef) )
 Local cTipo		:= ""
@@ -1361,21 +1356,21 @@ Private cMailConta	:= NIL
 Private cMailServer	:= NIL
 Private cMailSenha	:= NIL
 
-lTerminal := IF( lTerminal == NIL .or. ValType( lTerminal ) != "L" , .F. , lTerminal )
+lTermin := IF( lTermin == NIL .or. ValType( lTermin ) != "L" , .F. , lTermin )
 
 IF Esc == 1
-	cTipo := STR0060 // "Adiantamento"
+	cTipo :=  "Adiantamento" //STR0060 //
 ElseIF Esc == 2
-	cTipo := STR0061	//"Folha"
+	cTipo := "Folha" //STR0061	//
 ElseIF Esc == 3 
-	cTipo := STR0062 //"1a. Parcela do 13o."
+	cTipo := "1a. Parcela do 13o."  //STR0062 //
 ElseIF Esc == 4
-	cTipo := STR0063 //"2a. Parcela do 13o."
+	cTipo := "2a. Parcela do 13o."  //STR0063 //
 ElseIF Esc == 5
-	cTipo := STR0064 //"Valores Extras"
+	cTipo := "Valores Extras"  //STR0064 //
 EndIF				
 
-IF !lTerminal
+IF !lTermin
 	
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Busca parametros                                             ³
@@ -1416,7 +1411,7 @@ EndIF
 
 cHtml +=	'<html>'
 cHtml +=	'<head>'
-IF !lTerminal
+IF !lTermin
 	cHtml += 	'<title>DEMONSTRATIVO DE PAGAMENTO</title>'
 	cHtml +=	'<style>'
 	cHtml +=	'th { text-align:left; background-color:#4B87C2; line-height:01; line-width:400; border-left:0px solid  #FF9B06; border-right:0px solid #FF9B06; border-bottom:0px solid #FF9B06 ; border-top:0px solid #FF9B06 }'
@@ -1438,7 +1433,7 @@ IF !lTerminal
 	cHtml +=	'<b>'
 	cHtml += 	'<h4 size="03">'
 	cHtml +=	'<br>'
-	cHtml += 	STR0044 // " DEMONSTRATIVO DE PAGAMENTO "
+	cHtml += 	 " DEMONSTRATIVO DE PAGAMENTO " //STR0044 //
 	cHtml += 	'<br>'
 Else
 	cHtml += '<title>RH Online</title>' + CRLF
@@ -1449,7 +1444,7 @@ Else
 	cHtml += '<table width="515" border="0" cellspacing="0" cellpadding="0">' + CRLF
 	cHtml += '<tr>' + CRLF
 	cHtml += '<td class="titulo">' + CRLF
-	cHtml += '<p><img src="../rhonline/imagens/icone_titulo.gif" width="7" height="9"> <span class="titulo_opcao">' + Capital( STR0044 ) + '</span><br>' + CRLF //DEMONSTRATIVO DE PAGAMENTO 
+	cHtml += '<p><img src="../rhonline/imagens/icone_titulo.gif" width="7" height="9"> <span class="titulo_opcao">' + Capital( " DEMONSTRATIVO DE PAGAMENTO " ) + '</span><br>' + CRLF //DEMONSTRATIVO DE PAGAMENTO 
 	cHtml += '<br>'	+ CRLF
 	cHtml += '</p>'	+ CRLF
 	cHtml += '</td>' + CRLF 
@@ -1474,20 +1469,20 @@ If !Empty(Semana) .And. Semana # "99" .And.  Upper(SRA->RA_TIPOPGT) == "S"
 	//³ Carrega Datas Referente a semana                             ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     PerSemana()
-	IF !lTerminal
-		cHtml += STR0045 + Semana + " (" + cSem_De + STR0046 +	cSem_Ate + ")" //"Semana  "###" a " 
+	IF !lTermin
+		cHtml += "Semana  " + Semana + " (" + cSem_De +  " a " +	cSem_Ate + ")" //"Semana  "###" a " 
 	Else
-		cHtml += '<td><span class="dados">' + STR0045 + Semana + " (" + cSem_De + STR0046 +	cSem_Ate + ")" + '</span></td>' + CRLF
+		cHtml += '<td><span class="dados">' + "Semana  " + Semana + " (" + cSem_De + " a "  +	cSem_Ate + ")" + '</span></td>' + CRLF
 	EndIF	
 Else
-	IF !lTerminal
+	IF !lTermin
 		cHtml += MesExtenso(Month(dDataRef))+"/"+STR(YEAR(dDataRef),4) + " - ( " + cTipo + " )"
 	Else
 		cHtml += '<td><span class="dados">' + MesExtenso(Month(dDataRef))+"/"+STR(YEAR(dDataRef),4) + " - ( " + cTipo + " )" + '</span></td>' + CRLF
 	EndIF	
 EndIf	                    
 
-IF !lTerminal
+IF !lTermin
 
 	cHtml += '</b></h4></font></center>'
 	cHtml += '<hr whidth = 100% align=right color="#FF812D">'
@@ -1498,9 +1493,9 @@ IF !lTerminal
 	cHtml += '<p align=left  style="margin-top: 0">'
 	cHtml +=   '<font color="#000082" face="Courier New"><i><b>'
 	cHtml +=  	'&nbsp;&nbsp;&nbsp' + SRA->RA_NOME + "-" + SRA->RA_MAT+'</i><br>'
-	cHtml += 	'&nbsp;&nbsp;&nbsp' + STR0048 + SRA->RA_CODFUNC+ "  "+DescFun(SRA->RA_CODFUNC,SRA->RA_FILIAL)	+'<br>' //"Funcao    - "
-	cHtml +=  	'&nbsp;&nbsp;&nbsp' + STR0047 + SRA->RA_CC + " - " + DescCc(SRA->RA_CC,SRA->RA_FILIAL) +'<br>' //"C.Custo   - "
-	cHtml +=    '&nbsp;&nbsp;&nbsp' + STR0049 + SRA->RA_BCDEPSAL+"-"+DescBco(SRA->RA_BCDEPSAL,SRA->RA_FILIAL)+ '&nbsp;'+  SRA->RA_CTDEPSAL //"Bco/Conta - "
+	cHtml += 	'&nbsp;&nbsp;&nbsp' + "Funcao    - " + SRA->RA_CODFUNC+ "  "+DescFun(SRA->RA_CODFUNC,SRA->RA_FILIAL)	+'<br>' //"Funcao    - "
+	cHtml +=  	'&nbsp;&nbsp;&nbsp' + "C.Custo   - " + SRA->RA_CC + " - " + DescCc(SRA->RA_CC,SRA->RA_FILIAL) +'<br>' //"C.Custo   - "
+	cHtml +=    '&nbsp;&nbsp;&nbsp' + "Bco/Conta - " + SRA->RA_BCDEPSAL+"-"+DescBco(SRA->RA_BCDEPSAL,SRA->RA_FILIAL)+ '&nbsp;'+  SRA->RA_CTDEPSAL //"Bco/Conta - "
 	cHtml += '</b></p></font>'
 	cHtml += '<!Proventos e Desconto>'
 	cHtml += '<div align="center">'
@@ -1508,9 +1503,9 @@ IF !lTerminal
 	cHtml += '<Table bgcolor="#6F9ECE" border="0" cellpadding ="1" cellspacing="0" width="553" height="296">'
 	cHtml += '<TBody><Tr>'
 	cHtml +=	'<font face="Courier New" size="02" color="#000082"><b>'
-	cHtml += 	'<th>' + STR0050 + '</th>' //"Cod  Descricao "
-	cHtml += 	'<th>' + STR0051 + '</th>' //"Referencia"
-	cHtml += 	'<th>' + STR0052 + '</th>' //"Valores"
+	cHtml += 	'<th>' + "Cod  Descricao " + '</th>' //"Cod  Descricao "
+	cHtml += 	'<th>' + "Referencia" + '</th>' //"Referencia"
+	cHtml += 	'<th>' + "Valores" + '</th>' //"Valores"
 	cHtml += 	'</b></font></tr>'
 	cHtml += '<font color=#000082 face="Courier new"  size=2">'
 
@@ -1533,16 +1528,16 @@ Else
     cHtml += '<table width="490" border="0" cellspacing="0" cellpadding="0">' + CRLF
     cHtml += '<tr align="center">' + CRLF
     cHtml += '<td width="45" height="16">' + CRLF
-    cHtml += '<div align="Left"><span class="etiquetas">'+ STR0068 + '</span></div>' + CRLF //C&oacute;digo
+    cHtml += '<div align="Left"><span class="etiquetas">'+ "C&oacute;digo" + '</span></div>' + CRLF //C&oacute;digo
     cHtml += '</td>' + CRLF
     cHtml += '<td width="219" valign="top">' + CRLF
-    cHtml += '<div align="left"><span class="etiquetas">' + STR0069 + '</span></div>' + CRLF //Descri&ccedil;&atilde;o
+    cHtml += '<div align="left"><span class="etiquetas">' + "Descri&ccedil;&atilde;o" + '</span></div>' + CRLF //Descri&ccedil;&atilde;o
     cHtml += '</td>' + CRLF
     cHtml += '<td width="127" valign="top">' + CRLF
-    cHtml += '<div align="right"><span class="etiquetas">' + STR0070  + '</span></div>' + CRLF //Refer&ecirc;ncia
+    cHtml += '<div align="right"><span class="etiquetas">' + "Refer&ecirc;ncia"  + '</span></div>' + CRLF //Refer&ecirc;ncia
     cHtml += '</td>' + CRLF
     cHtml += '<td width="107" valign="top">' + CRLF
-    cHtml += '<div align="right"><span class="etiquetas">' + STR0052 + '</span></div>' + CRLF //Valores
+    cHtml += '<div align="right"><span class="etiquetas">' + "Valores" + '</span></div>' + CRLF //Valores
     cHtml += '<td width="107" valign="top">' + CRLF
     cHtml += '<div align="center"><span class="etiquetas"> (+/-) </span></div>' + CRLF
     cHtml += '</td>' + CRLF
@@ -1555,7 +1550,7 @@ EndIF
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 For nProv:=1 to  LEN(aProve)
 	nResto := ( ++nZebrado % 2 )
-	IF !lTerminal
+	IF !lTermin
 		cHtml += '<tr>'
 		cHtml += 	'<td class="tdPrinc">' + aProve[nProv,1] + '</td>'
 		cHtml += 	'<td class="td18_94_AlignR">' + Transform(aProve[nProv,2],'999.99')+'</td>'
@@ -1608,7 +1603,7 @@ Next nProv
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 For nDesco:=1 to Len(aDesco)
 	nResto := ( ++nZebrado % 2 )
-	IF !lTerminal
+	IF !lTermin
 		cHtml += '<tr>'
 		cHtml += 	'<td class="tdPrinc">' + aDesco[nDesco,1] + '</td>'
 		cHtml += 	'<td class="td18_94_AlignR">' + Transform(aDesco[nDesco,2],'999.99') + '</td>'
@@ -1656,7 +1651,7 @@ For nDesco:=1 to Len(aDesco)
 	EndIF	
 Next nDesco	   
 
-IF !lTerminal
+IF !lTermin
 
 	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 	//³ Espacos Entre os Proventos e Descontos e os Totais           ³
@@ -1674,19 +1669,19 @@ IF !lTerminal
 	cHtml += '<!Totais >'
 	cHtml +=	'<b><i>'
 	cHtml += 	'<tr>'
-	cHtml += 		'<td class="tdPrinc">' + STR0053 + '</td>' //"Total Bruto "
+	cHtml += 		'<td class="tdPrinc">' + "Total Bruto " + '</td>' //"Total Bruto "
 	cHtml += 		'<td class="td18_94_AlignR"></td>'
 	cHtml += 		'<td class="td18_95_AlignR">' + Transform(TOTVENC,"@E 999,999.99") + '</td>'
 	cHtml += 		'<td class="td18_18_AlignL"></td>'
 	cHtml +=	'</tr>'
 	cHtml += 	'<tr>'
-	cHtml += 		'<td class="tdPrinc">' + STR0054 + '</td>' //"Total Descontos "
+	cHtml += 		'<td class="tdPrinc">' + "Total Descontos " + '</td>' //"Total Descontos "
 	cHtml += 		'<td class="td18_94_AlignR"></Td>'
 	cHtml += 		'<td class="td18_95_AlignR">' + Transform(TOTDESC,"@E 999,999.99") + '</td>'
 	cHtml += 		'<td class="td18_18_AlignL">-</td>'
 	cHtml += 	'</tr>'
 	cHtml += 	'<tr>'
-	cHtml += 		'<td class="tdPrinc">' + STR0055 + '</td>' //"Liquido a Receber "
+	cHtml += 		'<td class="tdPrinc">' + "Liquido a Receber " + '</td>' //"Liquido a Receber "
 	cHtml += 		'<td class="td18_94_AlignR"></td>'
 	cHtml += 		'<td align=right height="18" width="95" Style="border-left:0px solid #FF812D; border-right:0px solid #FF9B06; border-bottom:0px solid #FF9B06 ; border-top:1px solid #FF9B06 bgcolor=#4B87C2">'
 	cHtml +=        Transform((TOTVENC-TOTDESC),"@E 999,999.99") +'</td>'
@@ -1715,7 +1710,7 @@ Else
 	cHtml += '</tr>'
 	cHtml += '<tr>' + CRLF
    	cHtml += '<td valign="top" bgcolor="#FAFBFC">' + CRLF 
-    cHtml += '<div align="left" class="etiquetas"> ' + STR0065 + '</div>' + CRLF //"Total Bruto: "
+    cHtml += '<div align="left" class="etiquetas"> ' + "Total Bruto: " + '</div>' + CRLF //"Total Bruto: "
     cHtml += '</td>' + CRLF
    	cHtml += '<td width="45" align="center" height="19" bgcolor="#FAFBFC">' 
     cHtml += '<div align="left"><span class="dados"></span></div>' + CRLF
@@ -1733,7 +1728,7 @@ Else
 	
 	cHtml += '<tr>' + CRLF
     cHtml += '<td valign="top">' + CRLF 
-    cHtml += '<div align="left" class="etiquetas">' + STR0066 + '</div>' + CRLF //"Total de Descontos: "
+    cHtml += '<div align="left" class="etiquetas">' + "Total de Descontos: " + '</div>' + CRLF //"Total de Descontos: "
     cHtml += '</td>' + CRLF
     cHtml += '<td width="45" align="center" height="19">' 
     cHtml += '<div align="left"><span class="dados"></span></div>' + CRLF
@@ -1751,7 +1746,7 @@ Else
 	
 	cHtml += '<tr>' + CRLF
     cHtml += '<td valign="top" bgcolor="#FAFBFC">' + CRLF 
-    cHtml += '<div align="left" class="etiquetas">' + STR0067  + '</div>' + CRLF //"L&iacute;quido a Receber: "
+    cHtml += '<div align="left" class="etiquetas">' + "L&iacute;quido a Receber: "  + '</div>' + CRLF //"L&iacute;quido a Receber: "
     cHtml += '</td>' + CRLF
     cHtml += '<td width="45" align="center" height="19" bgcolor="#FAFBFC">' 
     cHtml += '<div align="left"><span class="dados"></span></div>' + CRLF
@@ -1773,7 +1768,7 @@ EndIF
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Espacos Entre os Totais e as Bases                           ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-IF !lTerminal
+IF !lTermin
 	cHtml += 	'<tr>'
 	cHtml += 		'<td class="tdPrinc"></td>'
 	cHtml += 		'<td class="td18_94_AlignR">&nbsp;&nbsp</td>'
@@ -1789,16 +1784,16 @@ EndIF
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 If Esc = 1  
 	If cBaseAux = "S" .And. nBaseIr # 0
-		IF !lTerminal
+		IF !lTermin
 			cHtml +=	'<tr>'
-			cHtml +=		'<td class="tdPrinc"><p class="pStyle1"><font color=#000082 face="Courier new" size=2><i>'+STR0058+'</i></p></td></font>' //"Base IR Adiantamento"
+			cHtml +=		'<td class="tdPrinc"><p class="pStyle1"><font color=#000082 face="Courier new" size=2><i>'+"Base IR Adiantamento"+'</i></p></td></font>' //"Base IR Adiantamento"
 			cHtml +=		'<td class="td26_94_AlignR"><p></td>'
 			cHtml +=		'<td class="td26_95_AlignR"><p>'+ Transform(nBaseIr,"@E 999,999,999.99")+'</td>'
 			cHtml +=		'<td class="td26_18_AlignL"><p></td>'
 			cHtml += 	'</tr>'
 		Else
 			cHtml += '<tr>'
-			cHtml += '<td width="304" class="etiquetas">' + STR0058 + ' + </td>' + CRLF
+			cHtml += '<td width="304" class="etiquetas">' + "Base IR Adiantamento" + ' + </td>' + CRLF
             cHtml += '<td width="103" class="dados"><div align="center">' + Transform(nBaseIr,"@E 999,999.99") + '</div></td>' + CRLF
             cHtml += '<td width="91"  class="dados"><div align="center">' + Transform(0.00   ,"@E 999,999.99") + '</div></td>' + CRLF
             cHtml += '</tr>'
@@ -1809,27 +1804,27 @@ If Esc = 1
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 ElseIf Esc = 2 .Or. Esc = 4  
 	IF cBaseAux = "S"
-		IF !lTerminal
+		IF !lTermin
 			cHtml += '<tr>'
 			cHtml +=	'<td class="tdPrinc">'
-   	    	cHtml +=    '<p class="pStyle1">'+ STR0056 +'</p></td>'//"Base FGTS/Valor FGTS"
+   	    	cHtml +=    '<p class="pStyle1">'+ "Base FGTS/Valor FGTS" +'</p></td>'//"Base FGTS/Valor FGTS"
 			cHtml +=	'<td class="td26_94_AlignR">' + Transform(nBaseFgts,"@E 999,999.99")+'</td>'
 			cHtml +=	'<td class="td26_95_AlignR">' + Transform(nFgts    ,"@E 999,999.99")+'</td>'
 			cHtml += '</tr>'
 			cHtml += '<tr>'
 			cHtml +=	'<td class="tdPrinc">'
-   	    	cHtml +=    '<p class="pStyle1">'+ STR0057 +'</p></td>'//"Base IRRF Folha/Ferias"
+   	    	cHtml +=    '<p class="pStyle1">'+ "Base IRRF Folha/Ferias" +'</p></td>'//"Base IRRF Folha/Ferias"
 			cHtml +=	'<td class="td26_94_AlignR">' + Transform(nBaseIr,"@E 999,999.99")+'</td>'
 			cHtml +=	'<td class="td26_95_AlignR">' + Transform(nBaseIrfe,"@E 999,999.99")+'</td>'
 			cHtml += '</tr>'
 		Else
 			cHtml += '<tr>'
-			cHtml += '<td width="304" class="etiquetas">' + STR0056 + '</td>' + CRLF //"Base FGTS/Valor FGTS"
+			cHtml += '<td width="304" class="etiquetas">' + "Base IRRF Folha/Ferias" + '</td>' + CRLF //"Base FGTS/Valor FGTS"
        	    cHtml += '<td width="103" class="dados"><div align="center">' + Transform(nBaseFgts,"@E 999,999.99") + '</div></td>' + CRLF
            	cHtml += '<td width="91"  class="dados"><div align="center">' + Transform(nFgts    ,"@E 999,999.99") + '</div></td>' + CRLF
             cHtml += '</tr>'
 			cHtml += '<tr>'
-			cHtml += '<td width="304" class="etiquetas">' + STR0057 + '</td>' + CRLF //"Base IRRF Folha/Ferias"
+			cHtml += '<td width="304" class="etiquetas">' + "Base IRRF Folha/Ferias" + '</td>' + CRLF //"Base IRRF Folha/Ferias"
        	    cHtml += '<td width="103" class="dados"><div align="center">' + Transform(nBaseIr,"@E 999,999.99") + '</div></td>' + CRLF
            	cHtml += '<td width="91"  class="dados"><div align="center">' + Transform(nBaseIrFe,"@E 999,999.99") + '</div></td>' + CRLF
             cHtml += '</tr>'
@@ -1840,17 +1835,17 @@ ElseIf Esc = 2 .Or. Esc = 4
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 ElseIf Esc = 3  
 	If cBaseAux = "S"
-		IF !lTerminal
+		IF !lTermin
 			cHtml += 	'<tr>'
 			cHtml += 		'<td class="tdPrinc">' 
-			cHtml +=		'<p class="pStyle1">'+ STR0056 +'</td>' //"Base FGTS / Valor FGTS"
+			cHtml +=		'<p class="pStyle1">'+ "Base FGTS/Valor FGTS" +'</td>' //"Base FGTS / Valor FGTS"
 			cHtml += 		'<td class="td26_94_AlignL">' + Transform(nBaseFgts,"@E 999,999,999.99") +'</td>'
 			cHtml += 		'<td class="td26_95_AlignL">' + Transform(nFgts,"@E 99,999,999.99")+'</td>'
 			cHtml +=		'<td align=right height="26" width="95"  style="border-left: 0px solid #FF9B06; border-right:0px solid #FF9B06; border-bottom:1px solid #FF9B06 ; border-top: 0px solid #FF9B06 bgcolor=#6F9ECE"></td>'
 			cHtml += 	'</tr>'
 		Else
 			cHtml += '<tr>'
-			cHtml += '<td width="304" class="etiquetas">' + STR0056 + ' + </td>' + CRLF //"Base FGTS/Valor FGTS"
+			cHtml += '<td width="304" class="etiquetas">' + "Base FGTS/Valor FGTS" + ' + </td>' + CRLF //"Base FGTS/Valor FGTS"
        	    cHtml += '<td width="103" class="dados"><div align="center">' + Transform(nBaseFgts,"@E 999,999.99") + '</div></td>' + CRLF
            	cHtml += '<td width="91"  class="dados"><div align="center">' + Transform(nFgts    ,"@E 999,999.99") + '</div></td>' + CRLF
             cHtml += '</tr>'
@@ -1858,7 +1853,7 @@ ElseIf Esc = 3
 	Endif
 Endif
 	
-IF !lTerminal
+IF !lTermin
 	cHtml += '</font></i></b>'
 	cHtml += '</TBody>'
 	cHtml += '</table>'
@@ -1879,7 +1874,7 @@ IF !lTerminal
 	cHtml += 	'<td align=left height=18 width=574 style="border-left:1px solid #FF9B06; border-right:1px solid #FF9B06; border-bottom:1px solid #FF9B06 ; border-top: 0px solid #FF9B06 bgcolor=#6F9ECE"><i><font face="Courier New" size="2" color="#000082">'+DESC_MSG3+ '</font></td></tr>'
 	IF cMesComp == Month(SRA->RA_NASC)
 		cHtml += '<TD align=left height=18 width=574 bgcolor="#FFFFFF"><EM><B><CODE>      <font face="Courier New" size="4" color="#000082">'
-		cHtml += '<MARQUEE align="middle" bgcolor="#FFFFFF">' + STR0059	+ '</marquee><code></b></font></td></tr>' //"F E L I Z &nbsp;&nbsp  A N I V E R S A R I O !!!! "
+		cHtml += '<MARQUEE align="middle" bgcolor="#FFFFFF">' + "F E L I Z &nbsp;&nbsp  A N I V E R S A R I O !!!! "	+ '</marquee><code></b></font></td></tr>' //"F E L I Z &nbsp;&nbsp  A N I V E R S A R I O !!!! "
 	EndIF
 	cHtml += '</TBody>'
 	cHtml += '</Table>'
@@ -1910,11 +1905,11 @@ EndIF
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Envia e-mail p/funcionario                                   ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-IF !lTerminal
+IF !lTermin
 	GPEMail(cSubject,cHtml,cEMail)
 EndIF	
 
-Return( IF( lTerminal , cHtml , NIL ) ) 
+Return( IF( lTermin , cHtml , NIL ) ) 
 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ

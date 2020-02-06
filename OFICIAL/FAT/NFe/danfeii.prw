@@ -85,7 +85,7 @@ If nTipo <> 1
 	Endif
 
 	If lIsLoja
-		MV_PAR01 := SF2->F2_DOC
+		MV_PAR01:= SF2->F2_DOC
 		MV_PAR02 := SF2->F2_DOC
 		MV_PAR03 := SF2->F2_SERIE
 		MV_PAR04 := 2	//[Operacao] NF de Saida
@@ -121,7 +121,7 @@ If nTipo <> 1
 	EndIf
 
 ElseIf nTipo == 1
-	MV_PAR01 := SF2->F2_DOC
+	cNotaDe := SF2->F2_DOC
 	MV_PAR02 := SF2->F2_DOC
 	MV_PAR03 := SF2->F2_SERIE
 	MV_PAR04 := 2	//[Operacao] NF de Saida
@@ -224,6 +224,47 @@ Default nTipo	:= 0
 
 public nMaxItem := MAXITEM
 
+
+//Filtrando as Notas Fiscais atraves da Carga - DAI - <TLM> Alterado por Renata Alves - 26/08/10
+		If MV_PAR09 == 1
+        
+			If Empty(MV_PAR10) .or. Empty(MV_PAR11)
+				MsgAlert("Favor preencher o codigo da Carga.")
+			Return()
+			Endif
+        
+			IF Select("QDAI") <> 0
+				DbSelectArea("QDAI")
+				DbCloseArea()
+			EndIf
+        
+			cQuery := "SELECT DAI_COD, DAI_NFISCA, DAI_SERIE "
+			cQuery += "FROM "+RetSqlName("DAI")+" "
+			cQuery += "WHERE DAI_FILIAL = '"+xFilial("DAI")+"' AND D_E_L_E_T_ = '' AND DAI_COD BETWEEN '"+MV_PAR10+"' AND '"+MV_PAR11+"' "
+			cQuery += "ORDER BY DAI_COD, DAI_NFISCA"
+			cQuery := ChangeQuery(cQuery)
+			dbUseArea(.T.,"QDAI",TcGenQry(,,cQuery),"QDAI",.T.,.T.)
+			DbGoTop()
+			cNotaDe := QDAI->DAI_NFISCA
+			cSerie  := QDAI->DAI_SERIE
+			Do While !Eof()
+				cNotaAte := QDAI->DAI_NFISCA
+				DbSkip()
+			Enddo
+		Elseif MV_PAR09 == 2
+        
+			If Empty(MV_PAR01) .or. Empty(MV_PAR02) .or. Empty(MV_PAR03)  //ALTERADO
+				MsgAlert("Favor preencher n?ero de Nota Fiscal e S?ie.")
+			Return()
+			Endif
+        
+			cNotaDe  := Alltrim(MV_PAR01)
+			cNotaAte := Alltrim(MV_PAR02)
+			cSerie   := MV_PAR03
+    
+		Endif		
+
+
 MV_PAR01 := AllTrim(MV_PAR01)
 lImpSimp := ( !Empty( MV_PAR06 ) .and. MV_PAR06 == 1 )
 
@@ -236,10 +277,10 @@ If !lImpDir .or. oDanfe:lInJob
 
 		 	If lSdoc
 				cCampos += ", SF3.F3_SDOC"
-				cSerie := Padr(MV_PAR03,TamSx3("F3_SDOC")[1])
+				cSerie := Padr(cSerie,TamSx3("F3_SDOC")[1])
 				cWhere := "%SubString(SF3.F3_CFO,1,1) < '5' AND SF3.F3_FORMUL='S' AND SF3.F3_SDOC = '"+ cSerie + "' AND SF3.F3_ESPECIE = 'SPED'"
 			Else
-				cSerie := Padr(MV_PAR03,TamSx3("F3_SERIE")[1])
+				cSerie := Padr(cSerie,TamSx3("F3_SERIE")[1])
 				cWhere := "%SubString(SF3.F3_CFO,1,1) < '5' AND SF3.F3_FORMUL='S' AND SF3.F3_SERIE = '"+ cSerie + "' AND SF3.F3_ESPECIE = 'SPED'"
 			Endif
 
@@ -247,20 +288,20 @@ If !lImpDir .or. oDanfe:lInJob
 
 		 	If lSdoc
 				cCampos += ", SF3.F3_SDOC"
-				cSerie := Padr(MV_PAR03,TamSx3("F3_SDOC")[1])
+				cSerie := Padr(cSerie,TamSx3("F3_SDOC")[1])
 				cWhere := "%SubString(SF3.F3_CFO,1,1) >= '5' AND SF3.F3_SDOC = '"+ cSerie + "' AND SF3.F3_ESPECIE = 'SPED'"
 			Else
-				cSerie := Padr(MV_PAR03,TamSx3("F3_SERIE")[1])
+				cSerie := Padr(cSerie,TamSx3("F3_SERIE")[1])
 				cWhere := "%SubString(SF3.F3_CFO,1,1) >= '5' AND SF3.F3_SERIE = '"+ cSerie + "' AND SF3.F3_ESPECIE = 'SPED'"
 			Endif
 		Else
 
 			If lSdoc
 				cCampos += ", SF3.F3_SDOC"
-				cSerie := Padr(MV_PAR03,TamSx3("F3_SDOC")[1])
+				cSerie := Padr(cSerie,TamSx3("F3_SDOC")[1])
 				cWhere := "%SF3.F3_SDOC = '"+ cSerie + "' AND SF3.F3_ESPECIE = 'SPED'"
 			Else
-				cSerie := Padr(MV_PAR03,TamSx3("F3_SERIE")[1])
+				cSerie := Padr(cSerie,TamSx3("F3_SERIE")[1])
 				cWhere := "%SF3.F3_SERIE = '"+ cSerie + "' AND SF3.F3_ESPECIE = 'SPED'"
 			Endif
 
@@ -294,9 +335,9 @@ If !lImpDir .or. oDanfe:lInJob
 			FROM %Table:SF3% SF3
 			WHERE
 			SF3.F3_FILIAL = %xFilial:SF3% AND
-				SF3.F3_SERIE = %Exp:MV_PAR03% AND
-			SF3.F3_NFISCAL >= %Exp:MV_PAR01% AND
-			SF3.F3_NFISCAL <= %Exp:MV_PAR02% AND
+				SF3.F3_SERIE = %Exp:cSerie% AND
+			SF3.F3_NFISCAL >= %Exp:cNotaDe% AND
+			SF3.F3_NFISCAL <= %Exp:cNotaAte% AND
 			%Exp:cWhere% AND
 			SF3.F3_DTCANC = %Exp:Space(8)% AND
 			SF3.%notdel%
@@ -307,9 +348,9 @@ If !lImpDir .or. oDanfe:lInJob
 		cIndex    		:= CriaTrab(NIL, .F.)
 		cChave			:= IndexKey(6)
 		cCondicao 		:= 'F3_FILIAL == "' + xFilial("SF3") + '" .And. '
-		cCondicao 		+= 'SF3->F3_SERIE =="'+ MV_PAR03+'" .And. '
-		cCondicao 		+= 'SF3->F3_NFISCAL >="'+ MV_PAR01+'" .And. '
-		cCondicao		+= 'SF3->F3_NFISCAL <="'+ MV_PAR02+'" .And. '
+		cCondicao 		+= 'SF3->F3_SERIE =="'+ cSerie+'" .And. '
+		cCondicao 		+= 'SF3->F3_NFISCAL >="'+ cNotaDe+'" .And. '
+		cCondicao		+= 'SF3->F3_NFISCAL <="'+ cNotaAte+'" .And. '
 		cCondicao		+= 'SF3->F3_ESPECIE = "SPED" .And. '
 		cCondicao		+= 'Empty(SF3->F3_DTCANC)'
 		IndRegua(cAliasSF3, cIndex, cChave, , cCondicao)
@@ -333,9 +374,9 @@ If !lImpDir .or. oDanfe:lInJob
 	EndIf
 
 	While !Eof() .And. xFilial("SF3") == (cAliasSF3)->F3_FILIAL .And.;
-		cSerId == MV_PAR03 .And.;
-		(cAliasSF3)->F3_NFISCAL >= MV_PAR01 .And.;
-		(cAliasSF3)->F3_NFISCAL <= MV_PAR02
+		cSerId == cSerie .And.;
+		(cAliasSF3)->F3_NFISCAL >= cNotaDe .And.;
+		(cAliasSF3)->F3_NFISCAL <= cNotaAte
 
 		dbSelectArea(cAliasSF3)
 		If  Empty((cAliasSF3)->F3_DTCANC) .And. &cWhere //.And. AModNot((cAliasSF3)->F3_ESPECIE)=="55"
@@ -576,7 +617,7 @@ ElseIf  lImpDir
 	//³Registros no SF3, e sim buscando XML diretamente do        ³
 	//³webService, e caso exista será impresso.                   ³
 	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	nLenarray := Val(Alltrim(MV_PAR02)) - Val(Alltrim(MV_PAR01))
+	nLenarray := Val(Alltrim(cNotaAte)) - Val(Alltrim(cNotaDe))
 	nCursor	  := 1
 
 	While  !lBreak  .And. nLenarray >= 0
@@ -590,12 +631,12 @@ ElseIf  lImpDir
 
 			 	If lSdoc
 			 		cCampos += "%SF1.F1_FILIAL FILIAL, SF1.F1_DOC DOC, SF1.F1_SERIE SERIE, SF1.F1_SDOC SDOC%"
-					cSerie := Padr(MV_PAR03,TamSx3("F1_SDOC")[1])
-					cWhere := "%SF1.D_E_L_E_T_= '' AND SF1.F1_FILIAL ='"+xFilial("SF1")+"' AND SF1.F1_DOC <='"+MV_PAR02+ "' AND SF1.F1_DOC >='" + MV_PAR01 + "' AND SF1.F1_SDOC ='"+ cSerie + "' AND SF1.F1_ESPECIE = 'SPED' AND SF1.F1_FORMUL = 'S' ORDER BY SF1.F1_DOC%"
+					cSerie := Padr(cSerie,TamSx3("F1_SDOC")[1])
+					cWhere := "%SF1.D_E_L_E_T_= '' AND SF1.F1_FILIAL ='"+xFilial("SF1")+"' AND SF1.F1_DOC <='"+cNotaAte+ "' AND SF1.F1_DOC >='" + cNotaDe + "' AND SF1.F1_SDOC ='"+ cSerie + "' AND SF1.F1_ESPECIE = 'SPED' AND SF1.F1_FORMUL = 'S' ORDER BY SF1.F1_DOC%"
 				Else
 					cCampos += "%SF1.F1_FILIAL FILIAL, SF1.F1_DOC DOC, SF1.F1_SERIE SERIE%"
-					cSerie := Padr(MV_PAR03,TamSx3("F2_SERIE")[1])
-					cWhere := "%SF1.D_E_L_E_T_= '' AND SF1.F1_FILIAL ='"+xFilial("SF1")+"' AND SF1.F1_DOC <='"+MV_PAR02+ "' AND SF1.F1_DOC >='" + MV_PAR01 + "' AND SF1.F1_SERIE ='"+ cSerie + "' AND SF1.F1_ESPECIE = 'SPED' AND SF1.F1_FORMUL = 'S' ORDER BY SF1.F1_DOC%"
+					cSerie := Padr(cSerie,TamSx3("F2_SERIE")[1])
+					cWhere := "%SF1.D_E_L_E_T_= '' AND SF1.F1_FILIAL ='"+xFilial("SF1")+"' AND SF1.F1_DOC <='"+cNotaAte+ "' AND SF1.F1_DOC >='" + cNotaDe + "' AND SF1.F1_SERIE ='"+ cSerie + "' AND SF1.F1_ESPECIE = 'SPED' AND SF1.F1_FORMUL = 'S' ORDER BY SF1.F1_DOC%"
 				Endif
 
 			ElseIf MV_PAR04==2
@@ -605,12 +646,12 @@ ElseIf  lImpDir
 
 			 	If lSdoc
 			 		cCampos += "%SF2.F2_FILIAL FILIAL, SF2.F2_DOC DOC, SF2.F2_SERIE SERIE, SF2.F2_SDOC SDOC%"
-					cSerie := Padr(MV_PAR03,TamSx3("F2_SDOC")[1])
-					cWhere := "%SF2.D_E_L_E_T_= '' AND SF2.F2_FILIAL ='"+xFilial("SF2")+"' AND SF2.F2_DOC <='"+MV_PAR02+ "' AND SF2.F2_DOC >='" + MV_PAR01 + "' AND SF2.F2_SDOC ='"+ cSerie + "' AND SF2.F2_ESPECIE = 'SPED' ORDER BY SF2.F2_DOC%"
+					cSerie := Padr(cSerie,TamSx3("F2_SDOC")[1])
+					cWhere := "%SF2.D_E_L_E_T_= '' AND SF2.F2_FILIAL ='"+xFilial("SF2")+"' AND SF2.F2_DOC <='"+cNotaAte+ "' AND SF2.F2_DOC >='" + cNotaDe + "' AND SF2.F2_SDOC ='"+ cSerie + "' AND SF2.F2_ESPECIE = 'SPED' ORDER BY SF2.F2_DOC%"
 				Else
 					cCampos += "%SF2.F2_FILIAL FILIAL, SF2.F2_DOC DOC, SF2.F2_SERIE SERIE%"
-					cSerie := Padr(MV_PAR03,TamSx3("F2_SERIE")[1])
-					cWhere := "%SF2.D_E_L_E_T_= '' AND SF2.F2_FILIAL ='"+xFilial("SF2")+"' AND SF2.F2_DOC <='"+MV_PAR02+ "' AND SF2.F2_DOC >='" + MV_PAR01 + "' AND SF2.F2_SERIE ='"+ cSerie + "' AND SF2.F2_ESPECIE = 'SPED' AND SF2.F2_EMISSAO >= '" + %exp:DtoS(MV_PAR07)% + "' AND SF2.F2_EMISSAO <= '" + %exp:DtoS(MV_PAR08)% + "' ORDER BY SF2.F2_DOC%"					
+					cSerie := Padr(cSerie,TamSx3("F2_SERIE")[1])
+					cWhere := "%SF2.D_E_L_E_T_= '' AND SF2.F2_FILIAL ='"+xFilial("SF2")+"' AND SF2.F2_DOC <='"+cNotaAte+ "' AND SF2.F2_DOC >='" + cNotaDe + "' AND SF2.F2_SERIE ='"+ cSerie + "' AND SF2.F2_ESPECIE = 'SPED' AND SF2.F2_EMISSAO >= '" + %exp:DtoS(MV_PAR07)% + "' AND SF2.F2_EMISSAO <= '" + %exp:DtoS(MV_PAR08)% + "' ORDER BY SF2.F2_DOC%"					
 				Endif
 
 			EndIf
@@ -642,9 +683,9 @@ ElseIf  lImpDir
 
 		While !Eof() .And. !lBreak .And. ;
 			cxFilial == (cAliasSFX)->FILIAL .And.;
-			cSerId == MV_PAR03 .And.;
-			(cAliasSFX)->DOC >= MV_PAR01 .And.;
-			(cAliasSFX)->DOC <= MV_PAR02
+			cSerId == cSerie .And.;
+			(cAliasSFX)->DOC >= cNotaDe .And.;
+			(cAliasSFX)->DOC <= cNotaAte
 
 			aNotas := {}
 			For nx:=1 To 20
@@ -1087,9 +1128,12 @@ Local cCfop			:= ""
 Local cCfopAnt		:= ""
 Local aItensAux     := {}
 Local aArray		:= {}
+Local cMotorista 	:= "" //alterado por Weiden - 25/03/2013
+Local nSTAnt 		:= 0 //ALTERADO
 Default cDtHrRecCab := ""
 Default dDtReceb    := CToD("")
 Private aInfNf    := {}
+
 
 Private oDPEC     := oNfeDPEC
 Private oNF       := oNFe:_NFe
@@ -2239,6 +2283,46 @@ ElseIf MV_PAR04 == 1
 	EndIf
 EndIF
 
+
+// ***************************************************
+// INFORMA?O ADICIONAL - Nome + CPF do motorista   *
+// ALTERADO POR WEIDEN - 25/03/2013                 *
+// ****************************************************
+	
+if !Empty(SF2->F2_CARGA)
+	dbSelectArea("DAK")
+	dbSetOrder(1)
+	DBSeek(xFilial("DAK")+SF2->F2_CARGA)
+	dbSelectArea("DA4")
+	dbSetOrder(1)
+	DBSeek(xFilial("DA4")+DAK->DAK_MOTORI)
+Else
+	dbSelectArea("DA3")
+	dbSetOrder(1)
+	DBSeek(xFilial("DA3")+SF2->F2_VEICUL1)
+	dbSelectArea("DA4")
+	dbSetOrder(1)
+	DBSeek(xFilial("DA4")+DA3->DA3_MOTORI)
+EndIf
+cMotorista := DA4->DA4_NOME + " - " + DA4->DA4_CGC
+	aadd(aMensagem,SubStr("Motorista:"+cMotorista,1,IIf(EspacoAt(cAux, MAXMENLIN) > 1, EspacoAt(cAux, MAXMENLIN) - 1, MAXMENLIN))) //TESTE MENSAGEM
+	
+	
+	MsUnlock() //Alterado por Weiden - 25/03/2013
+// ***************************************************
+//         OUTRAS INFORMA?ES ADICIONAIS            *
+//        ALTERADO POR WEIDEN - 25/03/2013          *
+// ****************************************************
+	
+IF SF2->F2_TIPO=="N" //Alterado dia 23/01/15
+		dbSelectArea("SA1")
+		dbSetOrder(1)
+		DBSeek(xFilial("SA1")+SF2->F2_CLIENTE)
+		
+		cMunic := SA1->A1_COD_MUN+"-"+SA1->A1_MUN
+		aadd(aMensagem,SubStr("Municipio:"+cMunic,1,IIf(EspacoAt(cAux, MAXMENLIN) > 1, EspacoAt(cAux, MAXMENLIN) - 1, MAXMENLIN))) 
+EndIf
+	aadd(aMensagem,SubStr("Cod.Cliente:"+SF2->F2_CLIENTE,1,IIf(EspacoAt(cAux, MAXMENLIN) > 1, EspacoAt(cAux, MAXMENLIN) - 1, MAXMENLIN))) 
 
 
 For Nx := 1 to Len(aMensagem)
@@ -3775,7 +3859,7 @@ oDanfe:EndPage()
 //³Tratamento para nao imprimir DANFEs diferentes na mesma folha, uma na FRENTE e outra no VERSO.  |
 //|   Isso quando a impressora estiver configurada para frente e verso                             ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-If MV_PAR05==1 .And. MV_PAR01 <> MV_PAR02 .And. (--nFolha)%2<>0
+If MV_PAR05==1 .And. cNotaDe <> cNotaAte .And. (--nFolha)%2<>0
 	oDanfe:StartPage()
 	oDanfe:EndPage()
 EndIf

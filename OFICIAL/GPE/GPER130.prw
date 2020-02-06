@@ -670,7 +670,7 @@ Return
 北韧屯屯屯屯拖屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯屯图北
 北北北北北北北北北北北北北北北北北北北北北北北北北北北北北北北北北北北北北北北 /*/ 
 
-Function G130ValD(dDataIni, dDataFim)
+Static Function G130ValD(dDataIni, dDataFim)
 	Local lRet
 
 	If !Empty(dDataFim)

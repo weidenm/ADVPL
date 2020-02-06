@@ -32,6 +32,9 @@ Local cIniFile 		:= GetADV97()
 Local cStartPath 	:= GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+'NFE\ENTRADA\'
 Local nMessages		:= 0
 Local aContas		:={{'fiscal@produtosplinc.com.br'}}
+Local zX
+Local nX
+Local nY
 
 //Local aContas		:={{'nfentrada.plinc@gmail.com'}}
 //Local aContas		:={{'compras@produtosplinc.com.br'},{'informatica@produtosplinc.com.br'}  //,;
