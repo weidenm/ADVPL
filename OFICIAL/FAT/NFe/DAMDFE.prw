@@ -113,7 +113,7 @@ Local oNfe
 			DBGoTop()		
 		#ENDIF
 		
-		While !Eof() .And. xFilial("SF3") == (cAliasMDF)->CC0_FILIAL .And. (cAliasMDF)->CC0_SERMDF == MV_PAR01 .And.;
+		While (cAliasMDF)->(!Eof()) .And. (cAliasMDF)->CC0_SERMDF == MV_PAR01 .And.;
 			(cAliasMDF)->CC0_NUMMDF >= MV_PAR02 .And. (cAliasMDF)->CC0_NUMMDF <= MV_PAR03						
 					
 			aadd(aNotas,{})

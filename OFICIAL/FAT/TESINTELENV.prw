@@ -45,8 +45,9 @@ User Function TesInteligente
 			DbSkip()
 		EndDo
 */
+	
 		if trim(SB1->B1_GRTRIB) <> ""
-
+				
 //	   cTes := TesIntel(2,"01",SC6->C6_CLI,SC6->C6_LOJA,"C",SC6->C6_PRODUTO,"C6_TES")	
 
 			if (Alltrim(SA1->A1_EST) $ "BA/ES/GO/PE/SE") .or. (Alltrim(SA1->A1_EST) $ ("DF/RJ/MG") .and. Alltrim(SA1->A1_GRPTRIB) $ "001/002") .or.;
@@ -59,11 +60,12 @@ User Function TesInteligente
 					IF (Alltrim(SA1->A1_EST)="MG" .and. Alltrim(SA1->A1_GRPTRIB="") .and. Alltrim(SB1->B1_GRTRIB)="008")
 						cTes:="506"
 					Else
-						IF (Alltrim(SA1->A1_EST)="DF" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)<>"008") .or.;
+						IF (Alltrim(SA1->A1_EST)="DF" .and. SC6->C6_FILIAL='02' .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)<>"008") .or.;
 								(Alltrim(SA1->A1_EST)="RJ" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)="020")
+							
 							cTes := "504"
 						Else
-							IF (Alltrim(SA1->A1_EST)="DF" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)="008")
+							IF (Alltrim(SA1->A1_EST)="DF" .and. SC6->C6_FILIAL='02' .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)="008")
 								cTes:="507"
 							Else
 								IF (Alltrim(SA1->A1_EST)="RJ" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB) <> "020")
@@ -72,6 +74,9 @@ User Function TesInteligente
 									IF (Alltrim(SA1->A1_EST)="AL" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB) $ "001/002/003/004/005/006/007")
 										cTes:="509"
 									Else
+										IF (Alltrim(SA1->A1_EST)="DF" .and. SC6->C6_FILIAL='01')
+											cTes:="630"
+										EndIf
 										//conout("NЦo encontrou nenhuma condiГЦo para o cliente")
 									EndIf
 								EndIf
@@ -80,9 +85,7 @@ User Function TesInteligente
 					EndIF
 				EndIf
 			EndIf
-			
-			//conout("TES:"+cTes)
-	
+			//conout("TES:"+cTes)	
 		else
 			if trim(SB1->B1_TS) <> ""
 				alert("produto "+ SB1->B1_COD +" sem Grupo Trib.")
@@ -178,7 +181,6 @@ Static Function TesIntel(nEntSai,cTpOper,cClieFor,cLoja,cTipoCF,cProduto,cCampo)
 		cGrupo  := SA2->A2_GRPTRIB
 		cEstado := SA2->A2_EST
 	EndIf
-	
 	
 	//здддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 	//Ё Verifica o grupo do produto                                  Ё

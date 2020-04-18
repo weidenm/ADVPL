@@ -50,8 +50,8 @@ Static Function conexao()
 	Public DataHora := cData + " " + cHora
   
 	conout("iniciando importacao "+DataHora)
-Processa({|| gravaPedido()},"Aguarde...","Separando Pedidos...")	
-Processa({||AtualizaPedido()},"Aguarde...","Atualizando Pedidos...")
+Processa({|| gravaPedido(1)},"Aguarde...","Separando Pedidos...")	
+Processa({||AtualizaPedido(1)},"Aguarde...","Atualizando Pedidos...")
 
 		
 If MV_PAR05 == 1
@@ -71,9 +71,26 @@ EndIf
 
 Return
 
+//Abrindo Arquivos do Ambiente (Origem)
+	TCCONTYPE("TCPIP")
+	
+	nCon1 := TCLink("MSSQL/DADOS12","192.168.2.1")  //BASE OFICIAL
 
+	If nCon1 < 0
+		Alert("Nao Foi Possivel Realizar a Conexao com o SRVPP01/DADOS12.")
+		//Return
+	EndIf
 
-Static Function gravaPedido()
+	TCSETCONN(nCon1) //SETA CONEXÃO PARA OFICIAL E IMPORTA PARA FILIAL.
+	
+Processa({|| gravaPedido(2)},"Aguarde...","Separando Pedidos...")	
+Processa({||AtualizaPedido(2)},"Aguarde...","Atualizando Pedidos...")
+
+	nCon2 := TCLink("MSSQL/TESTE11","192.168.2.1")  //BASE TESTE
+    TCUnlink(nCon1)
+	TCSETCONN(nCon2) 
+
+Static Function gravaPedido(emp)
 
 	QryAtualiza := ""
 
@@ -84,7 +101,7 @@ Static Function gravaPedido()
 	cData := Dtoc(date())
 	cHora := time()
 	Public DataHora := cData + " " + cHora
-
+	
 
 //PEDIDOS NÃO EXCLUÍDOS, MENORES QUE 900000 OU JÁ HOUVER SIDO IMPORTADO.   
 	If Select("CABPED") > 0
@@ -92,15 +109,37 @@ Static Function gravaPedido()
 		dbCloseArea()
 	EndIf
 	
-	cQuery := "SELECT C5_FILIAL,C5_NUM,C5_TIPO,C5_CLIENTE,C5_LOJACLI,C5_CLIENT,C5_LOJAENT,C5_TIPOCLI,C5_CONDPAG,C5_TABELA,C5_VEND1,C5_COMIS1,"
-	cQuery += " C5_DESC1,C5_EMISSAO,C5_VOLUME1,C5_PBRUTO,C5_PESOL,C5_ESPECI1,C5_OBS, C5_MENNOTA,C5_MENPAD,C5_TIPLIB,C5_DESCONT,C5_TXMOEDA,C5_TPCARGA,C5_NUMLDX,"
-	cQuery += " C5_ROMANEI, C5_ROMIT,C5_DTSAIDA,C5_TPFRETE,C5_IMPRESS FROM SRVPP01.DADOS12.dbo.SC5010 WHERE D_E_L_E_T_ = '' AND C5_NUM < '900000'  "
-	cQuery += "  AND C5_EMISSAO >= '"+ cDataIni +"' and C5_EMISSAO <= '"+ cDataFim +"' "
-	cQuery += "  AND C5_NUM >= '"+ cPedIni +"' and C5_NUM <= '"+ cPedFim +"' "
-	cQuery += " AND C5_EMISSAO >'"+ dtos(ddatabase-30) +"'"
-	cQuery += " 	AND C5_CLIENTE IN (SELECT A1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SA1010 WHERE D_E_L_E_T_ ='' )"
-	cQuery += " ORDER BY C5_NUM "
-	
+		cQuery := "SELECT C5_FILIAL,C5_NUM,C5_TIPO,substring(LC.COD_CLIENTE,1,6) as C5_CLIENTE,substring(LC.COD_CLIENTE,7,2) as C5_LOJACLI, substring(LC.COD_CLIENTE,1,6) as C5_CLIENT, substring(LC.COD_CLIENTE,7,2) as C5_LOJAENT,"
+		cQuery += " C5_TIPOCLI,C5_CONDPAG,C5_TABELA,C5_VEND1,C5_COMIS1, C5_DESC1,C5_EMISSAO,C5_VOLUME1,C5_PBRUTO,C5_PESOL,C5_ESPECI1,C5_OBS, C5_MENNOTA,C5_MENPAD,C5_TIPLIB,C5_DESCONT,C5_TXMOEDA,C5_TPCARGA,C5_NUMLDX,"
+		cQuery += " C5_ROMANEI, C5_ROMIT,C5_DTSAIDA,C5_TPFRETE,C5_IMPRESS FROM SRVPP01.DADOS12.dbo.SC5010 A  "
+		cQuery += " INNER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C5_CLIENTE+A.C5_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
+		cQuery += "  WHERE D_E_L_E_T_ = '' AND C5_NUM < '900000'  AND C5_EMISSAO >= '"+ cDataIni +"' and C5_EMISSAO <= '"+ cDataFim +"' "
+		cQuery += "  AND C5_NUM >= '"+ cPedIni +"' and C5_NUM <= '"+ cPedFim +"' "
+		cQuery += " AND C5_EMISSAO >'"+ dtos(ddatabase-30) +"' " //and C5_FILIAL='01'"
+		cQuery += " 	AND substring(LC.COD_CLIENTE,1,6) IN (SELECT A1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SA1010 WHERE D_E_L_E_T_ ='' )"
+		cQuery += " ORDER BY C5_NUM "
+
+	/* if emp == 1
+		cQuery := "SELECT C5_FILIAL,C5_NUM,C5_TIPO,C5_CLIENTE,C5_LOJACLI,C5_CLIENT,C5_LOJAENT,C5_TIPOCLI,C5_CONDPAG,C5_TABELA,C5_VEND1,C5_COMIS1,"
+		cQuery += " C5_DESC1,C5_EMISSAO,C5_VOLUME1,C5_PBRUTO,C5_PESOL,C5_ESPECI1,C5_OBS, C5_MENNOTA,C5_MENPAD,C5_TIPLIB,C5_DESCONT,C5_TXMOEDA,C5_TPCARGA,C5_NUMLDX,"
+		cQuery += " C5_ROMANEI, C5_ROMIT,C5_DTSAIDA,C5_TPFRETE,C5_IMPRESS FROM SRVPP01.DADOS12.dbo.SC5010 WHERE D_E_L_E_T_ = '' AND C5_NUM < '900000'  "
+		cQuery += "  AND C5_EMISSAO >= '"+ cDataIni +"' and C5_EMISSAO <= '"+ cDataFim +"' "
+		cQuery += "  AND C5_NUM >= '"+ cPedIni +"' and C5_NUM <= '"+ cPedFim +"' "
+		cQuery += " AND C5_EMISSAO >'"+ dtos(ddatabase-30) +"' and C5_FILIAL='01'"
+		cQuery += " 	AND C5_CLIENTE IN (SELECT A1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SA1010 WHERE D_E_L_E_T_ ='' )"
+		cQuery += " ORDER BY C5_NUM "
+	else
+		if emp == 2
+			cQuery := "SELECT C5_NUM,C5_TIPO,C5_CLIENTE,C5_LOJACLI,C5_CLIENT,C5_LOJAENT,C5_TIPOCLI,C5_CONDPAG,C5_TABELA,C5_VEND1,C5_COMIS1,"
+			cQuery += " C5_DESC1,C5_EMISSAO,C5_VOLUME1,C5_PBRUTO,C5_PESOL,C5_ESPECI1,C5_MENNOTA,C5_MENPAD,C5_TIPLIB,C5_DESCONT,C5_TXMOEDA,C5_TPCARGA,"
+			cQuery += " C5_ROMANEI, C5_ROMIT,C5_DTSAIDA,C5_TPFRETE,C5_IMPRESS FROM SC5010 WHERE D_E_L_E_T_ = '' AND C5_NUM < '900000'  "
+			cQuery += "  AND C5_EMISSAO >= '"+ cDataIni +"' and C5_EMISSAO <= '"+ cDataFim +"' "
+			cQuery += "  AND C5_NUM >= '"+ cPedIni +"' and C5_NUM <= '"+ cPedFim +"' and C5_FILIAL='01'  "
+		//	cQuery += " AND LTRIM(C5_NOTA) = '' and C5_CONDPAG NOT IN ('015','998') "
+			cQuery += " AND C5_CLIENTE IN (SELECT A1_COD FROM SA1010 WHERE D_E_L_E_T_ ='' AND A1_CGC <> '' AND A1_CGC NOT LIKE '000000%' AND A1_EST='DF')"
+			cQuery += " AND C5_EMISSAO >"+ dtos(ddatabase-30)
+		EndIf
+	EndIf  */
 	//conout(cQuery)
 	TCQuery cQuery Alias CABPED New
 	
@@ -255,14 +294,20 @@ Static Function AtualizaPedido()
 		If ! SC5->(found())
 		//	conout("Gravando " + Pedido + ":"+time())
 			RecLock("SC5",.t.)
-			SC5->C5_NUM:=CABPED->C5_NUM
-			SC5->C5_FILIAL:='01'
-			//SC5->C5_INDPRES := "0"
-			SC5->C5_TIPO:=CABPED->C5_TIPO
+		/*	If emp== 2
+				SC5->C5_FILIAL:='02'
+			else */
+				SC5->C5_FILIAL:='01'
+		//	ENDIF
+			
 			SC5->C5_CLIENTE:=CABPED->C5_CLIENTE
 			SC5->C5_LOJACLI:=CABPED->C5_LOJACLI
 			SC5->C5_CLIENT:=CABPED->C5_CLIENT
 			SC5->C5_LOJAENT:=CABPED->C5_LOJAENT
+			SC5->C5_VEND1:=CABPED->C5_VEND1
+			SC5->C5_NUM:=CABPED->C5_NUM
+			//SC5->C5_INDPRES := "0"
+			SC5->C5_TIPO:=CABPED->C5_TIPO
 			SC5->C5_TIPOCLI:=CABPED->C5_TIPOCLI
 			SC5->C5_CONDPAG:=CABPED->C5_CONDPAG
 			SC5->C5_VEND1:=CABPED->C5_VEND1
@@ -715,7 +760,7 @@ Static Function AtualizaRoman()
 
 cQuery := " UPDATE SRVPP01.DADOS12.dbo.SC5010 SET C5_ROMANEI=B.C5_ROMANEI, C5_ROMIT=B.C5_ROMIT "
 cQuery += " FROM SRVPP01.DADOS12.dbo.SC5010 A INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SC5010 B "
-cQuery += " ON A.C5_NUM = B.C5_NUM WHERE A.C5_EMISSAO >= '20190701' AND B.C5_ROMANEI<>''  and A.C5_ROMANEI='' "
+cQuery += " ON A.C5_NUM = B.C5_NUM WHERE A.C5_EMISSAO >= '20190701' AND B.C5_ROMANEI<>''   and A.C5_ROMANEI<>B.C5_ROMANEI   "
 cQuery += " AND B.C5_ROMANEI IN (SELECT Z1_NUM  FROM SRVPP01.DADOS12.dbo.SZ1010 WHERE Z1_ITEM='01' AND Z1_DTFECH='' AND D_E_L_E_T_='')"
 TCSQLexec(cQuery)
 

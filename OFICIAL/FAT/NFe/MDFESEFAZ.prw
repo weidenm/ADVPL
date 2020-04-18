@@ -116,7 +116,6 @@ Static Function MDFeIde(cChave,aNota,cVeiculo)
 Local cString		:= ""
 Local cTpEmis		:= ""
 Local cDV			:= ""
-Local cMDF			:= ""
 Local cDhEmi		:= "" 
 Local lEndFis 	:= GetNewPar("MV_SPEDEND",.F.)
 Local lVeic		:= .F. 
@@ -129,15 +128,12 @@ If !Empty(cVeiculo)
 EndIf
 
 cDV := cTpEmis + Inverte(StrZero( val(aNota[02]),8))
-cMDF := Inverte(StrZero( val(aNota[02]),8))
-
 cChave := MDFeChave( aUF[aScan(aUF,{|x| x[1] == IIF(!lEndFis,ConvType(SM0->M0_ESTCOB),ConvType(SM0->M0_ESTENT)) })][02],;
 						FsDateConv(aNota[03],"YYMM"),AllTrim(SM0->M0_CGC),'58',;
 						StrZero(Val(aNota[01]),3),;
 						StrZero(Val(aNota[02]),9),;
-						cDV)
-					
-//cDV := Inverte(StrZero( val(aNota[02]),8))
+						cDV )
+
 cDhEmi := SubStr(DToS(aNota[3]), 1, 4) + "-" + SubStr(DToS(aNota[3]), 5, 2) + "-" + SubStr(DToS(aNota[3]), 7, 2) + "T" + aNota[4]
 
 cString += '<MDFe xmlns="http://www.portalfiscal.inf.br/mdfe">'
@@ -160,7 +156,7 @@ Else
 	cString += '<serie>'+ ConvType(Val(aNota[01]),3) +'</serie>'
 Endif                  
 cString += '<nMDF>' + ConvType(Val(aNota[02]),9) + '</nMDF>'
-cString += '<cMDF>'+ NoAcento(cMDF) + '</cMDF>'
+cString += '<cMDF>'+ NoAcento(cDV) + '</cMDF>'
 cString += '<cDV>' + SubStr( AllTrim(cChave), Len( AllTrim(cChave) ), 1) + '</cDV>'
 cString += '<modal>1</modal>'  //Modal Rodoviário
 cString += '<dhEmi>' + cDhEmi + '</dhEmi>'
@@ -342,7 +338,6 @@ Local aVeiSF2		:= {}
 Local aVeiculo		:= {}
 Local aMotorista	:= {}
 Local aProp			:= {}
-Local aNFRef		:= {}
 Local cString 		:= ""
 Local ctpProp		:= ""
 Local nCapcM3		:= 0
@@ -359,8 +354,6 @@ cString += '<infANTT>'
 cString += NfeTag('<RNTRC>',ConvType(SM0->M0_RNTRC))
 
 /*Elemento CIOT não gerado*/
-
-
 If !Empty(cVeiculo)
 
 	dbSelectArea('TRB')

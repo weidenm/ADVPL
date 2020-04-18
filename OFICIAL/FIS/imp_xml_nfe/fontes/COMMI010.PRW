@@ -2305,7 +2305,7 @@ Return aCodEmpFil
 */
 User Function ReadXML(cFile,lJob)
 
-	Local cProduto	:= CriaVar("B1_COD")
+	Local cProduto	//:= CriaVar("B1_COD")
 	Local cXML      := ""
 	Local cError    := ""
 	Local cWarning  := ""
@@ -2336,7 +2336,7 @@ User Function ReadXML(cFile,lJob)
 	Local aHeadSDS  := {}
 	Local aItemSDT  := {}
 	Local oDlg
-	Local cProduto2 := CriaVar("B1_COD")
+	Local cProduto2 //:= CriaVar("B1_COD")
 	Local aStatus   := {.f.,""}
 	Private cEmailAdm 	:= GETMV("MV_WFADMIN")
 	Private cEmailErro  := "informatica@produtosplinc.com.br"

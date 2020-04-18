@@ -18,6 +18,7 @@
 User Function CFGMI004()
 Local aFiles := {}
 Local nX	 := 0                
+Local nStart := time()
 Private aContas		:= {}
 Private cIniFile	:= GetADV97()                                      
 Private cStartPath 	:= GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+'NFE\ENTRADA\'
@@ -29,10 +30,10 @@ Private c4StartPath	:= Trim(c3StartPath)+"LANCANT\"
 Private c5StartPath	:= Trim(cStartPath)+"EVENTOS\"
 
 
-//conOut("ImportaXML: iniciando - "+ time())
-FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: iniciando - "+ time(), 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
-RpcSetType(3)
-RpcSetEnv("01","01")
+conOut("ImportaXML: iniciando - "+ time())
+//FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: iniciando  ", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função //+ str(time())
+//RpcSetType(3)
+//RpcSetEnv("01","01")
 
 //CRIA DIRETORIOS            
 
@@ -43,8 +44,8 @@ MakeDir(c2StartPath) //CRIA DIRETOTIO ANO
 MakeDir(c3StartPath) //CRIA DIRETOTIO MES
 MakeDir(c4StartPath) //CRIA DIRETOTIO NOTAS LANÇADAS ANTERIORMENTE
 MakeDir(cStartError) //CRIA DIRETORIO ERRO
-  //conOut("ImportaXML: criado pastas")
-  FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: criado pastas", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
+  conOut("ImportaXML: criado pastas")
+  //FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: criado pastas", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
 
 //aFiles := Directory(GetSrvProfString("RootPath","") +"\" +cStartPath2 +"*.xml")
 aFiles := Directory(GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+"NFE\entrada\*.xml")
@@ -61,8 +62,8 @@ For nX := 1 To Len(aFiles)
 	nXml++
 	//conout(aFiles[nX,1])
 	U_ReadXML(aFiles[nX,1],.T.)
-	//conOut("ImportaXML: lidos "+ str(nXml) +" xml")
-	FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: lidos "+ str(nXml) +" xml", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
+	conOut("ImportaXML: lidos "+ str(nXml) +" xml")
+	//FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: lidos "+ str(nXml) +" xml", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
     cErroGeral +=  "ImportaXML: lidos "+ str(nXml) +" xml"
 	//QUANDO TIVER 500 XML SAI DA ROTINA, SENAO ESTOURA O ARRAY DO XML
 	If nXml == 500
@@ -71,10 +72,11 @@ For nX := 1 To Len(aFiles)
 	
 Next nX
 	U_EnvMail('fiscal@produtosplinc.com.br','Geral Erros ImportaXML - '+ time() ,cErroGeral)
+		U_EnvMail('sistemas@produtosplinc.com.br','Geral Erros ImportaXML - '+ time() ,cErroGeral)
 
 RpcClearEnv()
 
-//conOut("ImportaXML: Finalizado - "+ time())
-FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: Finalizado - "+ time(), 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
+conOut("ImportaXML: Finalizado - "+ time())
+//FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: Finalizado - ", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função //+ time()
 
 Return

@@ -3,5 +3,6 @@
     "[advpl]": {
         "files.encoding": "windows1252"
     },
-    "totvsLanguageServer.askEncodingChange": false
+    "totvsLanguageServer.askEncodingChange": false,
+    "totvsLanguageServer.askCompileResult": true
 }
