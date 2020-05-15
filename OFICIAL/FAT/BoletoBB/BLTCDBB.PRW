@@ -160,8 +160,8 @@ Static Function MontaRel()
 	LOCAL nX := 0
 	Local cNroDoc :=  " "                                   
 
-	LOCAL aDadosEmp := {SM0->M0_NOMECOM,;	//[1]Nome da Empresa
-						SM0->M0_ENDCOB,;	//[2]Endereço
+	LOCAL aDadosEmp := {AllTrim(SM0->M0_NOMECOM),;	//[1]Nome da Empresa
+						AllTrim(SM0->M0_ENDCOB),;	//[2]Endereço
 						AllTrim(SM0->M0_BAIRCOB)+", "+AllTrim(SM0->M0_CIDCOB)+", "+SM0->M0_ESTCOB,;	//[3]Complemento
 						"CEP: "+Subs(SM0->M0_CEPCOB,1,5)+"-"+Subs(SM0->M0_CEPCOB,6,3),;	//[4]CEP
 						"PABX/FAX: "+SM0->M0_TEL,;	//[5]Telefones
@@ -389,7 +389,7 @@ Static Function Impress(oPrint,aDadosEmp,aDadosTit,aDadosBanco,aDatSacado,aBolTe
 	
 	
 	oPrint:Say (nRow1+0150,0100,"Cedente"   ,oFont8)
-	oPrint:Say (nRow1+0200,0100,aDadosEmp[1],oFont10)	//Nome + CNPJ
+	oPrint:Say (nRow1+0200,0100,Substr(aDadosEmp[1],1,42),oFont10)	//Nome + CNPJ
 	
 	oPrint:Say (nRow1+0150,1060,"Agência/Código Cedente"                            ,oFont8)
 	oPrint:Say (nRow1+0200,1060,aDadosBanco[3]+"/"+aDadosBanco[4]+"-"+aDadosBanco[5],oFont10)
@@ -486,7 +486,7 @@ Static Function Impress(oPrint,aDadosEmp,aDadosTit,aDadosBanco,aDatSacado,aBolTe
 	oPrint:Say (nRow2+0750,nCol,cString,oFont11c)
 
 	oPrint:Say (nRow2+0810,0100,"Cedente"                                 ,oFont8)
-	oPrint:Say (nRow2+0850,0100,aDadosEmp[1]+"            - "+aDadosEmp[6],oFont10)	//Nome + CNPJ
+	oPrint:Say (nRow2+0850,0100,aDadosEmp[1]+"  - "+aDadosEmp[6],oFont10)	//Nome + CNPJ
 
 	oPrint:Say (nRow2+0810,1810,"Agência/Código Cedente",oFont8)
 	cString := Alltrim(aDadosBanco[3]+"/"+aDadosBanco[4]+"-"+aDadosBanco[5])
@@ -629,7 +629,7 @@ Static Function Impress(oPrint,aDadosEmp,aDadosTit,aDadosBanco,aDatSacado,aBolTe
 	oPrint:Say (nRow3+2040,nCol,cString,oFont11c)
 	
 	oPrint:Say (nRow3+2100,0100,"Cedente"                                 ,oFont8)
-	oPrint:Say (nRow3+2140,0100,aDadosEmp[1]+"            - "+aDadosEmp[6],oFont10)//Nome + CNPJ
+	oPrint:Say (nRow3+2140,0100,aDadosEmp[1]+" - "+aDadosEmp[6],oFont10)//Nome + CNPJ
 	
 	oPrint:Say (nRow3+2100,1810,"Agência/Código Cedente",oFont8)
 	cString := Alltrim(aDadosBanco[3]+"/"+aDadosBanco[4]+"-"+aDadosBanco[5])

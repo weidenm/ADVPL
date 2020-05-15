@@ -21,7 +21,8 @@ Local nX	 := 0
 Local nStart := time()
 Private aContas		:= {}
 Private cIniFile	:= GetADV97()                                      
-Private cStartPath 	:= GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+'NFE\ENTRADA\'
+//Private cStartPath 	:= GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+'NFE\ENTRADA\'
+Private cStartPath 	:= '\NFE\ENTRADA\'
 Private cStartLido	:= Trim(cStartPath)+"LANCADOS\"
 Private c2StartPath	:= Trim(cStartLido)+AllTrim(Str(Year(Date())))+"\" 
 Private c3StartPath	:= Trim(c2StartPath)+AllTrim(Str(Month(Date())))+"\"	//MES
@@ -31,9 +32,11 @@ Private c5StartPath	:= Trim(cStartPath)+"EVENTOS\"
 
 
 conOut("ImportaXML: iniciando - "+ time())
+RpcSetType(3)
+RpcSetEnv("01","01")
+
 //FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: iniciando  ", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função //+ str(time())
-//RpcSetType(3)
-//RpcSetEnv("01","01")
+
 
 //CRIA DIRETORIOS            
 
@@ -47,20 +50,20 @@ MakeDir(cStartError) //CRIA DIRETORIO ERRO
   conOut("ImportaXML: criado pastas")
   //FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: criado pastas", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
 
+
 //aFiles := Directory(GetSrvProfString("RootPath","") +"\" +cStartPath2 +"*.xml")
-aFiles := Directory(GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+"NFE\entrada\*.xml")
-//aFiles := Directory(GetSrvProfString("RootPath","") +"\NFE\*.xml")
+//aFiles := Directory(GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+"NFE\entrada\*.xml")
+//aFiles := Directory(GetSrvProfString("RootPath","ERROR", cIniFile) +"\NFE\entrada\*.xml")
+aFiles := Directory("\NFE\entrada\*.xml")
 
-//CONOUT(GetSrvProfString("RootPath","") +"\NFE\*.xml")
-
-
-
+conout(Len(aFiles))
+ 
 nXml := 0
 cErroGeral :=""
 
 For nX := 1 To Len(aFiles)
 	nXml++
-	//conout(aFiles[nX,1])
+	conout(aFiles[nX,1])
 	U_ReadXML(aFiles[nX,1],.T.)
 	conOut("ImportaXML: lidos "+ str(nXml) +" xml")
 	//FwLogMsg("INFO", /*cTransactionId*/, "ImportaXML", FunName(), "", "01", "ImportaXML: lidos "+ str(nXml) +" xml", 0, (nStart - Seconds()), {}) // nStart é declarada no inicio da função
@@ -71,8 +74,13 @@ For nX := 1 To Len(aFiles)
 	EndIf
 	
 Next nX
-	U_EnvMail('fiscal@produtosplinc.com.br','Geral Erros ImportaXML - '+ time() ,cErroGeral)
-		U_EnvMail('sistemas@produtosplinc.com.br','Geral Erros ImportaXML - '+ time() ,cErroGeral)
+
+if cErroGeral <> ""
+		U_EnvMail('fiscal@produtosplinc.com.br','Geral Erros ImportaXML - '+ time() ,cErroGeral)
+	//	U_EnvMail('sistemas@produtosplinc.com.br','Geral Erros ImportaXML - '+ time() ,cErroGeral)
+else
+		Conout("Não existe arquivos para importar.")
+EndIf
 
 RpcClearEnv()
 

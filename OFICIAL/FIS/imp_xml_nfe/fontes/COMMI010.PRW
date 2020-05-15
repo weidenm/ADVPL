@@ -26,7 +26,8 @@
 User Function COMMI010()
 	Local clPar     := "MTA140I"
 	Private cIniFile	:= GetADV97()
-	Private cStartPath 	:= GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+'NFE\ENTRADA\'
+	//Private cStartPath 	:= GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+'NFE\ENTRADA\'
+	Private cStartPath 	:= '\NFE\ENTRADA\'
 	Private cStartLido	:= Trim(cStartPath)+"LANCADOS\"
 	Private c2StartPath	:= Trim(cStartLido)+AllTrim(Str(Year(Date())))+"\"
 	Private c3StartPath	:= Trim(c2StartPath)+AllTrim(Str(Month(Date())))+"\"	//MES
@@ -35,7 +36,7 @@ User Function COMMI010()
 	Private c5StartPath	:= Trim(cStartPath)+"EVENTOS\"
 
 //CRIA DIRETORIOS
-	MakeDir(GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+'NFE\')
+	//MakeDir(GetPvProfString(GetEnvServer(),"StartPath","ERROR", cIniFile )+'NFE\')
 	MakeDir(Trim(cStartPath)) //CRIA DIRETOTIO ENTRADA
 	MakeDir(cStartLido) //CRIA DIRETORIO ARQUIVOS IMPORTADOS
 	MakeDir(c2StartPath) //CRIA DIRETOTIO ANO
@@ -2304,8 +2305,9 @@ Return aCodEmpFil
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 User Function ReadXML(cFile,lJob)
-
-	Local cProduto	//:= CriaVar("B1_COD")
+    
+	//Local AreaSM0 := SM0->(GetArea())
+	Local cProduto	:= "" //CriaVar("B1_COD")
 	Local cXML      := ""
 	Local cError    := ""
 	Local cWarning  := ""
@@ -2322,7 +2324,7 @@ User Function ReadXML(cFile,lJob)
 	Local cCampo4   := ""
 	Local cCampo5   := ""
 	Local cQuery    := ""
-	Local cNFECFAP  := SuperGetMV("MV_NFECFAP",.F.,"")
+	//Local cNFECFAP  := SuperGetMV("MV_NFECFAP",.F.,"01")
 	Local lFound    := .F.
 	Local lFoundSF1 := .F.
 	Local lProces   := .T.
@@ -2336,10 +2338,10 @@ User Function ReadXML(cFile,lJob)
 	Local aHeadSDS  := {}
 	Local aItemSDT  := {}
 	Local oDlg
-	Local cProduto2 //:= CriaVar("B1_COD")
+	Local cProduto2 := "" //:= CriaVar("B1_COD")
 	Local aStatus   := {.f.,""}
-	Private cEmailAdm 	:= GETMV("MV_WFADMIN")
-	Private cEmailErro  := "informatica@produtosplinc.com.br"
+	Private cEmailAdm 	:= "sistemas@produtosplinc.com.br"  //"SuperGetMV"("MV_WFADMIN",.F.,"01") //GETMV("MV_WFADMIN")
+	Private cEmailErro  := "sistemas@produtosplinc.com.br"
 	//Private cErroGeral :=""
 
 	Private lMsErroAuto 	:= .F.
@@ -2392,6 +2394,7 @@ User Function ReadXML(cFile,lJob)
 		EndIf
 	
 	//-- Nao processa XML de outra empresa/filial
+	
 		If lProces .And. !(Substr(SM0->M0_CGC,0,8) $ cXML)
 			lProces := .F.
 		EndIf
@@ -2450,7 +2453,7 @@ User Function ReadXML(cFile,lJob)
 			EndDo
 		//VERIFICAR PARA QUAL FILIAL SERA IMPORTADO
 			cCNPJInf := oXML:_INFNFE:_DEST:_CNPJ:TEXT
-		/*		
+				
 		If lJob
 			dbSelectArea("SM0")
 			dbSetOrder(1)       
@@ -2470,7 +2473,7 @@ User Function ReadXML(cFile,lJob)
 				Return
 			EndIf
 		EndIf
-		*/
+		
 		//-- Verifica se este ID ja foi processado
 			DbSelectArea("SDS")
 			SDS->(DbSetOrder(2))
@@ -2961,7 +2964,7 @@ User Function ReadXML(cFile,lJob)
 			EndIf
 		EndIf
 	EndIf
-
+		//RestArea(AreaSM0)
 Return lProces
 
 /*

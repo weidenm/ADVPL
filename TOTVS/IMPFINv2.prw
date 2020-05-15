@@ -110,8 +110,8 @@ Static Function conexao()
 	
 	//Processa({|| GravaTrabEnv()},"Aguarde...","Separando Movimentos...")
 	//Processa({||AtualizaTitulos()},"Aguarde...","Atualizando títulos...")
-	//Processa({||MovBancarios()},"Aguarde...","Importando baixa de NF com Cheque...")
-//	Processa({||ImpBaixaLiq()},"Aguarde...","Importando exclusão e baixas de cheque...")
+	Processa({||MovBancarios()},"Aguarde...","Importando baixa de NF com Cheque...")
+	Processa({||ImpBaixaLiq()},"Aguarde...","Importando exclusão e baixas de cheque...")
 	//Processa({||AtualizTitBol()},"Aguarde...","Atualizando historico de titulos...")
 	Processa({||AtualizaRoman()},"Aguarde...","Atualizando historico de titulos...")
 	
@@ -135,6 +135,7 @@ Static Function GravaTrabEnv()
 	cQuery += " INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SE1010 C ON TITNF.E1_PEDIDO=C.E1_PEDIDO AND RTRIM(TITNF.E1_PARCELA)=RTRIM(C.E1_PARCELA)"
 	cQuery += " WHERE B.D_E_L_E_T_='' AND TITNF.D_E_L_E_T_='' AND C.D_E_L_E_T_='' AND E5_SITUACA='' AND E5_NUMERO<>'' "
 	cQuery += " AND TITNF.E1_PEDIDO<> '' AND E5_DATA>'"+cDataIni +"' AND E5_DATA <='"+ cDataFim +"' "   
+	cQuery += " AND E5_MOTBX IN ('LIQ')  AND E5_BANCO NOT IN ('CX1')   "
 	//cQuery += " AND E5_MOTBX IN ('NOR','LIQ')   AND (  TITNF.E1_HIST='BOLETO BB GERADO' OR E5_MOTBX='LIQ' ) AND E5_BANCO NOT IN ('CX1')"  
 	cQuery += " AND C.E1_SALDO > 0  AND E5_VALOR <= C.E1_VALOR*1.1"
 	cQuery += " AND B.R_E_C_N_O_ NOT IN (SELECT  CAST(E5_IDMOVI AS INT) FROM SRVPP03.DADOSTOTVS11.dbo.SE5010 WHERE E5_IDMOVI<>'' )"
@@ -292,6 +293,7 @@ Static Function MovBancarios()
 	cQuery += " INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SE1010 C ON TITNF.E1_PEDIDO=C.E1_PEDIDO "
 	cQuery += " WHERE B.D_E_L_E_T_=''AND TITNF.D_E_L_E_T_='' AND E5_SITUACA='' AND E5_NUMERO<>'' AND TITNF.E1_PEDIDO<> '' AND C.D_E_L_E_T_=''"
 	//cQuery += " AND E5_MOTBX IN ('NOR','LIQ')   AND (  TITNF.E1_HIST='BOLETO BB GERADO' OR E5_MOTBX='LIQ' ) AND E5_BANCO NOT IN ('CX1') "
+	cQuery += "	AND E5_MOTBX IN ('LIQ')  AND E5_BANCO NOT IN ('CX1')  "
 	cQuery += " AND E5_DATA>='"+cDataIni +"' AND E5_DATA <='"+ cDataFim +"' "  
 	cQuery += " AND B.R_E_C_N_O_ NOT IN (SELECT  CAST(E5_IDMOVI AS INT) FROM SRVPP03.DADOSTOTVS11.dbo.SE5010 WHERE E5_IDMOVI<>'' ) "
 	cQuery += " AND TITNF.E1_PEDIDO+TITNF.E1_PARCELA NOT IN (SELECT E1_PEDIDO+E1_PARCELA FROM SRVPP03.DADOSTOTVS11.dbo.SE1010 WHERE D_E_L_E_T_='') "
@@ -891,6 +893,7 @@ TCSQLexec(cQuery)
 
 Return
 
+/*
 Static Function AtualizaRoman()
 
 cQuery := " UPDATE SRVPP01.DADOS12.dbo.SC5010 SET C5_ROMANEI=B.C5_ROMANEI, C5_ROMIT=B.C5_ROMIT "
@@ -899,6 +902,8 @@ cQuery += " ON A.C5_NUM = B.C5_NUM WHERE A.C5_EMISSAO >= '20190701' AND B.C5_ROM
 cQuery += " AND B.C5_ROMANEI IN (SELECT Z1_NUM  FROM SRVPP01.DADOS12.dbo.SZ1010 WHERE Z1_ITEM='01' AND Z1_DTFECH='' AND D_E_L_E_T_='')"
 TCSQLexec(cQuery)
 
+Return
+*/
 
 /*
 //************************************************************

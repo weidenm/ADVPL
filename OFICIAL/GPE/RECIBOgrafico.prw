@@ -1055,11 +1055,11 @@ For nCont := 1 To nTermina
 			oPrn:StartPage()				
 			wimp1box := .t.
 		else
-			li+=510
-			oPrn:Box(1695,030,2145,2320)
-			oPrn:Box(2155,030,2905,2320)
+			li+= 365 //510
+			oPrn:Box(1550,030,2000,2320) //oPrn:Box(1695,030,2145,2320)
+			oPrn:Box(2010,030,2760,2320) //oPrn:Box(2155,030,2905,2320)
 //			oPrn:Box(1230,840,1500,0845)                              
-			oPrn:Box(2915,030,3185,2320)            
+			oPrn:Box(2770,030,3040,2320)  //oPrn:Box(2915,030,3185,2320)            
 	                 
     	Endif
 		fCabecZ()
@@ -1077,24 +1077,25 @@ LI += 60
  	
 oPrn:Say (li, 500,"TOTAL BRUTO     "+SPACE(5)+TRANS(TOTVENC,"@E 999,999,999.99"), ofont08,100)  	
 oPrn:Say (li, 1200,"TOTAL DESCONTOS     "+SPACE(37)+TRANS(TOTDESC,"@E 999,999,999.99")	, ofont08,100)  	
-LI += 60
+LI += 50
 //oPrn:Say (li, 1400,"LIQUIDO A RECEBER     "+SPACE(05)+TRANS((TOTVENC-TOTDESC),"@E 999,999,999.99"), ofont08,100)
 oPrn:Say (li, 1200,"LIQUIDO A RECEBER     "+SPACE(36)+TRANS((TOTVENC-TOTDESC),"@E 999,999,999.99"), ofont08,100)
 oPrn:Say (li, 050,"CREDITO: "+SRA->RA_BCDEPSAL+"-"+DescBco(SRA->RA_BCDEPSAL,SRA->RA_FILIAL), ofont08,100)  //li, 650  	
-LI += 60
-oPrn:Say (li, 050,"CONTA:" + SRA->RA_CTDEPSAL		, ofont08,100)  //li, 650
- 	  	
-LI += 60
+LI += 50
+oPrn:Say (li, 050,"CONTA: " + SRA->RA_CTDEPSAL		, ofont08,100)  //li, 650
+oPrn:Say (li, 590,"Sal.Contr.Inss: " + Transform(nAteLim,"@E 999,999,999.99")+space(30)+"Base Fgts: "+Transform(nBaseFgts,"@E 999,999,999.99")+space(30)+" Fgts Mes: "+Transform(nFgts,"@e 999,999.99"), ofont08,100)  	  	
+LI += 50
 oPrn:Say (li, 050,DESC_MSG1, ofont08,100) 
 LI += 50
-oPrn:Say (li, 050,DESC_MSG3, ofont08,100)  	
-oPrn:Say (li, 1200,DESC_MSG2, ofont08,100)
+oPrn:Say (li,1000,"Recebi o valor acima em       ___/___/___      " + Replicate("_",42), ofont08,100)  	
+//oPrn:Say (li, 050,DESC_MSG3, ofont08,100)  	
+//oPrn:Say (li, 1200,DESC_MSG2, ofont08,100)
 //LI ++
 //@ LI,000 PSAY "|"+REPLICATE("-",130)+"|"
-li+=50                                                               
-oPrn:Say (li, 050,"Sal.Contr.Inss: " + Transform(nAteLim,"@E 999,999,999.99")+space(30)+"Base Fgts: "+Transform(nBaseFgts,"@E 999,999,999.99")+space(30)+" Fgts Mes: "+Transform(nFgts,"@e 999,999.99"), ofont08,100)  	
-LI += 080
-oPrn:Say (li, 050,"Recebi o valor acima em       ___/___/___      " + Replicate("_",40), ofont08,100)  	
+//li+=50                                                               
+//oPrn:Say (li, 050,"Sal.Contr.Inss: " + Transform(nAteLim,"@E 999,999,999.99")+space(30)+"Base Fgts: "+Transform(nBaseFgts,"@E 999,999,999.99")+space(30)+" Fgts Mes: "+Transform(nFgts,"@e 999,999.99"), ofont08,100)  	
+//LI += 080
+//oPrn:Say (li, 050,"Recebi o valor acima em       ___/___/___      " + Replicate("_",40), ofont08,100)  	
 //LI ++
 //@ LI,00 PSAY "*"+REPLICATE("=",130)+"*"
 If li >= 2500
@@ -1104,10 +1105,10 @@ If li >= 2500
 	wimp1box := .t.
 else
 	li+=100
-	oPrn:Box(1695,030,2145,2320)
-	oPrn:Box(2155,030,2905,2320)
+		oPrn:Box(1550,030,2000,2320)  //oPrn:Box(1695,030,2145,2320)
+		oPrn:Box(2010,030,2760,2320) //oPrn:Box(2155,030,2905,2320)
 //		oPrn:Box(1230,840,1500,0845)                              
-	oPrn:Box(2915,030,3185,2320)                              
+		oPrn:Box(2770,030,3040,2320)  //oPrn:Box(2915,030,3185,2320)                             
 //	fCabecZ()
 //	nValidos := 0	
 Endif

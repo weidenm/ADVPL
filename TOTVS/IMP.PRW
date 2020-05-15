@@ -112,11 +112,12 @@ Static Function gravaPedido(emp)
 		cQuery := "SELECT C5_FILIAL,C5_NUM,C5_TIPO,substring(LC.COD_CLIENTE,1,6) as C5_CLIENTE,substring(LC.COD_CLIENTE,7,2) as C5_LOJACLI, substring(LC.COD_CLIENTE,1,6) as C5_CLIENT, substring(LC.COD_CLIENTE,7,2) as C5_LOJAENT,"
 		cQuery += " C5_TIPOCLI,C5_CONDPAG,C5_TABELA,C5_VEND1,C5_COMIS1, C5_DESC1,C5_EMISSAO,C5_VOLUME1,C5_PBRUTO,C5_PESOL,C5_ESPECI1,C5_OBS, C5_MENNOTA,C5_MENPAD,C5_TIPLIB,C5_DESCONT,C5_TXMOEDA,C5_TPCARGA,C5_NUMLDX,"
 		cQuery += " C5_ROMANEI, C5_ROMIT,C5_DTSAIDA,C5_TPFRETE,C5_IMPRESS FROM SRVPP01.DADOS12.dbo.SC5010 A  "
-		cQuery += " INNER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C5_CLIENTE+A.C5_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
+		cQuery += " INNER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C5_NUMLDX)+A.C5_CLIENTE+A.C5_LOJACLI = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
 		cQuery += "  WHERE D_E_L_E_T_ = '' AND C5_NUM < '900000'  AND C5_EMISSAO >= '"+ cDataIni +"' and C5_EMISSAO <= '"+ cDataFim +"' "
 		cQuery += "  AND C5_NUM >= '"+ cPedIni +"' and C5_NUM <= '"+ cPedFim +"' "
 		cQuery += " AND C5_EMISSAO >'"+ dtos(ddatabase-30) +"' " //and C5_FILIAL='01'"
-		cQuery += " 	AND substring(LC.COD_CLIENTE,1,6) IN (SELECT A1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SA1010 WHERE D_E_L_E_T_ ='' )"
+		cQuery += " 	AND substring(LC.COD_CLIENTE,1,6) COLLATE Latin1_General_BIN  IN (SELECT A1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SA1010 WHERE D_E_L_E_T_ ='' )"
+		//cQuery += " AND C5_NUM NOT IN (SELECT C5_NUM FROM SRVPP01.DADOS12.dbo.SC5010 WHERE D_E_L_E_T_='' GROUP BY C5_NUM HAVING COUNT(*) > 1) "   //Não importa duplicados
 		cQuery += " ORDER BY C5_NUM "
 
 	/* if emp == 1
@@ -210,7 +211,7 @@ Static Function gravaProduto()
 	cQuery := "SELECT B1_FILIAL,B1_COD,B1_DESC,B1_TIPO,B1_UM,B1_LOCPAD,B1_GRUPO,B1_POSIPI,B1_TS,B1_PICMRET,B1_PICMENT,B1_SEGUM,  "
 	cQuery += " B1_CONV,B1_TIPCONV,B1_GRTRIB,B1_CC, B1_ORIGEM, B1_CONTA, B1_CODBAR FROM SRVPP01.DADOS12.dbo.SB1010 "
 	cQuery += " WHERE D_E_L_E_T_ = '' "
-	//cQuery += " AND B1_COD NOT IN (SELECT B1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SB1010 WHERE D_E_L_E_T_='')"
+	cQuery += " AND B1_COD NOT IN (SELECT B1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SB1010 WHERE D_E_L_E_T_='')"
 
 //Grava dados da base 2
 	TCQuery cQuery Alias PRODUTOS New
@@ -286,7 +287,7 @@ Static Function AtualizaPedido()
 	//IndRegua("CABPED", cIndexName, cIndexKey,,,"Aguarde,incluindo pedido "+ TRIM(CABPED->C5_NUM)+ " ...")
 
 	Do While (!CABPED->(Eof()))
-		conout("While "+CABPED->C5_NUM+" - "+ time())
+		//conout("While "+CABPED->C5_NUM+" - "+ time())
 		dbSelectArea("SC5")
 		dbsetorder(1)
 		dbseek(xfilial("SC5")+CABPED->C5_NUM)
@@ -343,7 +344,7 @@ Static Function AtualizaPedido()
 		
 			SC5->(MsUnlock())
 			
-		//	conout("Cabeçalho incluido "+time())
+		
 		
 		//INCLUI ITENS DE PEDIDOS NÃO IMPORTADOS
 			Pedido := CABPED->C5_NUM
@@ -365,7 +366,7 @@ cQuery += " WHERE A.D_E_L_E_T_ = '' AND  B.D_E_L_E_T_ = '' AND C6_NUM = '"+ Pedi
 
 //conout(cQuery)
 TCQuery cQuery Alias ITENSPED New
-conout("Consulta de dados concluida -"+time())
+//conout("Consulta de dados concluida -"+time())
 
 			
 			dbSelectArea("ITENSPED")
@@ -422,7 +423,7 @@ conout("Consulta de dados concluida -"+time())
 				ITENSPED->(dbskip())
 			EndDo
 			conout("Importado " + Pedido + ":" + STR(contItPed) + " itens")
-//		conout(CABPED->C5_NUM)
+// 
 		EndIf
 		CABPED->(dbskip())
 	
@@ -519,10 +520,10 @@ Static Function AtualizaMotorista()
 				
 			DA4->(MsUnlock())
 			MOTORISTA->(dbskip())
-		//	conout("atualizado motorista "+DA4->DA4_COD)
+			//conout("atualizado motorista "+DA4->DA4_COD)
 		EndDo
 		dbCloseArea("MOTORISTA")
-	//	conout("Importado e atualizado todos os motoristas.")
+		conout("Importado e atualizado todos os motoristas.")
 
 Return
 
@@ -566,7 +567,7 @@ Static Function AtualizaVeiculo()
 		VEICULO->(dbskip())
 	EndDo
 	dbCloseArea("VEICULO")
-	//conout("Importado e atualizado todos os veiculos.")
+	conout("Importado e atualizado todos os veiculos.")
 
 Return
 */
@@ -758,11 +759,17 @@ Return
 
 Static Function AtualizaRoman()
 
-cQuery := " UPDATE SRVPP01.DADOS12.dbo.SC5010 SET C5_ROMANEI=B.C5_ROMANEI, C5_ROMIT=B.C5_ROMIT "
-cQuery += " FROM SRVPP01.DADOS12.dbo.SC5010 A INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SC5010 B "
-cQuery += " ON A.C5_NUM = B.C5_NUM WHERE A.C5_EMISSAO >= '20190701' AND B.C5_ROMANEI<>''   and A.C5_ROMANEI<>B.C5_ROMANEI   "
-cQuery += " AND B.C5_ROMANEI IN (SELECT Z1_NUM  FROM SRVPP01.DADOS12.dbo.SZ1010 WHERE Z1_ITEM='01' AND Z1_DTFECH='' AND D_E_L_E_T_='')"
-TCSQLexec(cQuery)
+//cQuery := " UPDATE SRVPP01.DADOS12.dbo.SC5010 SET C5_ROMANEI=B.C5_ROMANEI, C5_ROMIT=B.C5_ROMIT "
+//cQuery += " FROM SRVPP01.DADOS12.dbo.SC5010 A INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SC5010 B "
+//cQuery += " ON A.C5_NUM = B.C5_NUM WHERE A.C5_EMISSAO >= '20190701' AND B.C5_ROMANEI<>''   and A.C5_ROMANEI<>B.C5_ROMANEI   "
+//cQuery += " AND B.C5_ROMANEI IN (SELECT Z1_NUM  FROM SRVPP01.DADOS12.dbo.SZ1010 WHERE Z1_ITEM='01' AND Z1_DTFECH='' AND D_E_L_E_T_='')"
 
+cQuery := " UPDATE SC5010 SET C5_ROMANEI=B.C5_ROMANEI, C5_ROMIT=B.C5_ROMIT "
+cQuery += " FROM SRVPP01.DADOS12.dbo.SC5010 A INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SC5010 B ON A.C5_NUM = B.C5_NUM  "
+cQuery += " WHERE A.D_E_L_E_T_='' AND B.D_E_L_E_T_='' AND B.C5_ROMANEI<>''   and A.C5_ROMANEI<>B.C5_ROMANEI  AND A.C5_EMISSAO >= '"+ dtos(ddatabase-30) +"' "
+cQuery += " AND B.C5_ROMANEI IN (SELECT Z1_NUM  FROM SRVPP01.DADOS12.dbo.SZ1010 WHERE Z1_ITEM='01' AND Z1_DTFECH='' AND D_E_L_E_T_='')"
+cQuery += " AND B.C5_NUM NOT IN (SELECT C5_NUM FROM SRVPP01.DADOS12.dbo.SC5010 WHERE D_E_L_E_T_='' GROUP BY C5_NUM HAVING COUNT(*) > 1) "
+TCSQLexec(cQuery)
+conout("Atualizado números de romaneios.")
 	
 Return

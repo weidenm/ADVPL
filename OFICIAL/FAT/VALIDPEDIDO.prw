@@ -313,7 +313,7 @@ Local lRet     := .T.
 
 /*
 //dbSelectArea("SB1") 
-//SB1->(dbSetOrder(1)) //B1_FILIAL+B1_COD 
+//SB1->(dbSetOrder(1)) //B1_FILIAL+B1_COD  
 
 		nPosQtde := ASCAN(aHeader, {|aVal| Alltrim(aVal[2]) == "C6_QTDVEN"})
 		n:= 0
