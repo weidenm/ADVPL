@@ -81,7 +81,7 @@ User Function SIGATEC()
 	NumOP := OP->C2_NUM
 	cTurma := pswret(1)[1][12]
 
-	DEFINE MSDIALOG oDlg TITLE "Etiquetamento e apontamento de Produção  6.0 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
+	DEFINE MSDIALOG oDlg TITLE "Etiquetamento e apontamento de Produção  v.2020-06 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
 
 	@ 000, 004 BITMAP BmpLogo SIZE 143, 045 OF oDlg1 FILENAME "\\srvpp02\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
 	@ 008, 090 SAY oSay1 PROMPT "OP:" SIZE 022, 017 OF oDlg FONT oFont4 COLORS 0, 16777215 PIXEL
@@ -364,10 +364,10 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 		cDataFab :=Dtoc(dDataBase)
 		
 		IF  Alltrim(cGrupo) =="1209" //Suco
-			//cDataVal := dtoc(date()+120) //Validade 4 meses
 			cDataVal := dtoc(dDataBase+180) //Validade 4 meses
+			//mesval := strzero(val(substring(dtos(ddatabase),5,2))+6)  //Teste de código que aproxime da lógica do datador
+			//cDataVal:= substring(dtoc(ddatabase),1,3)+mesval+
 		Else
-			//cDataVal := dtoc(date()+180) //Validade 6 meses
 			cDataVal := dtoc(dDataBase+180) //Validade 6 meses
 		EndIf
 		
@@ -425,7 +425,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 					EndIf
 					
 					//Imprime data de fabricação, validade e lote no grupo 1204, 1205,1203
-					if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209") .and. Alltrim(cUM)== "CX")
+					if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
 						MSCBSAY(01,30,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","3","1,0")
 						MSCBSAY(50,22,"Turma: "+ Turma,"N","1","2,2")
 						MSCBSAY(50,18,"F: ","N","1","2,2")
@@ -577,12 +577,14 @@ Static Function ImpSub(cTipoEtq)
 	
 	Pergunte(cPerg2,.T.,"Substituição de Etiqueta")
 
-	_Motivo := MV_PAR01
-	cEtqSub := MV_PAR02 //nº da etiqueta antiga - gravar em outro campo para registro
-	cLoteSub := MV_PAR03 //Preencher com nº do lote no pacotinho caso etiqueta antiga não existir ou for ilegível
-	cCodProd := MV_PAR04
-	//cQuant	 := MV_PAR05 //CRIAR
+	_Motivo	:= MV_PAR01
+	cEtqSub	:= substring(MV_PAR02,1,12) //nº da etiqueta antiga - gravar em outro campo para registro
+	cLoteSub:= MV_PAR03 //Preencher com nº do lote no pacotinho caso etiqueta antiga não existir ou for ilegível
+	cCodProd:= MV_PAR04
+	dValid	:= MV_PAR05  //Data de Validade caso for produtos com esse tipo de controle
+	nQuant	:= MV_PAR06 
 	
+
 	Numerac := "0001"
 	
 	if Alltrim(cLoteSub) <> ""
@@ -591,17 +593,17 @@ Static Function ImpSub(cTipoEtq)
 		dbseek(xfilial("SB1")+cCodProd) //ALTERAR PARA PARÂMETRO DE PRODUTO
 		
 		cCodBarProd := SB1->B1_CODBAR
-		cProduto := SB1->B1_COD
+		cProduto 	:= SB1->B1_COD
+		cGrupo 		:= SB1->B1_GRUPO
 	EndIF
 	
 	
 	if  MSGYESNO("Deseja realmente imprimir etiqueta para o produto "+SB1->B1_DESC+"?", "Confirmação")
 
 		if _Motivo = 1
-			cMot := "R" //Rasgada/Reenfardamento
+			cMot := "R" //Rasgada/Reenfardamento - utiliza produtos antigos com produtos novos algumas vezes.
 		ElseIf _Motivo = 2
-			cMot := "S" //Substituição
-		//ElseIf _Motivo = 3  //Retirada opção.Fardos sem etiqueta devem ser etiquetados como produto novo.
+			cMot := "S" //Substituição - fardos devolvidos ou com etiqueta danificada
 		EndIf
 		
 		
@@ -682,7 +684,7 @@ Static Function ImpSub(cTipoEtq)
 
 								
 		if _nImpress = 1
-			MSCBBEGIN(1,6)
+		/*	MSCBBEGIN(1,6)
 			MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO
 					
 			if Alltrim(SB1->B1_GRUPO) $ "1207"
@@ -698,6 +700,62 @@ Static Function ImpSub(cTipoEtq)
 			//MSCBSAY(50,10,cDataFab + " " + _cDoc,"N","1","2,2")
 			//MSCBSAY(50,06,"Origem: "+ cMot,"N","1","2,2")
 			MSCBEND()
+		*/
+			MSCBBEGIN(1,6)
+						MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO
+							
+					if Alltrim(cGrupo) $ "1207" //.or. Alltrim(cCodProd) == "PA8215"
+						//MSCBSAYBAR ( 05, 20 , cCodBarProd , 'N',"MB01",06,,.T.,,,2,2) //EAN14 OFICIAL												
+						MSCBSAYBAR ( 05, 17 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // BARRAS DO PRODUTO
+					EndIf
+					
+					
+					//Imprime data de fabricação, validade e lote no grupo 1204, 1205,1203
+					if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
+						MSCBSAY(01,30,Alltrim(cProduto)+ "-"+Alltrim(SB1->B1_DESC),"N","3","1,0")
+						MSCBSAY(73,22, cMot,"N","3","2,0")
+						//MSCBSAY(50,18,"F: ","N","1","2,2")
+					//	MSCBSAY(55,18,cDataFab,"N","1","2,2")
+						MSCBSAY(50,13,"V: ","N","1","2,2")
+						MSCBSAY(55,13,dtoc(dValid),"N","1","2,2")
+						MSCBSAY(50,8,"Lote: ","N","1","2,2")
+						
+					// ALTERAR ESSA PARTE DO CODIGO PARA MOSTRAR O LOTE DA ETIQUETA SE FOR DIGITADO. SE NÃO FOR, MOSTRAR O CÓDIGO DO LOTE
+						IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209" 
+							MSCBSAY(61,8, cEtqSub,"N","1","2,2")  //Formato DDMMAA+IT
+						Else
+							MSCBSAY(61,8,cLoteSub,"N","1","2,2") //Formato dia do ano DDD (3 digitos) 
+						EndIf
+						MSCBEND()
+					EndIf
+									
+					MSCBSAY(01,30,Alltrim(cProduto)+ "-"+Alltrim(SB1->B1_DESC),"N","3","1,0")
+					MSCBSAY(73,22, cMot,"N","3","2,0")
+					MSCBSAY(50,15,"Impresso em: ","N","1","2,2") //MSCBSAY(50,15,"Fabricacao: ","N","1","2,2")
+					MSCBSAY(50,10,cDataFab,"N","1","2,2")
+					//Imprime motivo de Substituição
+					//MSCBSAY(50,06, cMot,"N","1","2,2")  //MSCBSAY(50,06, _cDoc,"N","1","2,2")
+					MSCBEND()
+					
+					//nImprEtiq := nImprEtiq + 1 //CONTADOR DE ETIQUETA CASO FOR MAIS DE UMA. ATIVAR QUANDO CRIAR O WHILE PARA VARIAS ETIQUETAS.
+					
+					if Alltrim(cGrupo) == "1208"
+						nPcte := 1
+						while nPcte <= 5
+							MSCBBEGIN(1,6) //01/01/16 - Diminuido 2 pontos na posição da linha.
+							MSCBSAYBAR ( 05, 15 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // original
+							MSCBSAY(07,08,"Lote: "+cLoteSub,"N","2","0.8,0")
+							MSCBSAY(03,28,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","2","1,0")
+							MSCBSAY(50,22,"Validade: ","N","1","2,2")
+							MSCBSAY(50,17,dtoc(dValid),"N","1","2,2")
+						//	MSCBSAY(50,09,"Fabricacao: ","N","1","2,2")
+						//	MSCBSAY(50,06,cDataFab,"N","1","2,2")
+						//Imprime motivo de Substituição
+							MSCBSAY(50,03, cMot,"N","3","1")  /// MSCBSAY(50,03, _cDoc,"N","1","2,2")  
+							MSCBEND()
+							nPcte += 1
+						EndDo
+					EndIf
 				
 		endif
 				
@@ -717,11 +775,14 @@ Static Function ImpSub(cTipoEtq)
 			SZ3->Z3_ITEMOP := substr(cb1,7,2) //  Alltrim(SC2->C2_ITEM)
 			SZ3->Z3_NUMERAC	:= cNumFardo
 			SZ3->Z3_DOCSD3 :=  _cDoc
-			SZ3->Z3_DATA   := dDatabase  //DATA DE APONTAMENTO DO FARDO - INCLUIR CAMPO
-			SZ3->Z3_LETRA  := cTurma
+			SZ3->Z3_DATA   := date() // dDatabase  //DATA DE APONTAMENTO DO FARDO - INCLUIR CAMPO
+			//SZ3->Z3_LETRA  := cTurma
 		//	if cMot = "D"  //Registrar que fardo já foi carregado e tem etiqueta substituta de devolução.
 		//		SZ3->Z3_REG ='D'
 		//	EndIf
+			SZ3->Z3_DTVALID := dValid
+			SZ3->Z3_LOTE := cLoteSub
+
 			SZ3->(MsUnlock())
 		//Else
 //			MSGINFO("Fardo"+SZ3->Z3_NUMERAC+" já existe com documento "+SZ3->Z3_DOCSD3+". Favor informar responsavel pelo sistema.")

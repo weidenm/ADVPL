@@ -22,10 +22,10 @@
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
-User Function SIGAQIP()
+//User Function SIGAQIP()
 
 //User Function SIGAWMS
-//User Function Exped2
+User Function Exped2()
 
 	Public cNumRom := ""
 	Static Hoje := dtos(ddatabase)
@@ -46,7 +46,7 @@ User Function SIGAQIP()
 	_nMostraFinaliz := Mv_Par01
 
 
-	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 7.0 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
+	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 2020-06 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
 
     @ 000, 004 BITMAP BmpLogo SIZE 143, 045 OF oDlg1 FILENAME "\\srvpp02\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
 	@ 025, 155 SAY oLblResp PROMPT "Separação da Carga: " SIZE 100, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -277,6 +277,7 @@ Static Function TelaCarga()
 	HrFim := ""
 	cStatus := ""
 	nQtdTotal := 0
+	nCod := 0
 	#define DS_MODALFRAME 128 //Desabilita fechar tela pelo X
 
 
@@ -323,11 +324,12 @@ Static Function TelaCarga()
 		nColG2	:= 363
 		nLinG2	:= 443
 		nLinh	:= 2
-		nTamProd := 270
+		nTamProd := 230
+		nCod := 50
 		
 	Else
 		oFontGrid := oFont1
-		nTamDesc := 200
+		nTamDesc := 150
 		nTamTela := 2
 		nColTela := 1359  //aSize[5]
 		nLinTela := 731   //aSize[6]
@@ -336,7 +338,8 @@ Static Function TelaCarga()
 		nColG2	:= 240
 		nLinG2	:= 300
 		nLinh	:= 1
-		nTamProd := 170
+		nTamProd := 130
+		nCod := 30
 	EndIf
 
 //Passamos agora todas as informações para o calculo das dimenções://MsObjSize( aInfo, aObjects, Mantem Proporção , Disposição Horizontal )
@@ -350,18 +353,19 @@ Static Function TelaCarga()
 //******************************************************************************
 //****************         MONTAGEM DA TELA            ************************
 //******************************************************************************
-	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 20, 0 TO nLinTela, nColTela COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
+	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 0, 0 TO nLinTela-170, nColTela-70 COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
 	@ 002, 002 BUTTON oBtnFinaliz PROMPT "FINALIZAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (finalizarom()) PIXEL
 	@ 020, 002 BUTTON oBtnApont PROMPT "PAUSAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
 	@ 002, 060 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 050, 015 OF oDlg2 ACTION LOGRES() PIXEL	
 	@ 020, 060 BUTTON oBtnApont PROMPT "EXCLUIR FARDOS" SIZE 050, 015 OF oDlg2 ACTION (retfardos()) PIXEL
-	@ 002, 120 GROUP oGroup1 TO 025, 410 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
+	@ 002, 120 GROUP oGroup1 TO 020, 410 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
 	@ 004, 125 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 004, 160 SAY oTxtVeic PROMPT 	cVeic SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 015, 125 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 015, 160 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 004, 220 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 003, 245 SAY oTxtRota PROMPT cRota SIZE 200, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
+	@ 004, 200 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 004, 222 SAY oTxtRota PROMPT cRota SIZE 200, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
+	@ 004, 335 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 004, 360 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	
 	//@ 003, 380 SAY oTxtRota1 PROMPT substr(cRota,21,25) SIZE 070, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
 	//@ 115, 010 SAY oLblMot PROMPT "Motorista:" SIZE 049, 012 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	//@ 115, 040 SAY oTxtMot PROMPT cMotori SIZE 035, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
@@ -369,8 +373,8 @@ Static Function TelaCarga()
 	//@ 130, 060 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
 	//@ 145, 010 SAY oLblResp PROMPT "Início Separação: " SIZE 150, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	//@ 145, 085 SAY oLblResp PROMPT HrInicio SIZE 150, 011 OF oGroup1 FONT oFont3  CfOLORS 0, 16777215 PIXEL
-	@ 005, nColG1+50 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
-	@ 005, nColG1+100 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
+	@ 007, nColG1+10 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
+	@ 005, nColG1+56 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
 	@ 030, 150 SAY oLblPend PROMPT "PENDENTES"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 030, nColG1+20 SAY oLblConc PROMPT "CONCLUÍDOS"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 //@ 030, nColG1-40 SAY oLblStatus1 PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -516,9 +520,9 @@ Next
 	//TButton():New( 208, 002, "Linhas visiveis", oDlg2,{|| alert(oBrowse:nRowCount()) },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
 
 // Cria Browse
-oBrowse := TCBrowse():New(040,10,nColG1,nLinG1,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
+oBrowse := TCBrowse():New(040,10,nColG1,nLinG1-50,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
 //oBrowse := TCBrowse():New(040,020,500,450,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
-oBrowse:AddColumn(TCColumn():New("PRODUTO"	, {|| aColsExCg[oBrowse:nAt,01]},"@!",,,"CENTER", 040,.F.,.F.,,{|| .F. },,.F., ) )
+oBrowse:AddColumn(TCColumn():New("PRODUTO"	, {|| aColsExCg[oBrowse:nAt,01]},"@!",,,"CENTER", nCod,.F.,.F.,,{|| .F. },,.F., ) )
 oBrowse:AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsExCg[oBrowse:nAt,02]},"@!",,,"CENTER", nTamDesc,.F.,.F.,,{|| .F. },,.F., ) )
 oBrowse:AddColumn(TCColumn():New("QUANTIDADE"	, {|| aColsExCg[oBrowse:nAt,03]},"@E 9999",,,"CENTER"  , 040,.F.,.F.,,,,.F., ) )
 oBrowse:AddColumn(TCColumn():New("REGISTRADO"	, {|| aColsExCg[oBrowse:nAt,04]},"@E 9999",,,"CENTER", 040,.F.,.T.,,,,.F., ) )
@@ -531,10 +535,10 @@ oBrowse:lUseDefaultColors := .F.
 oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
 oBrowse:Refresh()
 
-oBrwFinaliz := TCBrowse():New(040,nColG1+20,nColG2,nLinG2,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE'},{20,100,10},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
-oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", 020,.F.,.F.,,{|| .F. },,.F., ) )
+oBrwFinaliz := TCBrowse():New(040,nColG1+20,nColG2-30,nLinG2-50,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE'},{20,200,005},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
+oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", nCod,.F.,.F.,,{|| .F. },,.F., ) )
 oBrwFinaliz :AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsConc[oBrwFinaliz:nAt,02]},"@!",,,"CENTER", nTamProd,.F.,.F.,,{|| .F. },,.F., ) )
-oBrwFinaliz :AddColumn(TCColumn():New("QUANT."	, {|| aColsConc[oBrwFinaliz:nAt,03]},"@E 9999",,,"CENTER"  , 010,.F.,.F.,,,,.F., ) )
+oBrwFinaliz :AddColumn(TCColumn():New("QUANT."	, {|| aColsConc[oBrwFinaliz:nAt,03]},"@E 9999",,,"CENTER"  , 005,.F.,.F.,,,,.F., ) )
 
 oBrwFinaliz:nLinhas := nLinh
 oBrwFinaliz:SetArray(aColsConc)
@@ -705,7 +709,7 @@ Static Function atual()
 				aColsConc[Linew,02] := aColsExCg[nLin,02]
 				aColsConc[Linew,03] := aColsExCg[nLin,03]
 				aColsConc[Linew,04] := aColsExCg[nLin,04]
-				aColsConc[Linew,05] := aColsExCg[nLin,05] 
+				aColsConc[Linew,05] := aColsExCg[nLin,05]
 				aColsConc[Linew,06] := aColsExCg[nLin,06]
 				aColsConc[Linew,07] := aColsExCg[nLin,07]
 				aColsConc[Linew,08] := aColsExCg[nLin,08]

@@ -29,7 +29,7 @@
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 
-User Function PEDVEN()
+User Function PEDVENv2()
 
 	//SetPrvt("ALFA,CBTXT,CBCONT,NORDEM,Z,M")
 	SetPrvt("TAMANHO,LIMITE,NOMEPROG,NLASTKEY,NCONTLINH,CSTRING")
@@ -346,7 +346,7 @@ Static Function Imprime()
 		else
 			nTotalBru  := 0
 			nDescVist  := 0
-			nDescVist2 := 0
+			nDescVist2  := 0
 			nTotDesc   := 0
 			nTotalPro  := 0
 			nQuantPro  := 0
@@ -356,7 +356,7 @@ Static Function Imprime()
 			DBSeek(TRBC->Pedido)
 		EndIf
 	
-		nLin := LI+16 //nLin (linha dos itens)
+		nLin := LI+14 //LI+16 //nLin (linha dos itens)
 		_nIt := 0 //Zera contador de itens
 	
 	//@ nLin, 001 PSAY Chr(15)
@@ -377,8 +377,18 @@ Static Function Imprime()
 			dbSkip()
 		EndDo
 	
-		nLin:=nLin + 1
+		While nLin < 44	
+			nLin:=nLin + 1
+			@ nLin, 000 PSAY "|"
+			@ nLin, 007 PSAY "|"   
+			@ nLin, 043 PSAY "|" 
+			@ nLin, 048 PSAY "|" 
+			@ nLin, 056 PSAY "|" 
+			@ nLin, 067 PSAY "|"  
+			@ nLin, 081 PSAY "|"  
+		EndDo
 	
+		
 //	DBSelectArea("TRBI")
 //	DBSkip(-1)  
 	
@@ -419,31 +429,33 @@ Static Function ImprCabe()
 	@ LI, 000 PSAY Chr(27) + "0" + Chr(18)
 	@ LI, 000 PSAY Chr(27) + "C" + Chr(96)
 
-//@ 01, 001 PSAY " "
-
-//DBSelectArea("SF4")
-//DBSeek(xFilial("SF4")+TRBC->CodiTes)
-
 	DBSelectArea("SX5")
 	DBSeek(xFilial("SX5")+"13"+SF4->F4_CF)
 
 
-// DATA HORA IMPRESSï¿½O
-
 	HoraImpr := Time()
 	DataImpr := Ddatabase
 
-	@ LI+4, 036 PSAY DataImpr
-	@ LI+4, 050 PSAY HoraImpr
-	@ LI+4, 062 PSAY TRBC->Vendedor
-	@ LI+4, 072 PSAY TRBC->Pedido
+    @ LI+1 , 000 PSAY "*" + Repl("-",80) + "*" //+ "*" + Repl("-",24) + "*" + Repl("-",23) + "*"
+    @ LI+2 , 000 PSAY "|" + Space(03) + " DISTRIBUIDORA ACAUA COM. E IND. PROD. ALIMENTICIOS LTDA - PRODUTOS PLINC " + Space(3) + "| "  
+    @ LI+3 , 000 PSAY "|" + Space(03) + " Rod. BR 381, S/N - ANEL RODOVIARIO - HORTO BARATINHA - ANTONIO DIAS - MG " + Space(3) + "| "  
+    @ LI+4 , 000 PSAY "|" + Space(03) + " CEP 35177-000 - TEL. (31)3824-2268/3841-4478                             " + Space(3) + "| "  
+    @ LI+5 , 000 PSAY "*" + Repl("-",80) + "*" 
+    
+ //   nLin := nLin + 1
+
+  
+//	@ LI+4, 036 PSAY DataImpr
+//	@ LI+4, 050 PSAY HoraImpr
+//	@ LI+4, 062 PSAY TRBC->Vendedor
+//	@ LI+4, 072 PSAY TRBC->Pedido
 
 
 	DBSelectArea("SA1")
 	DBSeek(xFilial("SA1")+TRBC->CodiClFo+TRBC->LojaClFo)
 	cCodiClFo := SA1->A1_COD
-	cNomeClfo := SA1->A1_Nome
-	cFantasClfo := SA1->A1_FANTAS
+	cNomeClfo := Ltrim(SA1->A1_Nome)
+	cFantasClfo := Ltrim(SA1->A1_FANTAS)
 	cCGCCliFo := SA1->A1_CGC
 	cTeleDDD := SA1->A1_DDD
 	cTeleClFo := SA1->A1_Tel
@@ -458,21 +470,27 @@ Static Function ImprCabe()
 	cPracaCob := SA1->A1_MUNC
 	cUFCob    := SA1->A1_EstC
 	cCepCob   := SA1->A1_CEPC
+	cNomVend  := SA3->A3_NREDUZ
 
-
-//@ LI+04, 001 PSAY Chr(15)
-
-	@ LI+06, 039 PSAY cCodiClFo + " - " +cNomeClFo
-	@ LI+07, 039 PSAY cFantasClfo
-	@ LI+09, 039 PSAY cEndeClFo
-	@ LI+10, 039 PSAY cBairClFo
-	@ LI+10, 061 PSAY cMuniClFo
-	@ LI+11, 039 PSAY "("+Alltrim(cTeleDDD)+")"+Alltrim(cTeleClFo)
-	@ LI+11, 061 PSAY cCEPCliFo        Picture"@R 99999-999"
-	@ LI+11, 077 PSAY cEstaClFo
-	@ LI+13, 038 PSAY cCGCCliFo        Picture "@R 99.999.999/9999-99"
-//@ LI+10, 070 PSAY TRBC->DataEmis
-	@ LI+13, 061 PSAY cInscClFo
+    @ LI+6 , 000 PSAY "|  Pedido...:" + TRBC->Pedido + Space(03) + " Data: " + Dtoc(DataImpr) +  Space(3) +  " Vendedor: " + TRBC->Vendedor + "-"+SUBSTR(cNomVend,1,21) + "|"  
+	@ LI+7 , 000 PSAY "|  Cliente..:" + cCodiClFo + "-" + Substr(cNomeClFo,1,40) + "-" + substring(cFantasClfo,1,19) +  "|"  
+    @ LI+8 , 000 PSAY "|  Endereco :" + SUBSTRING(cEndeClFo,1,60) + " - " + Space(6) +  "|"  
+    @ LI+9 , 000 PSAY "|  Bairro...:" + cBairClFo + "-" + "Cidade:" +  Ltrim(cMuniClFo) + "-"+ Ltrim(cEstaClFo) + "| "  
+    @ LI+10, 000 PSAY "|  Cep......:" +  Transform(cCEPCliFo,"@R 99999-999")  + Space(03) +" - CNPJ:"  + Transform(cCGCCliFo,"@R 99.999.999/9999-99")  + Space(03) + "- I.E:" + SUBSTR(cInscClFo,1,17) + Space(03) +  "|"  
+	@ LI+11 , 000 PSAY "|" 
+	@ LI+12 , 000 PSAY "*" + Repl("-",80) + "*" 
+	@ LI+13 , 000 PSAY "|Codigo|          Nome do Produto           |UN | Quant  | Val.Unit. |  Total    |    |"  
+	@ LI+14 , 000 PSAY "*" + Repl("-",80) + "*" 
+//	@ LI+06, 039 PSAY cCodiClFo + " - " +cNomeClFo
+//	@ LI+07, 039 PSAY cFantasClfo
+//	@ LI+09, 039 PSAY cEndeClFo
+//	@ LI+10, 039 PSAY cBairClFo
+//	@ LI+10, 061 PSAY cMuniClFo
+//	@ LI+11, 039 PSAY "("+Alltrim(cTeleDDD)+")"+Alltrim(cTeleClFo)
+//	@ LI+11, 061 PSAY cCEPCliFo Picture"@R 99999-999"
+//	@ LI+11, 077 PSAY cEstaClFo
+//	@ LI+13, 038 PSAY cCGCCliFo        Picture "@R 99.999.999/9999-99"
+//	@ LI+13, 061 PSAY cInscClFo
 
 
 // Monta array com as duplicatas
@@ -501,14 +519,16 @@ Static Function ImprItem()
 
 	nPrecoItem := TRBI->QtdeProd*nPrecoTabela   ///TRBI->PrecoTab
 
-	@ nLin, 000 PSay Left(TRBI->CodiProd,11) // +" "+Left(TRBI->DescProd,32)
-	@ nLin, 008 PSay Left(TRBI->DescProd,42)
-	@ nLin, 044 PSAY TRBI->CodiUnid
-	@ nLin, 049 PSAY TRBI->QtdeProd  Picture "@E 999,999"
-	@ nLin, 056 PSAY nPrecoTabela  Picture "@E 999,999.99"  //Alterado em 16/08/18 //
+	@ nLin, 000 PSay "|" + Left(TRBI->CodiProd,11) // +" "+Left(TRBI->DescProd,32)
+	@ nLin, 008 PSay "|" +  Left(TRBI->DescProd,42)
+	@ nLin, 044 PSAY "|" + TRBI->CodiUnid
+	@ nLin, 049 PSAY "|" + Transform(TRBI->QtdeProd,"@E 999,999")  //TRBI->QtdeProd  Picture "@E 999,999"
+	@ nLin, 056 PSAY " |" + Transform(nPrecoTabela,"@E 999,999.99") //nPrecoTabela  Picture "@E 999,999.99"  //Alterado em 16/08/18 //
 	//@ nLin, 056 PSAY TRBI->ValrUnit  Picture "@E 999,999.99"  //Retornado em 04/12/18
-	@ nLin, 067 PSAY nPrecoItem  Picture "@E 999,999.99"  //Alterado em 16/08/18 //
+	@ nLin, 067 PSAY " |" + Transform(nPrecoItem,"@E 999,999.99") //nPrecoItem  Picture "@E 999,999.99"  //Alterado em 16/08/18 //
 	//@ nLin, 067 PSAY TRBI->ValrTota  Picture "@E 999,999.99"  //Retornado em 04/12/18
+	@ nLin, 082 PSAY "|"  
+
 
 	nTotalBru := nTotalBru + nPrecoItem
 	nTotalPro := nTotalPro + (TRBI->ValrUnit*TRBI->QtdeProd) //TRBI->ValrTota
@@ -517,7 +537,7 @@ Static Function ImprItem()
 		nDescVist := nDescVist + (round(nPrecoTabela*0.01,2)*TRBI->QtdeProd)
 	EndIF
 
-	IF TRBC->CondPaga $ "010"  //Verifica se condiï¿½ï¿½o tem desconto ï¿½ Vista 1%
+	IF TRBC->CondPaga $ "010"  //Verifica se condiï¿½ï¿½o tem desconto ï¿½ Vista 1%Ta
 		nDescVist2 := nDescVist2 + (round(nPrecoTabela*0.02,2)*TRBI->QtdeProd)
 	EndIF
 	//alert(str(TRBI->ValrUnit))
@@ -562,8 +582,11 @@ Static Function ImprRoda()
 	DBSeek(xFilial("SE4")+TRBC->CondPaga)
 	cCondPgto := SE4->E4_DESCRI
 
+	  @ LI+44 , 000 PSAY "*" + Repl("-",80) + "*" 
 	if _nIt <= 27
+		@ LI+45, 000 PSAY "|"  	
 		if nDescVist > 0 
+		    
 			@ LI+45, 050 PSAY "DESCONTO A VISTA:"
 			@ LI+45, 067 PSAY nDescVist  Picture "@E 999,999.99"    //Desconto - Alterado Incluï¿½do 16/08/18
 		EndIf
@@ -572,25 +595,49 @@ Static Function ImprRoda()
 			@ LI+45, 050 PSAY "DESCONTO A VISTA:"
 			@ LI+45, 067 PSAY nDescVist2  Picture "@E 999,999.99"    //Desconto - Alterado Incluï¿½do 16/08/18
 		EndIf
-
-		
+		@ LI+45, 082 PSAY "|"  
+		@ LI+46, 000 PSAY "|"  
 		@ LI+46, 001 PSAY  "NAO EFETUAR PAGAMENTO EM DINHEIRO NA ENTREGA."
+		@ LI+46, 082 PSAY "|"
+		@ LI+47, 000 PSAY "|"    
 		if nTotDesc > 0 
 			@ LI+47, 050 PSAY "OUTROS DESCONTOS:"
 			@ LI+47, 067 PSAY nTotDesc-nDescVist-nDescVist2  Picture "@E 999,999.99"    //Desconto - Alterado Incluï¿½do 16/08/18
 		EndIf
+		@ LI+47, 082 PSAY "|"  
+		@ LI+48, 000 PSAY "|"
+		@ LI+48, 082 PSAY "|"
+		@ LI+49, 000 PSAY "|"      
 		@ LI+49, 001  PSAY cCondPgto
 		@ LI+49, 030 PSAY  VolTotal   Picture "@E 99,999.99"
 		@ LI+49, 045  PSAY nQuantPro  Picture "@E 999,999"    //Quantidade Total
 		@ LI+49, 068  PSAY nTotalBru  Picture "@E 9,999,999.99"    //Valor Total Bruto (sem descontos) - Alterado/Incluï¿½do 16/08/18
+		@ LI+49, 082 PSAY "|"  
+		@ LI+50, 000 PSAY "|"  
+		@ LI+50, 082 PSAY "|"  
+		@ LI+51, 000 PSAY "|"  
+		@ LI+51, 082 PSAY "|" 
+		@ LI+52, 000 PSAY "|"  
 		@ LI+52, 001 PSAY  cEndeEnt
 		@ LI+52, 068  PSAY nTotalPro  Picture "@E 9,999,999.99"    //Valor das mercadorias
+		@ LI+52, 082 PSAY "|"
+		@ LI+53, 000 PSAY "|"  
+		@ LI+53, 082 PSAY "|"
+		@ LI+54, 000 PSAY "|"  
+		@ LI+54, 082 PSAY "|"
+		@ LI+55, 000 PSAY "|"  
 		@ LI+55, 001 PSAY  "CONFERIR O PEDIDO NA ENTREGA,NAO ACEITAMOS RECLAMACOES POSTERIORES"
+		@ LI+55, 082 PSAY "|"    
+		@ LI+56, 000 PSAY "|"  
+		@ LI+56, 082 PSAY "|"
+		@ LI+57, 000 PSAY "|"  
 		if alltrim(cObsCli)<>""
 			@ LI+57, 001 PSAY  substring(cObsCli,1,90) + " / " + cOBSAtu //Observacao do cliente
 		else
 			@ LI+57, 001 PSAY  Alltrim(cOBSAtu)
 		ENDIF
+		@ LI+57, 082 PSAY "|"
+		 @ LI+58 , 000 PSAY "*" + Repl("-",80) + "*" 
 	else
 	
 		@ LI+49, 003  PSAY "Continua..."
