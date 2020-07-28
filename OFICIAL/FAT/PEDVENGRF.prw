@@ -469,26 +469,40 @@ STATIC FUNCTION MontaPedido()
 
 //Imprime parte superior A4
 	If nVia = 1
+		oPrn:Line( 1700,050,1700,2400 )
 		nLin := 020
 		ImprimeCabe()
 		nLin :=0470  //linha do item 
 		ImprimeItens()
-		nLin :=1300 //linha do Rodapé 
-		ImprRoda()  //Imprime rodapé
-		nVia := 2
-	Else
-		if nVia = 2
-			nLin := 1700
-			ImprimeCabe()
-			nLin :=2150  //linha do item 
-			ImprimeItens()
-			nLin :=3000 //linha do Rodapé 
+		if nVia = 1 //Se a via não foi alterada por excesso de itens ( maior que 21 ) 
+			nLin :=1300 //linha do Rodapé 
 			ImprRoda()  //Imprime rodapé
+			
+			nVia := 2
+		Else		
 			nVia := 1
 			oPrn:EndPage()
 		EndIf
+	Else
+		if nVia = 2
+			oPrn:Line( 1700,050,1700,2400 )
+			nLin := 1750
+			ImprimeCabe()
+			nLin :=2200  //linha do item 
+			ImprimeItens()
+			
+			if nVia = 2  //Se a via não foi alterada por excesso de itens ( maior que 21 ) 
+				nLin :=3050 //linha do Rodapé 
+				ImprRoda()  //Imprime rodapé
+				nVia := 1
+				oPrn:EndPage()
+			Else
+				nVia := 2
+			EndIf
+			
+		EndIf
 	EndIf
-		
+							
 		
 //Imprime segunda parte 	
 
@@ -555,7 +569,7 @@ Static Function ImprimeCabe()
 			oPrn:Say(nLin,1400,"Quantidade"	  	            ,oFont10N) //	oPrn:Say(0330,1100,"Quantidade"	  	            ,oFont12N)
 			oPrn:Say(nLin,1650,"Unid."		  	            ,oFont10N)
 			oPrn:Say(nLin,1800,"Preço Unit."	   	            	,oFont10N)
-            oPrn:Say(nLin,2300,"Total"	   	            	,oFont10N)
+            oPrn:Say(nLin,2200,"Total"	   	            	,oFont10N)
 			
 Return
 
@@ -572,11 +586,12 @@ ValrTotal := 0
 nTotDesc  := 0
 nDescVist2 := 0   
 nDescVist := 0
-
+lMudaPag := .f.	
+nitens :=1		
 		//ITENS DO ROMANEIO
             DBSelectArea("TRBI")
 			DBSeek(TRBC->Pedido)
-			nitens :=1		
+			
 			While !Eof() .AND. TRBI->Pedido == TRBC->Pedido
 			
 				oPrn:Say(nLin,0200,OemToAnsi(TRBI->CodiProd),		   oFont09)
@@ -622,12 +637,42 @@ nDescVist := 0
 				nitens+=1
 			
 				//CONTINUACAO PEDIDO - DESENVOLVER SEGUNDA PARTE DO PEDIDO
-			/*	IF  nitens > 20
-						nitens := 1
-						nLin := 120
+				IF  nitens > 21 .and. lMudaPag = .f.	
+						//nitens := 1
+						
+					If nVia = 2
+						
+						nLin := 3250
+						oPrn:Say(nLin,1600,"CONTINUA.....",oFont11N)
+						oPrn:Say(nLin+50,1700,"***********",oFont11N)
+						oPrn:Say(nLin+100,1700,"***********",oFont11N)
 						oPrn:EndPage()
+						nVia := 1
+						nLin := 020
+						ImprimeCabe()
+						nLin :=1300 //linha do Rodapé 
+						ImprRoda()  //Imprime rodapé
+						nLin :=0470  //linha do item 
+							
+					Else
+						if nVia = 1
+							nLin := 1400
+							oPrn:Say(nLin,1600,"CONTINUA NA PROX. PAG.",oFont11N)
+							oPrn:Say(nLin+50,1700,"***********",oFont11N)
+							oPrn:Say(nLin+100,1700,"***********",oFont11N)
+						
+							nVia := 2
+							nLin := 1750
+							ImprimeCabe()
+							nLin :=3050 //linha do Rodapé 
+							ImprRoda()  //Imprime rodapé
+							nLin :=2200  //linha do item 
+							
+						EndIf
+					EndIf
+					lMudaPag := .t.	
 				EndIf		
-			*/		
+					
 			EndDo
 
 
@@ -647,7 +692,9 @@ Static Function ImprRoda()
 	//if _nIt <= 27
 	//	oPrn:Say(nLin+100,0020, Transform(nLin+110, "@E 99999")		  	            			,oFont09N)
 		nLin += 20
+		oPrn:Say(nLin,1250,"Quant:",oFont10N)
 		oPrn:Say(nLin,1510,Transform(QtdeTotal,"@E 9,999,999.99"),	oFont10,,,,1)   //oPrn:Say(nLin,1900,Transform(TRBI->ValrUnit,"@E 9,999,999.99"),	oFont10,,,,1)
+		oPrn:Say(nLin,1800,"Valor Bruto:",oFont10N)
 		oPrn:Say(nLin,2300,Transform(ValrBru,"@E 9,999,999.99"),	oFont10,,,,1)
 
 		DBSelectArea("SE4")
@@ -683,14 +730,14 @@ Static Function ImprRoda()
 	oPrn:Say(nLin,0100,"Observação:",oFont10N)
 	oPrn:Say(nLin,0360, Trim(TRBC->Observ),	oFont10N)
 	nLin += 30  //+240
-	oPrn:Say(nLin,01850,"ST.....:      ________________",oFont10N)
-	nLin += 60  //+300
- 	oPrn:Say(nLin,0300,"NAO EFETUAR PAGAMENTO EM DINHEIRO NA ENTREGA.",oFont11N)
+	oPrn:Say(nLin,1850,"ST.....:      ________________",oFont10N)
+	nLin += 80  //+300
+ 	oPrn:Say(nLin,1850,"Crédito:    ________________",oFont10N)
 	nLin += 20 //+320
-	oPrn:Say(nLin,01850,"Crédito:    ________________",oFont10N)
-	nLin += 30 //+350	
+	oPrn:Say(nLin,0300,"NAO EFETUAR PAGAMENTO EM DINHEIRO NA ENTREGA.",oFont11N)
+	nLin += 50 //+350	
 	oPrn:Say(nLin,0100,"CONFERIR O PEDIDO NA ENTREGA,NAO ACEITAMOS RECLAMACOES POSTERIORES",oFont11N)
-	nLin += 50 //+400	
+	nLin += 30 //+400	
 	oPrn:Say(nLin,1850,"A Pagar:    _______________",oFont10N)
 	//OBSERVAÇÕES
 
@@ -698,25 +745,10 @@ Static Function ImprRoda()
 			cOBSAtu := "ENVIAR FICHA DE ATUALIZACAO"
 		ENDIF 
 */	
-//		if alltrim(cObsCli)<>""
-
-			///@ LI+57, 001 PSAY  substring(cObsCli,1,90) + " / " + cOBSAtu //Observacao do cliente
-				
-//		else
-//			@ LI+57, 001 PSAY  Alltrim(cOBSAtu)
-//		ENDIF
 		
-//	else
-	
-//		@ LI+49, 003  PSAY "Continua..."
-//		@ LI+49, 030 PSAY  "*****"
-//		@ LI+49, 045  PSAY "*****"
-//		@ LI+49, 068  PSAY "*****"
-	
-//	EndIf
-	nLin += 90 //+400	
-	oPrn:Say(nLin,001,Transform(nLin,"@E 9999"),oFont09)
-	oPrn:Line( nLin,050,nLin,2400 )
+	//nLin += 90 //+400	
+	//oPrn:Say(nLin,001,Transform(nLin,"@E 9999"),oFont09)
+	//oPrn:Line( nLin,050,nLin,2400 )
 
 	DBSelectArea("TRBC")
 
