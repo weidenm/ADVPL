@@ -31,7 +31,7 @@ User Function PEDVENGRF()
 	Private nTotal	:= 0
 	Private nSubTot	:= 0
 
-	AjustaSx1()
+	//AjustaSx1()
 	If ! Pergunte(cPerg,.T.)
 		Return
 	Endif
@@ -74,9 +74,7 @@ User Function PEDVENGRF()
 	SetPrvt("A,LCONTITEM,NTAMPROD,NPOS,NLINCLAS,NCONT")
 	SetPrvt("NOMECLI, MUNICIP,ESTADO")
 
-//Private cPerg := "FATR05"
 	Private nLastKey := 0
-///Private nLin := 1650 // Linha de inicio da impressao das clausulas contratuais
 
 	DEFINE FONT oFont1 NAME "Times New Roman" SIZE 0,20 BOLD  OF oPrn
 	DEFINE FONT oFont2 NAME "Times New Roman" SIZE 0,14 BOLD OF oPrn
@@ -86,7 +84,7 @@ User Function PEDVENGRF()
 	DEFINE FONT oFont6 NAME "Courier New" BOLD
 	DEFINE FONT oFont08I NAME "Times New Roman" SIZE 0,08 ITALIC OF oPrn
 
-	//oFont06	 := TFont():New("Arial",06,06,,.F.,,,,.T.,.F.)
+	//oFont06  := TFont():New("Arial",06,06,,.F.,,,,.T.,.F.)
 	//oFont06N := TFont():New("Arial",06,06,,.T.,,,,.T.,.F.)
 	oFont08	 := TFont():New("Arial",08,08,,.F.,,,,.T.,.F.)
 	oFont08N := TFont():New("Arial",08,08,,.T.,,,,.T.,.F.)
@@ -274,21 +272,17 @@ Static Function GravTrab()
 	
 	//<TLM - 08/10/10>
 	//Se nao considera os pedidos de ja impressos
-		If mv_par10 == 2
-		
+		If mv_par10 == 2	
 		//Se o pedido ja tiver sido impresso
 			If SC5->C5_IMPRESS == "1"
 				SC5->(DBSKIP())
 				LOOP
 			EndIf
-		
 		EndIf
 
-	//Seta o pedido como jï¿½ impresso
+	//Seta o pedido como ja impresso
 		Reclock("SC5",.F.)
-	
 		SC5->C5_IMPRESS := "1"
-	
 		SC5->(MsUnlock())
 	//</TLM>
 
@@ -301,16 +295,7 @@ Static Function GravTrab()
 				(SC6->C6_Filial == xFilial("SC6")) .And. ;
 				(SC6->C6_NUM    == SC5->C5_NUM)
 		
-		
-            conout(SC6->C6_NUM+" "+SC6->C6_ITEM)
-		/*	If Select("ITENSPED") > 0
-				dbSelectArea("ITENSPED")
-				dbCloseArea()
-			EndIf		
-				cQuery := "  SELECT PER_DESCACRES, VLR_VENDA  FROM  SRVPP01.LANDIX_FLX.dbo.TAFITE  WHERE NUM_PEDIDO = '" + STR(SC5->C5_NUMLDX) +"' AND COD_PRODUTO = '"+ SC6->C6_PRODUTO +"'"
-					//cQuery += "  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C6_CLI+A.C6_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
-				TCQuery cQuery Alias ITENSPED New
-		*/
+           // conout(SC6->C6_NUM+" "+SC6->C6_ITEM)
 		
 			DBSelectArea("SB1")
 			dbSetOrder(1)
@@ -325,8 +310,6 @@ Static Function GravTrab()
 			dbseek(xfilial("DA1")+SC5->C5_TABELA+SC6->C6_PRODUTO)
 		
 	nPrecoTabela := DA1->DA1_PRCVEN  //Busca preço bruto direto na tabela
-
-
 
 		//	dbSelectArea("ITENSPED")	
 		
@@ -472,7 +455,7 @@ STATIC FUNCTION MontaPedido()
 		oPrn:Line( 1700,050,1700,2400 )
 		nLin := 020
 		ImprimeCabe()
-		nLin :=0470  //linha do item 
+		nLin :=0440  //linha do item 
 		ImprimeItens()
 		if nVia = 1 //Se a via não foi alterada por excesso de itens ( maior que 21 ) 
 			nLin :=1300 //linha do Rodapé 
@@ -488,7 +471,7 @@ STATIC FUNCTION MontaPedido()
 			oPrn:Line( 1700,050,1700,2400 )
 			nLin := 1750
 			ImprimeCabe()
-			nLin :=2200  //linha do item 
+			nLin :=2170  //linha do item 
 			ImprimeItens()
 			
 			if nVia = 2  //Se a via não foi alterada por excesso de itens ( maior que 21 ) 
@@ -502,11 +485,7 @@ STATIC FUNCTION MontaPedido()
 			
 		EndIf
 	EndIf
-							
-		
-//Imprime segunda parte 	
-
-
+								
     TRBC->(dbskip())
 
 	EndDo
@@ -529,7 +508,7 @@ Static Function ImprimeCabe()
 			
 	// DATA HORA IMPRESSÃO
 	//	dataHora:=Time()
-	//		oPrn:Say(0120,2100,dataHora,oFont12)
+	//	oPrn:Say(0120,2100,dataHora,oFont12)
 	dDataEmiss:=Dtoc(ddatabase)
 	oPrn:Say(nLin,2000,"Data: "+ OemToAnsi(DdataEmiss),oFont10N) //050
  		
@@ -561,9 +540,9 @@ Static Function ImprimeCabe()
 		
 		//CABEÇALHO ITENS DO ROMANEIO
 	nLin +=	50//0400
-			oPrn:Box(nLin,0050,nLin+100,2400) //Caixa de cabeçalho
+			oPrn:Box(nLin,0050,nLin+80,2400) //Caixa de cabeçalho
 //		oPrn:Say(0330,0100,"Item"  	  		          	,oFont12N)
-	nLin +=30 
+	nLin +=20 
 			oPrn:Say(nLin,0200,"Codigo"  	            	,oFont10N)
 			oPrn:Say(nLin,0400,"Nome do Produto"	            	,oFont10N)
 			oPrn:Say(nLin,1400,"Quantidade"	  	            ,oFont10N) //	oPrn:Say(0330,1100,"Quantidade"	  	            ,oFont12N)
@@ -587,13 +566,14 @@ nTotDesc  := 0
 nDescVist2 := 0   
 nDescVist := 0
 lMudaPag := .f.	
-nitens :=1		
+nitens :=0		
 		//ITENS DO ROMANEIO
             DBSelectArea("TRBI")
 			DBSeek(TRBC->Pedido)
 			
 			While !Eof() .AND. TRBI->Pedido == TRBC->Pedido
-			
+			    nitens+=1
+				
 				oPrn:Say(nLin,0200,OemToAnsi(TRBI->CodiProd),		   oFont09)
 			
 				dbSelectArea("SB1")
@@ -633,8 +613,7 @@ nitens :=1
 							
 				dbSelectArea("TRBI")
 				TRBI->(dbSkip())
-				nLin+=5
-				nitens+=1
+				nLin+=5				
 			
 				//CONTINUACAO PEDIDO - DESENVOLVER SEGUNDA PARTE DO PEDIDO
 				IF  nitens > 21 .and. lMudaPag = .f.	
@@ -643,7 +622,7 @@ nitens :=1
 					If nVia = 2
 						
 						nLin := 3250
-						oPrn:Say(nLin,1600,"CONTINUA.....",oFont11N)
+						oPrn:Say(nLin,1600,"CONTINUA NA PROX. PAG.",oFont11N)
 						oPrn:Say(nLin+50,1700,"***********",oFont11N)
 						oPrn:Say(nLin+100,1700,"***********",oFont11N)
 						oPrn:EndPage()
@@ -652,7 +631,7 @@ nitens :=1
 						ImprimeCabe()
 						nLin :=1300 //linha do Rodapé 
 						ImprRoda()  //Imprime rodapé
-						nLin :=0470  //linha do item 
+						nLin :=0440  //linha do item 
 							
 					Else
 						if nVia = 1
@@ -666,15 +645,13 @@ nitens :=1
 							ImprimeCabe()
 							nLin :=3050 //linha do Rodapé 
 							ImprRoda()  //Imprime rodapé
-							nLin :=2200  //linha do item 
+							nLin :=2170  //linha do item 
 							
 						EndIf
 					EndIf
 					lMudaPag := .t.	
-				EndIf		
-					
+				EndIf					
 			EndDo
-
 
 Return
 
@@ -689,7 +666,6 @@ Static Function ImprRoda()
 
 	oPrn:Line( nLin,050,nLin,2400 )
 
-	//if _nIt <= 27
 	//	oPrn:Say(nLin+100,0020, Transform(nLin+110, "@E 99999")		  	            			,oFont09N)
 		nLin += 20
 		oPrn:Say(nLin,1250,"Quant:",oFont10N)
@@ -729,16 +705,17 @@ Static Function ImprRoda()
 	nLin += 50 //+210
 	oPrn:Say(nLin,0100,"Observação:",oFont10N)
 	oPrn:Say(nLin,0360, Trim(TRBC->Observ),	oFont10N)
-	nLin += 30  //+240
-	oPrn:Say(nLin,1850,"ST.....:      ________________",oFont10N)
-	nLin += 80  //+300
- 	oPrn:Say(nLin,1850,"Crédito:    ________________",oFont10N)
+	nLin += 60  //30
+	oPrn:Say(nLin,2000,"ST : _____________",oFont10N)
+	oPrn:Say(nLin,1400,"Crédito:    _____________",oFont10N)
+	nLin += 50  //80
+ 	//oPrn:Say(nLin,1850,"Crédito:    ________________",oFont10N)
 	nLin += 20 //+320
-	oPrn:Say(nLin,0300,"NAO EFETUAR PAGAMENTO EM DINHEIRO NA ENTREGA.",oFont11N)
+	oPrn:Say(nLin,0050,"NAO EFETUAR PAGAMENTO EM DINHEIRO NA ENTREGA.",oFont11N)
 	nLin += 50 //+350	
-	oPrn:Say(nLin,0100,"CONFERIR O PEDIDO NA ENTREGA,NAO ACEITAMOS RECLAMACOES POSTERIORES",oFont11N)
-	nLin += 30 //+400	
-	oPrn:Say(nLin,1850,"A Pagar:    _______________",oFont10N)
+	oPrn:Say(nLin,0050,"CONFERIR O PEDIDO NA ENTREGA,NAO ACEITAMOS RECLAMACOES POSTERIORES",oFont11N)
+	oPrn:Say(nLin,1900,"A Pagar:    _____________",oFont10N)
+	//nLin += 30 //+400	
 	//OBSERVAÇÕES
 
 	/*	IF (Alltrim(SA1->A1_ATUALIZ)="" .or. Alltrim(SA1->A1_ATUALIZ)="E")
@@ -755,54 +732,3 @@ Static Function ImprRoda()
 Return
 
 
-/*
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄ-¿±±
-±±³Fun‡…o    ³ AjustaSX1    ³Autor ³  J.Marcelino Correa  ³    03.06.2005 ³±±
-±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄ-´±±
-±±³Descri‡…o ³ Ajusta perguntas do SX1                                    ³±±
-±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-*/
-Static Function AjustaSX1()
-
-	Local aArea := GetArea()
-	PutSx1(cPerg,"01","No Romaneio de               ?"," "," ","mv_ch1","C",6,0,0,	"G","","   ","","","mv_par01"," "," "," ","",	" "," "," "," "," "," ", " "," "," "," ",	" "," ",{"Informe numero inicial do romaneio"},{"Informe o numero do romaneio de"},{"Informe o Numero do Romaneio"})
-	PutSx1(cPerg,"02","No Romaneio Ate              ?"," "," ","mv_ch2","C",6,0,0,	"G","","   ","","","mv_par02"," "," "," ","",	" "," "," "," "," "," ", " "," "," "," ",	" "," ",{"Informe o numero final do romaneio"},{"Informe o Numero do Romaneio ate"},{"Informe o Numero do Romaneio ate"})
-
-	RestArea(aArea)
-
-Return
-
-
-//Processo para salvar relatório como imagem
-
-aCaminho           := {"\\192.168.2.1\teste.jpg"}
-filepath          := "\192.168.1.2"
-nwidthpage      := 630
-nheightpage     := 870
-
-aFiles := Directory(aCaminho[1])
-For i:=1 to Len(aFiles)
-	fErase("\\192.168.2.1\"+aFiles[1])
-Next i
-
-oPrint:SaveAllAsJpeg(filepath,nwidthpage,nheightpage,100)   //Gera arquivos JPEG na Pasta \Protheus_data\Images\
-
-aFiles := {}
-aFiles := Directory(aCaminho[1])
-
-//Visualizacao e finalizacao do relatorio
-
-oPrint:Setup()
-oPrint:Preview()
-oPrint:EndPage()
-MS_FLUSH()
-
-If MV_PAR03 = 1               //Envia E-mail
-	EMAIL()
-EndIf
-
-Return

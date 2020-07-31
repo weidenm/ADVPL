@@ -31,7 +31,7 @@ User Function ROMAN()
 	Private nTotal	:= 0
 	Private nSubTot	:= 0
 
-	AjustaSx1()
+	//AjustaSx1()
 	If ! Pergunte(cPerg,.T.)
 		Return
 	Endif
@@ -50,9 +50,8 @@ User Function ROMAN()
 	PRIVATE oFont4  := NIL
 	PRIVATE oFont5  := NIL
 	PRIVATE oFont6  := NIL
-//Private cPerg := "FATR05"
+
 	Private nLastKey := 0
-///Private nLin := 1650 // Linha de inicio da impressao das clausulas contratuais
 
 	DEFINE FONT oFont1 NAME "Times New Roman" SIZE 0,20 BOLD  OF oPrn
 	DEFINE FONT oFont2 NAME "Times New Roman" SIZE 0,14 BOLD OF oPrn
@@ -66,7 +65,6 @@ User Function ROMAN()
 	oFont06N := TFont():New("Arial",06,06,,.T.,,,,.T.,.F.)
 	oFont08	 := TFont():New("Arial",08,08,,.F.,,,,.T.,.F.)
 	oFont08N := TFont():New("Arial",08,08,,.T.,,,,.T.,.F.)
-	//oFont08I := TFont():New("Arial",08,08,,.T.,,,,.T.,.F.)
 	oFont10	 := TFont():New("Arial",10,10,,.F.,,,,.T.,.F.)
 	oFont10N := TFont():New("Arial",10,10,,.T.,,,,.T.,.F.)
 	oFont11  := TFont():New("Arial",11,11,,.F.,,,,.T.,.F.)
@@ -114,7 +112,6 @@ User Function ROMAN()
 	ACTIVATE MSDIALOG oDlg CENTERED
 
 	oPrn:End()
-
 
 Return
 
@@ -310,7 +307,6 @@ STATIC FUNCTION MontaRoman()
 					SC6->(dbSkip())
 				EndDo
 		
-					
 				dDtEmissao:=Dtoc(SC5->C5_EMISSAO)//			dData:=Dtoc(ROMITENS->C5_EMISSAO)
 				oPrn:Say(nLin,0100,OemToAnsi(dDtEmissao),oFont10)
 				oPrn:Say(nLin,0300,OemToAnsi(ROMITENS->A1_COD)+" - "+ OemToAnsi(substr(ROMITENS->A1_NOME,1,40)),			   oFont10)
@@ -325,7 +321,7 @@ STATIC FUNCTION MontaRoman()
 				ENDIF
 
 				if len(Trim(ROMITENS->C5_OBS))>0 
-					oPrn:Say(nLin+100,0100,"OBS: "+OemToAnsi(cObsFardo+ctrim(ROMITENS->C5_OBS)), oFont10N)
+					oPrn:Say(nLin+100,0100,"OBS: "+OemToAnsi(cObsFardo+Alltrim(ROMITENS->C5_OBS)), oFont10N)
 					oPrn:Line(nLin+140,00100,nLin+140,2300)
 					nLin+=150
 				Else
@@ -474,10 +470,11 @@ STATIC FUNCTION MontaRoman()
 				VolTotal 	:= VolTotal + Volume
 			//oPrn:Say(nLin,1800,Transform(Volume,"@E 9,999,999.99"),		oFont11)
 				oPrn:Say(nLin,1800,Transform(Volume,"@E 9,999,999.99"),	oFont10)
+				oPrn:Line(nLin+35,00100,nLin+35,2300)
 			
 				dbSelectArea("ROMITENS")
 				dbSkip()
-				nLin+=40
+				nLin+=50
 				nitens+=1
 			
 			//Segunda pagina - Alterado em 13/08/2018
@@ -560,7 +557,7 @@ STATIC FUNCTION MontaRoman()
 			nRomaneio 	:= SZ1->Z1_NUM
 			nVia		:= 1
 		EndIf
-
+		
 		nLin    :=0530  //linha inicial dos itens do romaneio
 		oPrn:EndPage()
 	
