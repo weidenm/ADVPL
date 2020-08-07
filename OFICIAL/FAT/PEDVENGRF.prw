@@ -504,37 +504,42 @@ Return
 Static Function ImprimeCabe()
  
  	oPrn:SayBitmap(nLin,0020,cBitMap,0300,0300)			//LinIni, ColIni,Imagem,ColFim,LinFim Imprime logo da Empresa: comprimento X altura
+	oPrn:Say(nLin,1950, "PEDIDO Nº "+OemToAnsi(TRBC->Pedido),oFont12N)  //050
 	nLin += 30
-	oPrn:Say(nLin,0900, "PEDIDO DE VENDA Nº ",oFont14N)  //050
-	oPrn:Say(nLin,1600,OemToAnsi(TRBC->Pedido),	oFont14N) //050
-			
+	nLin += 20
+	oPrn:Say(nLin,300,"Veículo: ___________",	oFont10N) 
+	oPrn:Say(nLin,750,"Motorista: ________________",	oFont10N) 		
+	oPrn:Say(nLin,1350,"Ajudante: _______________",	oFont10N) 		
 	// DATA HORA IMPRESSÃO
 	//	dataHora:=Time()
 	//	oPrn:Say(0120,2100,dataHora,oFont12)
-	dDataEmiss:=Dtoc(ddatabase)
-	oPrn:Say(nLin,2000,"Data: "+ OemToAnsi(DdataEmiss),oFont10N) //050
- 		
+	
+ 	nLin += 030	
+		dDataEmiss:=Dtoc(ddatabase)
+		//oPrn:Say(nLin,2000,"Data: "+ OemToAnsi(DdataEmiss),oFont10N) //050
 		//DADOS CLIENTE
-	nLin += 100 //0150
-			oPrn:Say(nLin,0350,"Cliente: ",			   oFont10N) 
-			oPrn:Say(nLin,0550, OemToAnsi(TRBC->CodiClFo)+" - "+ OemToAnsi(substr(TRBC->NomeCli,1,40)),			   oFont10)
-			oPrn:Say(nLin,1900,"Vendedor: ",oFont10N)
-			oPrn:Say(nLin,2100,TRBC->Vendedor,oFont10)
+	nLin += 050 //0150
+			oPrn:Say(nLin,0300,"Cliente: ",			   oFont10N) 
+			oPrn:Say(nLin,0500, OemToAnsi(TRBC->CodiClFo)+" - "+ OemToAnsi(substr(TRBC->NomeCli,1,40)),			   oFont10N)
+			oPrn:Say(nLin,2000,"Vendedor: ",oFont10N)
+			oPrn:Say(nLin,2200,TRBC->Vendedor,oFont10N)
 	nLin += 50 //0200
-			oPrn:Say(nLin,0350,"Endereço: ", oFont10N)
-			oPrn:Say(nLin,0550,OemToAnsi(trim(TRBC->cEnd))+" - "+ OemToAnsi(trim(TRBC->Bairro))+" - "+ OemToAnsi(trim(TRBC->Municip))+" - "+ OemToAnsi(trim(TRBC->Estado)), oFont10)
+			oPrn:Say(nLin,0300,"Endereço: ", oFont10N)
+			oPrn:Say(nLin,0500,OemToAnsi(trim(TRBC->cEnd))+" - "+ OemToAnsi(trim(TRBC->Bairro))+" - "+ OemToAnsi(trim(TRBC->Municip))+" - "+ OemToAnsi(trim(TRBC->Estado)), oFont10N)
 	nLin += 50	//250	
-			oPrn:Say(nLin,0350,"CEP:",oFont10N)
-			oPrn:Say(nLin,0450,OemToAnsi(TRBC->cCEPCli),		   oFont10)
-			oPrn:Say(nLin,0650,"Telefones:",oFont10N)
-			oPrn:Say(nLin,0830,OemToAnsi(TRBC->cTeleDDD)+"-"+OemToAnsi(TRBC->cTeleCl),		   oFont10)
+			oPrn:Say(nLin,0300,"CEP:",oFont10N)
+			oPrn:Say(nLin,0400,OemToAnsi(TRBC->cCEPCli),		   oFont10)
+			oPrn:Say(nLin,0600,"Telefones:",oFont10N)
+			oPrn:Say(nLin,0790,OemToAnsi(TRBC->cTeleDDD)+"-"+OemToAnsi(TRBC->cTeleCl),		   oFont10)
 			oPrn:Say(nLin,1450,"CNPJ/CGC:",oFont10N)
 			oPrn:Say(nLin,1660,OemToAnsi(TRBC->cCGCCli),		   oFont10)
 			oPrn:Say(nLin,2010,"IE:",oFont10N)
 			oPrn:Say(nLin,2070,OemToAnsi(TRBC->cInscCli),		   oFont10)
 	nLin += 50		//0300
-			oPrn:Say(nLin,0350,"Endereço Entrega:",oFont10N)
-			oPrn:Say(nLin,0700,OemToAnsi(TRBC->cEndEnt),		   oFont10)
+			oPrn:Say(nLin,0300,"End.Entrega:",oFont10N)
+			oPrn:Say(nLin,0550,OemToAnsi(TRBC->cEndEnt),		   oFont10N)
+			oPrn:Say(nLin,2050,"Data: "+ OemToAnsi(DdataEmiss),oFont09N) //050
+
 		
 		//Data e hora impressão
 		//	oPrn:Say(0220,0100,"EMITENTE:",oFont12N)
@@ -699,7 +704,7 @@ Static Function ImprRoda()
 		oPrn:Say(nLin,0100,"Forma Patgo:",oFont10N)
 		oPrn:Say(nLin,0350,OemToAnsi(cCondPgto),		   oFont10)
 		oPrn:Say(nLin,0750,"Volume:",oFont10N)
-		oPrn:Say(nLin,1000, Transform(VolTotal,"@E 9,999,999.99"),	oFont10,,,,1)
+		oPrn:Say(nLin,1000, Transform(VolTotal,"@E 9,999,999.99"),	oFont10N,,,,1)
 
 //DESCONTOS		
 	nLin += 50
