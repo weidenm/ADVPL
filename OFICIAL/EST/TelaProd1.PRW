@@ -1292,8 +1292,9 @@ Static Function ExcFardo_OP()
 				Else
 					conout("ExcFardo: SD3 ESTORNADO - DOC="+_cDoc)
 				
-				//ATUALIZA CAMPO DE QUANTIDADE JÁ ENTREGUE
-					dbSelectArea("SC2")
+				//ATUALIZA CAMPO DE QUANTIDADE JÁ ENTREGUE  
+				//DESATIVADO DEVIDO PROBLEMA NA ATUALIZACAO DO C2_QUJE. Provavelmente pq MsExecAuto já deve atualizar o campo.
+				/*	dbSelectArea("SC2")
 					dbgotop()
 					dbseek(xfilial("SC2")+cOP+"001")
 				
@@ -1304,7 +1305,7 @@ Static Function ExcFardo_OP()
 						conout("ExcFardo: SC2 - Diminuido para "+ str(SC2->C2_QUJE))
 						msunlock()
 					EndIf
-				
+				*/
 				//****************************************************************************
 				//**** REAPONTAMENTO DA DIFERENÇA ENTRE ESTORNADO E CANCELADA PELO USUÁRIO ***
 				//****************************************************************************
@@ -1487,8 +1488,6 @@ MSCBPRINTER(cPrinter,cPorta, , , .F., , , , ,,.f. , )
 MSCBCHKStatus(.f.)
 	
 	While  cont < 10
-
-		
 
 		MSCBBEGIN(1,6)
 		MSCBSAYBAR ( 05, 05 , aConteudo , 'N',cPadraoBar,08,,.T.,,,3,2.5) // LOTE (OP) + FARDO

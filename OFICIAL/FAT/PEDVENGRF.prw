@@ -72,7 +72,7 @@ User Function PEDVENGRF()
 	SetPrvt("CINSCCLI,XPARC_DUP,XVENC_DUP,XVALOR_DUP,XDUPLICATAS")
 	SetPrvt("NTAMEXTE,NPOVAZ,NPOFIN,LTEST,CEXTENSO1,CEXTENSO2")
 	SetPrvt("A,LCONTITEM,NTAMPROD,NPOS,NLINCLAS,NCONT")
-	SetPrvt("NOMECLI, MUNICIP,ESTADO")
+	SetPrvt("NOMECLI, MUNICIP,ESTADO, BAIRRO")
 
 	Private nLastKey := 0
 
@@ -225,6 +225,7 @@ EndDo
 	Aadd(aTempStru,{"PercDesc","N",05,2})  
 	Aadd(aTempStru,{"NomeCli","C",50,0})
 	Aadd(aTempStru,{"Municip","C",30,0})
+	Aadd(aTempStru,{"Bairro","C",20,0})
 	Aadd(aTempStru,{"Estado","C",2,0})
 	Aadd(aTempStru,{"cEnd","C",60,0})
 	Aadd(aTempStru,{"cCepCli","C",10,0})
@@ -352,7 +353,8 @@ Static Function GravTrab()
 		Replace  Observ	   With   Alltrim(SA1->A1_OBSERV) + " - " + Alltrim(SC5->C5_OBS)
 		Replace  PercDesc  With   SC5->C5_DESC1
 		Replace  NomeCli   With   SA1->A1_NOME
-		Replace cEnd	   With	  SA1->A1_END
+		Replace  cEnd	   With	  SA1->A1_END
+		Replace  Bairro	   With   SA1->A1_BAIRRO
 		Replace  Municip   With   SA1->A1_MUN
 		Replace  Estado	   With   SA1->A1_EST
 		Replace	 cCepCli   With   SA1->A1_CEP
@@ -520,7 +522,7 @@ Static Function ImprimeCabe()
 			oPrn:Say(nLin,2100,TRBC->Vendedor,oFont10)
 	nLin += 50 //0200
 			oPrn:Say(nLin,0350,"Endereço: ", oFont10N)
-			oPrn:Say(nLin,0550,OemToAnsi(trim(TRBC->cEnd))+" - "+ OemToAnsi(trim(TRBC->Municip))+" - "+ OemToAnsi(trim(TRBC->Estado)), oFont10)
+			oPrn:Say(nLin,0550,OemToAnsi(trim(TRBC->cEnd))+" - "+ OemToAnsi(trim(TRBC->Bairro))+" - "+ OemToAnsi(trim(TRBC->Municip))+" - "+ OemToAnsi(trim(TRBC->Estado)), oFont10)
 	nLin += 50	//250	
 			oPrn:Say(nLin,0350,"CEP:",oFont10N)
 			oPrn:Say(nLin,0450,OemToAnsi(TRBC->cCEPCli),		   oFont10)
@@ -616,8 +618,7 @@ nitens :=0
 				nLin+=5				
 			
 				//CONTINUACAO PEDIDO - DESENVOLVER SEGUNDA PARTE DO PEDIDO
-				IF  nitens > 21 .and. lMudaPag = .f.	
-						//nitens := 1
+			IF  nitens > 21 .and. lMudaPag = .f.	
 						
 					If nVia = 2
 						
@@ -630,7 +631,7 @@ nitens :=0
 						nLin := 020
 						ImprimeCabe()
 						nLin :=1300 //linha do Rodapé 
-						ImprRoda()  //Imprime rodapé
+						//ImprRoda()  //Imprime rodapé
 						nLin :=0440  //linha do item 
 							
 					Else
@@ -644,7 +645,7 @@ nitens :=0
 							nLin := 1750
 							ImprimeCabe()
 							nLin :=3050 //linha do Rodapé 
-							ImprRoda()  //Imprime rodapé
+						//	ImprRoda()  //Imprime rodapé
 							nLin :=2170  //linha do item 
 							
 						EndIf
@@ -653,6 +654,24 @@ nitens :=0
 				EndIf					
 			EndDo
 
+//Imprimir rodape com quantidade total correta
+				IF  nitens > 21 //.and. lMudaPag = .f.	
+						//nitens := 1
+						
+					If nVia = 1
+						nLin :=1300 //linha do Rodapé 
+						ImprRoda()  //Imprime rodapé
+							
+					Else
+						if nVia = 2
+							nLin :=3050 //linha do Rodapé 
+							ImprRoda()  //Imprime rodapé
+							
+						EndIf
+					EndIf
+					//lMudaPag := .t.	
+				EndIf					
+			
 Return
 
 //*****************************************************************************
