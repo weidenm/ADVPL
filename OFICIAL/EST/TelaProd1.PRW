@@ -49,6 +49,8 @@ User Function SIGATEC()
 	Public _nPorta
 	Public _nPadraoBar
 	Static cTurma
+//	Private cFechEst := GETNEWPAR( "MV_ULMES", "20200101", <Filial> )
+
 
 //CRIA PARAMETROS PARA IMPRIMIR ETIQUETAS
 	aPerg := {}
