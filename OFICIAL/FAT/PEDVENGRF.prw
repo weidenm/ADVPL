@@ -72,7 +72,7 @@ User Function PEDVENGRF()
 	SetPrvt("CINSCCLI,XPARC_DUP,XVENC_DUP,XVALOR_DUP,XDUPLICATAS")
 	SetPrvt("NTAMEXTE,NPOVAZ,NPOFIN,LTEST,CEXTENSO1,CEXTENSO2")
 	SetPrvt("A,LCONTITEM,NTAMPROD,NPOS,NLINCLAS,NCONT")
-	SetPrvt("NOMECLI, MUNICIP,ESTADO, BAIRRO")
+	SetPrvt("NOMECLI, NOMEFAN, MUNICIP,ESTADO, BAIRRO")
 
 	Private nLastKey := 0
 
@@ -224,6 +224,7 @@ EndDo
 	Aadd(aTempStru,{"Observ","C",80,0})
 	Aadd(aTempStru,{"PercDesc","N",05,2})  
 	Aadd(aTempStru,{"NomeCli","C",50,0})
+	Aadd(aTempStru,{"NomeFan","C",50,0})
 	Aadd(aTempStru,{"Municip","C",30,0})
 	Aadd(aTempStru,{"Bairro","C",20,0})
 	Aadd(aTempStru,{"Estado","C",2,0})
@@ -353,6 +354,7 @@ Static Function GravTrab()
 		Replace  Observ	   With   Alltrim(SA1->A1_OBSERV) + " - " + Alltrim(SC5->C5_OBS)
 		Replace  PercDesc  With   SC5->C5_DESC1
 		Replace  NomeCli   With   SA1->A1_NOME
+		Replace  NomeFan   With   SA1->A1_FANTAS
 		Replace  cEnd	   With	  SA1->A1_END
 		Replace  Bairro	   With   SA1->A1_BAIRRO
 		Replace  Municip   With   SA1->A1_MUN
@@ -509,20 +511,23 @@ Static Function ImprimeCabe()
 	nLin += 20
 	oPrn:Say(nLin,300,"Veículo: ___________",	oFont10N) 
 	oPrn:Say(nLin,750,"Motorista: ________________",	oFont10N) 		
-	oPrn:Say(nLin,1350,"Ajudante: _______________",	oFont10N) 		
+	oPrn:Say(nLin,1350,"Ajudante: _______________",	oFont10N) 
+	nLin += 30
+	oPrn:Say(nLin,2000,"Vendedor: ",oFont10N)
+	oPrn:Say(nLin,2200,TRBC->Vendedor,oFont10N)		
 	// DATA HORA IMPRESSÃO
 	//	dataHora:=Time()
 	//	oPrn:Say(0120,2100,dataHora,oFont12)
 	
- 	nLin += 030	
-		dDataEmiss:=Dtoc(ddatabase)
-		//oPrn:Say(nLin,2000,"Data: "+ OemToAnsi(DdataEmiss),oFont10N) //050
+ 	//nLin += 030	
+	
 		//DADOS CLIENTE
 	nLin += 050 //0150
 			oPrn:Say(nLin,0300,"Cliente: ",			   oFont10N) 
-			oPrn:Say(nLin,0500, OemToAnsi(TRBC->CodiClFo)+" - "+ OemToAnsi(substr(TRBC->NomeCli,1,40)),			   oFont10N)
-			oPrn:Say(nLin,2000,"Vendedor: ",oFont10N)
-			oPrn:Say(nLin,2200,TRBC->Vendedor,oFont10N)
+			oPrn:Say(nLin,0430, OemToAnsi(TRBC->CodiClFo)+" - "+ OemToAnsi(Alltrim(TRBC->NomeCli))+" ("+ OemToAnsi(Alltrim(TRBC->NomeFan))+")",			   oFont10N)
+			//oPrn:Say(nLin,0400, OemToAnsi(TRBC->CodiClFo)+" - "+ OemToAnsi(substr(TRBC->NomeCli,1,40))+" ("+ OemToAnsi(Alltrim(TRBC->NomeFan,1,20))+")",			   oFont10N)
+			//oPrn:Say(nLin,0400, " ("+ OemToAnsi(substr(TRBC->NomeFan,1,20))+")",			   oFont09)
+		
 	nLin += 50 //0200
 			oPrn:Say(nLin,0300,"Endereço: ", oFont10N)
 			oPrn:Say(nLin,0500,OemToAnsi(trim(TRBC->cEnd))+" - "+ OemToAnsi(trim(TRBC->Bairro))+" - "+ OemToAnsi(trim(TRBC->Municip))+" - "+ OemToAnsi(trim(TRBC->Estado)), oFont10N)
@@ -538,6 +543,7 @@ Static Function ImprimeCabe()
 	nLin += 50		//0300
 			oPrn:Say(nLin,0300,"End.Entrega:",oFont10N)
 			oPrn:Say(nLin,0550,OemToAnsi(TRBC->cEndEnt),		   oFont10N)
+			dDataEmiss:=Dtoc(ddatabase)
 			oPrn:Say(nLin,2050,"Data: "+ OemToAnsi(DdataEmiss),oFont09N) //050
 
 		
@@ -581,6 +587,40 @@ nitens :=0
 			While !Eof() .AND. TRBI->Pedido == TRBC->Pedido
 			    nitens+=1
 				
+				IF  nitens > 21 .and. lMudaPag = .f.	
+						
+					If nVia = 2
+						
+						nLin := 3250
+						oPrn:Say(nLin,1600,"CONTINUA NA PROX. PAG.",oFont11N)
+						oPrn:Say(nLin+50,1700,"***********",oFont11N)
+						oPrn:Say(nLin+100,1700,"***********",oFont11N)
+						oPrn:EndPage()
+						nVia := 1
+						nLin := 020
+						ImprimeCabe()
+						//nLin :=1300 //linha do Rodapé 
+						//ImprRoda()  //Imprime rodapé
+						nLin :=0440  //linha do item 
+							
+					Else
+						if nVia = 1
+							nLin := 1400
+							oPrn:Say(nLin,1600,"CONTINUA NA PROX. PAG.",oFont11N)
+							oPrn:Say(nLin+50,1700,"***********",oFont11N)
+							oPrn:Say(nLin+100,1700,"***********",oFont11N)
+						
+							nVia := 2
+							nLin := 1750
+							ImprimeCabe()
+						//	nLin :=3050 //linha do Rodapé 
+						//	ImprRoda()  //Imprime rodapé
+							nLin :=2170  //linha do item 		
+						EndIf
+					EndIf
+					lMudaPag := .t.	
+				EndIf
+
 				oPrn:Say(nLin,0200,OemToAnsi(TRBI->CodiProd),		   oFont09)
 			
 				dbSelectArea("SB1")
@@ -620,43 +660,10 @@ nitens :=0
 							
 				dbSelectArea("TRBI")
 				TRBI->(dbSkip())
-				nLin+=5				
-			
-				//CONTINUACAO PEDIDO - DESENVOLVER SEGUNDA PARTE DO PEDIDO
-			IF  nitens > 21 .and. lMudaPag = .f.	
-						
-					If nVia = 2
-						
-						nLin := 3250
-						oPrn:Say(nLin,1600,"CONTINUA NA PROX. PAG.",oFont11N)
-						oPrn:Say(nLin+50,1700,"***********",oFont11N)
-						oPrn:Say(nLin+100,1700,"***********",oFont11N)
-						oPrn:EndPage()
-						nVia := 1
-						nLin := 020
-						ImprimeCabe()
-						nLin :=1300 //linha do Rodapé 
-						//ImprRoda()  //Imprime rodapé
-						nLin :=0440  //linha do item 
-							
-					Else
-						if nVia = 1
-							nLin := 1400
-							oPrn:Say(nLin,1600,"CONTINUA NA PROX. PAG.",oFont11N)
-							oPrn:Say(nLin+50,1700,"***********",oFont11N)
-							oPrn:Say(nLin+100,1700,"***********",oFont11N)
-						
-							nVia := 2
-							nLin := 1750
-							ImprimeCabe()
-							nLin :=3050 //linha do Rodapé 
-						//	ImprRoda()  //Imprime rodapé
-							nLin :=2170  //linha do item 
-							
-						EndIf
-					EndIf
-					lMudaPag := .t.	
-				EndIf					
+				nLin+=5		
+				
+							//CONTINUACAO PEDIDO - DESENVOLVER SEGUNDA PARTE DO PEDIDO
+		
 			EndDo
 
 //Imprimir rodape com quantidade total correta
