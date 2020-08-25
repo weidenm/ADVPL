@@ -1223,7 +1223,7 @@ Static Function ExcFardo_OP()
 		
 		ASORT(aColsExclui,,,{|x,y| x[5] < y[5]})
 		
-		conout("aColsExclui com elementos:"+ str(len(aColsExclui)))
+		//conout("aColsExclui com elementos:"+ str(len(aColsExclui)))
 		//ASORT(aEtqOrd,,,{|x,y| x[5] > y[5]})
 		
 		_cDoc := ""
@@ -1250,7 +1250,7 @@ Static Function ExcFardo_OP()
 					Loop
 				EndIf
 				
-				conout("EXCFARDO_OP: cDoc válido "+_cDoc+" - DOCSD3="+SZ3->Z3_DOCSD3+" cProd="+cProd+" nFardo="+nFardo)
+			//	conout("EXCFARDO_OP: cDoc válido "+_cDoc+" - DOCSD3="+SZ3->Z3_DOCSD3+" cProd="+cProd+" nFardo="+nFardo)
 			
 			//CRIAR FUNÇÃO QUE RETORNA QUANTIDADE DO DOCUMENTO SZ3.
 				QtdSZ3 := 0
@@ -1288,7 +1288,7 @@ Static Function ExcFardo_OP()
 				MSExecAuto({|x,y| MATA250(x,y)},_aVetor,5) //Estorno
 					
 				If lMsErroAuto
-					MSGALERT("ExcFardo: Não foi possível estornar o estoque do DOC."+_cDoc)
+					MSGSTOP("CANCELAMENTO NÃO AUTORIZADO. Verificar se estoque está fechado.")
 					conout("ExcFardo: Não foi possível estornar fardos - DOC="+_cDoc)
 					Return
 				Else
@@ -1308,11 +1308,11 @@ Static Function ExcFardo_OP()
 						msunlock()
 					EndIf
 				*/
+				
 				//****************************************************************************
 				//**** REAPONTAMENTO DA DIFERENÇA ENTRE ESTORNADO E CANCELADA PELO USUÁRIO ***
 				//****************************************************************************
 				//i guarda a quantidade excluída anteriormente de fardos.
-				
 					if QtdSZ3 < QtdSD3
 						nReap := 0
 						nQtdDif := QtdSD3 - QtdSZ3
@@ -1349,26 +1349,32 @@ Static Function ExcFardo_OP()
 							MSGALERT("Não foi possível reapontar diferença do documento "+_cDoc)
 						EndIf
 					EndIf //Fecha Reapontamento
+				
+					//****************************************************************************
+					//***     EXCLUSÃO DE FARDOS NA SZ3 CASO CANCELAMENTO FOR BEM SUCEDIDO     ***
+					//****************************************************************************
+					dbSelectArea("SZ3")
+					dbGotop()
+					dbseek(xfilial("SZ3")+ cOP + nFardo)
+			//EXCLUI OS REGISTROS DE FARDOS NO SZ3
+					if  SZ3->(found())
+						reclock("SZ3",.f.)
+						dbdelete()
+						msunlock()
+						contCanc := contCanc+1
+						conout("EXCFARDO: Excluído SZ3 "+ nFardo)
+					else
+						contErro := contErro+1
+					endif
+				
 				EndIF //Fecha If lMsErroAuto do Estorno
 			ENDIF //Fecha IF _cDoc <> SZ3->Z3_DOCSD3
 	
-			dbSelectArea("SZ3")
-			dbGotop()
-			dbseek(xfilial("SZ3")+ cOP + nFardo)
-	//EXCLUI OS REGISTROS DE FARDOS NO SZ3
-			if  SZ3->(found())
-				reclock("SZ3",.f.)
-				dbdelete()
-				msunlock()
-				contCanc := contCanc+1
-				conout("EXCFARDO: Excluído SZ3 "+ nFardo)
-			else
-				contErro := contErro+1
-			endif
-	
 		Next
 
-		MSGALERT(str(contCanc)+" fardos cancelados com sucesso.")
+		IF contCanc > 0
+			MSGALERT(str(contCanc)+" fardos cancelados com sucesso.")
+		EndIf
 		if contErro > 0
 			MSGALERT(str(contErro)+" fardos não encontrados.")
 		EndIf
