@@ -49,8 +49,8 @@ User Function TesInteligente
 		if trim(SB1->B1_GRTRIB) <> ""
 				
 //	   cTes := TesIntel(2,"01",SC6->C6_CLI,SC6->C6_LOJA,"C",SC6->C6_PRODUTO,"C6_TES")	
-
-			if (Alltrim(SA1->A1_EST) $ "BA/ES/GO/PE/SE") .or. (Alltrim(SA1->A1_EST) $ ("DF/RJ/MG") .and. Alltrim(SA1->A1_GRPTRIB) $ "001/002") .or.;
+		/*
+			if (Alltrim(SA1->A1_EST) $ "BA/ES/GO/PE/SE") .or. (Alltrim(SA1->A1_EST) $ ("AL/DF/RJ/MG") .and. Alltrim(SA1->A1_GRPTRIB) $ "001/002") .or.;
 					(Alltrim(SA1->A1_EST)="AL" .and.  Alltrim(SB1->B1_GRTRIB) $ ("008/020"))
 				cTes := "501"
 			Else
@@ -85,7 +85,48 @@ User Function TesInteligente
 					EndIF
 				EndIf
 			EndIf
-			//conout("TES:"+cTes)	
+			*/
+			
+			DO CASE
+
+			CASE  (Alltrim(SA1->A1_EST) $ "BA/ES/GO/PE/SE") .or. (Alltrim(SA1->A1_EST) $ ("AL/DF/RJ/MG") .and. Alltrim(SA1->A1_GRPTRIB) $ "001/002") .or.;
+				(Alltrim(SA1->A1_EST)="AL" .and.  Alltrim(SB1->B1_GRTRIB) $ ("008/020"))
+			
+				cTes := "501"
+			
+			CASE (SA1->A1_EST="MG" .and. Alltrim(SA1->A1_GRPTRIB)="" .AND. Alltrim(SB1->B1_GRTRIB)<>"008")
+
+				cTes := "503"
+
+			CASE (Alltrim(SA1->A1_EST)="MG" .and. Alltrim(SA1->A1_GRPTRIB="") .and. Alltrim(SB1->B1_GRTRIB)="008")
+
+				cTes:="506"
+
+			CASE (Alltrim(SA1->A1_EST)="DF" .and. SC6->C6_FILIAL='02' .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)<>"008") .or.;
+				(Alltrim(SA1->A1_EST)="RJ" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)="020")
+
+				cTes :="504"
+
+			CASE (Alltrim(SA1->A1_EST)="DF" .and. SC6->C6_FILIAL='02' .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB)="008")
+
+				cTes:="507"
+
+			CASE (Alltrim(SA1->A1_EST)="RJ" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB) <> "020")
+
+				cTes:="508"
+
+			CASE ((Alltrim(SA1->A1_EST)="AL" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB) $ "001/002/003/004/005/006/007")
+											
+				cTes:="509"
+			
+			CASE (Alltrim(SA1->A1_EST)="DF" .and. SC6->C6_FILIAL='01')
+				
+				cTes:="630"
+
+			//OTHERWISE
+
+			ENDCASE
+
 		else
 			if trim(SB1->B1_TS) <> ""
 				alert("produto "+ SB1->B1_COD +" sem Grupo Trib.")

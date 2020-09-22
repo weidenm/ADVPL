@@ -947,6 +947,7 @@ Static Function ExcFardo(_nOPexc,_nFardoIni2,_nFardoFim2, _turma)
 				conout("ExcFardo: SD3 ESTORNADO - DOC="+_cDoc)
 				
 				//ATUALIZA CAMPO DE QUANTIDADE JÁ ENTREGUE
+				/*
 				dbSelectArea("SC2")
 				dbgotop()
 				dbseek(xfilial("SC2")+cOP+"001")
@@ -958,7 +959,7 @@ Static Function ExcFardo(_nOPexc,_nFardoIni2,_nFardoFim2, _turma)
 					conout("ExcFardo: SC2 - Diminuido para "+ str(SC2->C2_QUJE))
 					msunlock()
 				EndIf
-				
+				*/
 				//****************************************************************************
 				//**** REAPONTAMENTO DA DIFERENÇA ENTRE ESTORNADO E CANCELADA PELO USUÁRIO ***
 				//****************************************************************************
@@ -1288,9 +1289,9 @@ Static Function ExcFardo_OP()
 				MSExecAuto({|x,y| MATA250(x,y)},_aVetor,5) //Estorno
 					
 				If lMsErroAuto
-					MSGSTOP("CANCELAMENTO NÃO AUTORIZADO. Verificar se estoque está fechado.")
+					MSGSTOP("Entre em contato com o responsável do PCP.", "CANCELAMENTO NÃO AUTORIZADO")
 					conout("ExcFardo: Não foi possível estornar fardos - DOC="+_cDoc)
-					Return
+					//Return
 				Else
 					conout("ExcFardo: SD3 ESTORNADO - DOC="+_cDoc)
 				

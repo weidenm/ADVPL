@@ -28,29 +28,7 @@
 *
 *
 *****/         
-/*
-User Function ImpAutoFin()
-	Local lAuto := .F.
-	cTimeIni := TIME()
-
-
-	If Select("SX2")==0
-		PREPARE ENVIRONMENT EMPRESA "01" FILIAL "01" TABLES "SF1","SD1","SE2","SE5","SEF","SZ2"
-		Conout(DtoC(dDatabase)+" - "+cTimeIni+" Iniciando JOB de Atualizacao TOTVS...")
-		lAuto := .T.
-	EndIf
-
-	Conexao()
-
-	If lAuto
-		RpcClearEnv()
-		Conout(DtoC(dDatabase)+" - "+TIME()+" FIM do JOB Atualizacao NFE ")
-	Else
-	//Alert ("Atualização BETONMIX efetuada com sucesso! Hora Inicio: " + cTimeIni + " Hora Fim: " + TIME())
-	Endif
-
-Return
-*/                           
+                        
 
 User Function ImpFinV2()
 
@@ -80,12 +58,12 @@ cTimeIni := TIME()
 Activate Dialog oDlg1 Center
 */	
 
-	Conexao()
+	FuncoesParam()
 
 Return
 
 
-Static Function conexao()
+Static Function FuncoesParam()
 
 	//u_zAtuPerg("IMPFIN", "MV_PAR01", ddatabase-10) //Data De
 	//u_zAtuPerg("IMPFIN", "MV_PAR02", ddatabase) //Data Até
@@ -98,6 +76,11 @@ Static Function conexao()
 
 	cDataIni := dtos(MV_PAR01)
 	cDataFim := dtos(MV_PAR02)
+	Public PedIni := MV_PAR04
+	Public PedFim := MV_PAR05
+	Public RomIni := MV_PAR06
+	Public RomFim := MV_PAR07
+
 
 	cData := Dtoc(date())	
 	cHora := time()
@@ -108,42 +91,20 @@ Static Function conexao()
 //Abrindo Arquivos do Ambiente (Origem)
 	TCCONTYPE("TCPIP")
 	
-	Processa({|| GravaTrabEnv()},"Aguarde...","Separando Movimentos...")
+	//Apaga movimentos importados e excluídos do OFICIAL
+	Processa({||ExcluiMov()},"Aguarde...","Excluindo movimentos...")
+	//Importa baixas de titulos por Liquidação (Cheques)
 	Processa({||MovBancarios()},"Aguarde...","Importando baixa de NF com Cheque...")
-	Processa({||ImpBaixaLiq()},"Aguarde...","Importando exclusão e baixas de cheque...")
+	//Processa({||ImportaCheque()},"Aguarde...","Importando titulo e registro de cheque...")
+	//Processa({||ImpBaixaLiq()},"Aguarde...","Importando exclusão e baixas de cheque...")
 	Processa({||AtualizaTitulos()},"Aguarde...","Atualizando títulos...")
-	If MV_PAR05 = 1
-		Processa({||ExcluiMov()},"Aguarde...","Excluindo movimentos...")
-	EndIf
+
+	//If MV_PAR05 = 1
+	
+//	EndIf
 	//Processa({||AtualizTitBol()},"Aguarde...","Atualizando historico de titulos...")
 	//Processa({||AtualizaRoman()},"Aguarde...","Atualizando historico de titulos...")
 	
-
-Return
-
-
-Static Function GravaTrabEnv()
-
-	//1) Movimento de baixa de titulo com cheque
-	
-	//fecha o alias temporário 
-	If Select("MOVNFIG") > 0
-		dbSelectArea("MOVNFIG")
-		dbCloseArea()
-	EndIf
-
-	cQuery := "SELECT TITNF.E1_PEDIDO AS PEDIDO, TITNF.E1_PARCELA,  E5_PREFIXO, E5_NUMERO, E5_PARCELA,E5_DATA, E5_TIPO,E5_TIPODOC,E5_MOTBX, E5_RECPAG, E5_DOCUMEN,  E5_BENEF,E5_HISTOR,"
-	cQuery += " E5_MOEDA,E5_NATUREZ, E5_CLIENTE, E5_VALOR,  E5_CLIFOR, E5_LOJA, E5_DTDIGIT,  E5_SEQ, E5_DTDISPO, E5_FILORIG, E5_BANCO, E5_AGENCIA, E5_CONTA , B.R_E_C_N_O_ AS ID"
-	cQuery += " FROM  SRVPP01.DADOS12.dbo.SE5010 B INNER JOIN SRVPP01.DADOS12.dbo.SE1010 TITNF ON B.E5_PREFIXO = TITNF.E1_PREFIXO AND B.E5_NUMERO = TITNF.E1_NUM AND B.E5_PARCELA = TITNF.E1_PARCELA"
-	cQuery += " INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SE1010 C ON TITNF.E1_PEDIDO=C.E1_PEDIDO AND RTRIM(TITNF.E1_PARCELA)=RTRIM(C.E1_PARCELA)"
-	cQuery += " WHERE B.D_E_L_E_T_='' AND TITNF.D_E_L_E_T_='' AND C.D_E_L_E_T_='' AND E5_SITUACA='' AND E5_NUMERO<>'' "
-	cQuery += " AND TITNF.E1_PEDIDO<> '' AND E5_DATA>'"+cDataIni +"' AND E5_DATA <='"+ cDataFim +"' "   
-	cQuery += " AND E5_MOTBX IN ('LIQ')  AND E5_BANCO NOT IN ('CX1')   "
-	//cQuery += " AND E5_MOTBX IN ('NOR','LIQ')   AND (  TITNF.E1_HIST='BOLETO BB GERADO' OR E5_MOTBX='LIQ' ) AND E5_BANCO NOT IN ('CX1')"  
-	cQuery += " AND C.E1_SALDO > 0  AND E5_VALOR <= C.E1_VALOR*1.1"
-	cQuery += " AND B.R_E_C_N_O_ NOT IN (SELECT  CAST(E5_IDMOVI AS INT) FROM SRVPP03.DADOSTOTVS11.dbo.SE5010 WHERE E5_IDMOVI<>'' )"
-    
-	TCQuery cQuery Alias MOVNFIG New
 
 Return
 	
@@ -159,7 +120,44 @@ Static Function MovBancarios()
 	cErroGeral := ""
 	cErroSem := ""
 	cErroIg  := ""
-		
+
+	//1) Movimento de baixa de titulo com cheque
+	
+	//fecha o alias temporário 
+	If Select("MOVNFIG") > 0
+		dbSelectArea("MOVNFIG")
+		dbCloseArea()
+	EndIf
+
+/*
+	cQuery := "SELECT TITNF.E1_PEDIDO AS PEDIDO, TITNF.E1_PARCELA,  E5_PREFIXO, E5_NUMERO, E5_PARCELA,E5_DATA, E5_TIPO,E5_TIPODOC,E5_MOTBX, E5_RECPAG, E5_DOCUMEN,  E5_BENEF,E5_HISTOR,"
+	cQuery += " E5_MOEDA,E5_NATUREZ, E5_CLIENTE, E5_VALOR,  E5_CLIFOR, E5_LOJA, E5_DTDIGIT,  E5_SEQ, E5_DTDISPO, E5_FILORIG, E5_BANCO, E5_AGENCIA, E5_CONTA , B.R_E_C_N_O_ AS ID"
+	cQuery += " FROM  SRVPP01.DADOS12.dbo.SE5010 B INNER JOIN SRVPP01.DADOS12.dbo.SE1010 TITNF ON B.E5_PREFIXO = TITNF.E1_PREFIXO AND B.E5_NUMERO = TITNF.E1_NUM AND B.E5_PARCELA = TITNF.E1_PARCELA"
+	cQuery += " INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SE1010 C ON TITNF.E1_PEDIDO=C.E1_PEDIDO AND RTRIM(TITNF.E1_PARCELA)=RTRIM(C.E1_PARCELA)"
+	cQuery += " WHERE B.D_E_L_E_T_='' AND TITNF.D_E_L_E_T_='' AND C.D_E_L_E_T_='' AND E5_SITUACA='' AND E5_NUMERO<>'' "
+	cQuery += " AND TITNF.E1_PEDIDO<> '' AND E5_DATA>'"+cDataIni +"' AND E5_DATA <='"+ cDataFim +"' "   
+	cQuery += " AND E5_MOTBX IN ('LIQ')  AND E5_BANCO NOT IN ('CX1')   "
+	//cQuery += " AND E5_MOTBX IN ('NOR','LIQ')   AND (  TITNF.E1_HIST='BOLETO BB GERADO' OR E5_MOTBX='LIQ' ) AND E5_BANCO NOT IN ('CX1')"  
+	cQuery += " AND C.E1_SALDO > 0  AND E5_VALOR <= C.E1_VALOR*1.1"
+	cQuery += " AND B.R_E_C_N_O_ NOT IN (SELECT  CAST(E5_IDMOVI AS INT) FROM SRVPP03.DADOSTOTVS11.dbo.SE5010 WHERE E5_IDMOVI<>'' )"
+  */
+
+
+	cQuery := " SELECT TITNF.E1_PEDIDO AS PEDIDO, TITNF.E1_PARCELA,  E5_PREFIXO, E5_NUMERO, E5_PARCELA,E5_DATA, E5_TIPO,E5_TIPODOC,E5_MOTBX, E5_RECPAG, E5_DOCUMEN,  E5_BENEF,E5_HISTOR,"
+	cQuery += "  E5_MOEDA,E5_NATUREZ, E5_CLIENTE, E5_VALOR,  E5_CLIFOR, E5_LOJA, E5_DTDIGIT,  E5_SEQ, E5_DTDISPO, E5_FILORIG, E5_BANCO, E5_AGENCIA, E5_CONTA , B.R_E_C_N_O_ AS ID"
+	cQuery += "  FROM  SRVPP01.DADOS12.dbo.SE5010 B INNER JOIN SRVPP01.DADOS12.dbo.SE1010 TITNF ON B.E5_PREFIXO = TITNF.E1_PREFIXO AND B.E5_NUMERO = TITNF.E1_NUM AND B.E5_PARCELA = TITNF.E1_PARCELA"
+	cQuery += " INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SE1010 C ON TITNF.E1_PEDIDO=C.E1_PEDIDO AND RTRIM(TITNF.E1_PARCELA)=RTRIM(C.E1_PARCELA)"
+	cQuery += "  WHERE B.D_E_L_E_T_='' AND TITNF.D_E_L_E_T_='' AND E5_NUMERO<>'' AND E5_SITUACA='' "
+	cQuery += "  AND TITNF.E1_PEDIDO<> ''  AND E5_MOTBX IN ('LIQ') AND E5_TIPODOC NOT IN ('JUR')   AND E5_BANCO NOT IN ('CX1')   "
+	cQuery += " 	AND C.E1_SALDO > 0  AND E5_VALOR <= C.E1_VALOR*1.1"
+	cQuery += "  AND B.R_E_C_N_O_ NOT IN (SELECT  CAST(E5_IDMOVI AS INT) FROM SRVPP03.DADOSTOTVS11.dbo.SE5010 WHERE E5_IDMOVI<>'' )"
+	cQuery += "  AND TITNF.E1_PEDIDO IN ( SELECT  C5_NUM FROM SRVPP03.DADOSTOTVS11.dbo.SC5010 "
+	cQuery += "  WHERE C5_NUM >='"+PedIni +"' AND C5_NUM <='"+PedIni +"' AND C5_ROMANEI >='"+RomIni +"' AND C5_ROMANEI <='"+RomFim +"' )"
+
+	TCQuery cQuery Alias MOVNFIG New
+
+
+
 	dbSelectArea("MOVNFIG")
 
 	Do While (! MOVNFIG->(Eof()))
@@ -180,8 +178,8 @@ Static Function MovBancarios()
 			If Alltrim(SE1->E1_PARCELA) == Alltrim(MOVNFIG->E5_PARCELA)
 				//conout("Parcelas iguais:<"+SE1->E1_PARCELA+"> e <"+MOVNFIG->E5_PARCELA+">")
 				lparcig := .t.
-				if SE1->E1_SALDO*1.10 >= MOVNFIG->E5_VALOR
-				
+				//if SE1->E1_SALDO*1.10 >= MOVNFIG->E5_VALOR //Para quando importava todas as movimentações não baixar titulo parcial
+				if SE1->E1_SALDO >= MOVNFIG->E5_VALOR // .or. MOVNFIG = "JUR"
 					nSaldoTit := SE1->E1_SALDO
 					cNum  := SE1->E1_NUM
 					cParc := SE1->E1_PARCELA
@@ -243,7 +241,8 @@ Static Function MovBancarios()
 		 
 	//Atualiza status do título Origem
 	 
-					IF SE1->E1_SALDO*1.10  >= MOVNFIG->E5_VALOR .AND. Alltrim(SE1->E1_NUM)=Alltrim(cNum)
+					//IF SE1->E1_SALDO*1.10  >= MOVNFIG->E5_VALOR .AND. Alltrim(SE1->E1_NUM)=Alltrim(cNum)
+					IF SE1->E1_SALDO  >= MOVNFIG->E5_VALOR .AND. Alltrim(SE1->E1_NUM)=Alltrim(cNum)
 						RecLock("SE1",.f.)
 						SE1->E1_BASCOM5 := SE1->E1_SALDO
 						conout("Valor Saldo Anterior ="+str(SE1->E1_SALDO)+" Valliq="+str(E1_VALLIQ))
@@ -288,7 +287,7 @@ Static Function MovBancarios()
 		dbSelectArea("MOVNFSEM")
 		dbCloseArea()
 	EndIf
-
+/*
 	cQuery := "SELECT SUM(C.E1_SALDO) AS SALDO_TOTVS, COUNT(C.E1_SALDO) QTPARC_TOT, SUM(C.E1_VALOR)/COUNT(C.E1_SALDO) AS VALPARC_TOT,"
 	cQuery += " TITNF.E1_PEDIDO AS PEDIDO, TITNF.E1_PARCELA,  E5_PREFIXO, E5_NUMERO, E5_PARCELA,E5_DATA, E5_TIPO,E5_TIPODOC,E5_MOTBX, E5_RECPAG, E5_DOCUMEN,  E5_BENEF,E5_HISTOR,"
 	cQuery += " E5_MOEDA,E5_NATUREZ, E5_CLIENTE, E5_VALOR,  E5_CLIFOR, E5_LOJA, E5_DTDIGIT,  E5_SEQ, E5_DTDISPO, E5_FILORIG, E5_BANCO, E5_AGENCIA, E5_CONTA , B.R_E_C_N_O_ AS ID"
@@ -303,7 +302,23 @@ Static Function MovBancarios()
 	cQuery += " GROUP BY TITNF.E1_PEDIDO, TITNF.E1_PARCELA,  E5_PREFIXO, E5_NUMERO, E5_PARCELA,E5_DATA, E5_TIPO,E5_TIPODOC,E5_MOTBX, E5_RECPAG, E5_DOCUMEN,  E5_BENEF,E5_HISTOR,"
 	cQuery += " E5_MOEDA,E5_NATUREZ, E5_CLIENTE, E5_VALOR,  E5_CLIFOR, E5_LOJA, E5_DTDIGIT,  E5_SEQ, E5_DTDISPO, E5_FILORIG, E5_BANCO, E5_AGENCIA, E5_CONTA , B.R_E_C_N_O_ "
 	cQuery += " HAVING  SUM(C.E1_SALDO)>0 " 
+	*/
 	
+
+cQuery := "	SELECT TITNF.E1_PEDIDO AS PEDIDO, TITNF.E1_PARCELA, TITNF.E1_VALOR, TITNF.E1_SALDO, "
+cQuery += " C.E1_PARCELA, SUM(C.E1_VALOR) AS VALOR, SUM(C.E1_SALDO) AS SALDO_TOTVS, COUNT(C.E1_SALDO) QTPARC_TOT, SUM(C.E1_VALOR)/COUNT(C.E1_SALDO) AS VALPARC_TOT, "
+cQuery += " E5_PREFIXO, E5_NUMERO, E5_PARCELA,E5_DATA, E5_TIPO,E5_TIPODOC,E5_MOTBX, E5_RECPAG, E5_DOCUMEN,  E5_BENEF,E5_HISTOR,"
+cQuery += " E5_MOEDA,E5_NATUREZ, E5_CLIENTE, E5_VALOR,  E5_CLIFOR, E5_LOJA, E5_DTDIGIT,  E5_SEQ, E5_DTDISPO, E5_FILORIG, E5_BANCO, E5_AGENCIA, E5_CONTA , B.R_E_C_N_O_ AS ID"
+cQuery += " FROM  SRVPP01.DADOS12.dbo.SE5010 B INNER JOIN SRVPP01.DADOS12.dbo.SE1010 TITNF ON B.E5_PREFIXO = TITNF.E1_PREFIXO AND B.E5_NUMERO = TITNF.E1_NUM AND B.E5_PARCELA = TITNF.E1_PARCELA"
+cQuery += " INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SE1010 C ON TITNF.E1_PEDIDO=C.E1_PEDIDO "
+cQuery += " WHERE B.D_E_L_E_T_=''AND TITNF.D_E_L_E_T_='' AND C.D_E_L_E_T_=''  AND E5_SITUACA='' AND E5_NUMERO<>'' AND TITNF.E1_PEDIDO<> '' AND E5_MOTBX IN ('LIQ') AND E5_TIPODOC NOT IN ('JUR') AND E5_BANCO NOT IN ('CX1') AND C.E1_SALDO>0"
+cQuery += " AND B.R_E_C_N_O_ NOT IN (SELECT  CAST(E5_IDMOVI AS INT) FROM SRVPP03.DADOSTOTVS11.dbo.SE5010 WHERE E5_IDMOVI<>'' ) "
+cQuery += " AND TITNF.E1_PEDIDO+TITNF.E1_PARCELA NOT IN (SELECT E1_PEDIDO+E1_PARCELA FROM SRVPP03.DADOSTOTVS11.dbo.SE1010 WHERE D_E_L_E_T_='' AND E1_SALDO>0 AND LEN(E1_PEDIDO)=6) "
+cQuery += " AND TITNF.E1_PEDIDO IN ( SELECT  C5_NUM FROM SRVPP03.DADOSTOTVS11.dbo.SC5010 WHERE C5_NUM >='"+PedIni +"' AND C5_NUM <='"+PedIni +"' AND C5_ROMANEI >='"+RomIni +"' AND C5_ROMANEI <='"+RomFim +"' )"
+cQuery += " GROUP BY TITNF.E1_PEDIDO, TITNF.E1_PARCELA,TITNF.E1_VALOR, TITNF.E1_SALDO, C.E1_PARCELA,  E5_PREFIXO, E5_NUMERO, E5_PARCELA,E5_DATA, E5_TIPO,E5_TIPODOC,E5_MOTBX, E5_RECPAG, E5_DOCUMEN,  E5_BENEF,E5_HISTOR,"
+cQuery += " E5_MOEDA,E5_NATUREZ, E5_CLIENTE, E5_VALOR,  E5_CLIFOR, E5_LOJA, E5_DTDIGIT,  E5_SEQ, E5_DTDISPO, E5_FILORIG, E5_BANCO, E5_AGENCIA, E5_CONTA , B.R_E_C_N_O_ "
+
+
 	TCQuery cQuery Alias MOVNFSEM New
 
 	dbSelectArea("MOVNFSEM")
@@ -320,7 +335,8 @@ Static Function MovBancarios()
 		
 		Do While SE1->E1_PEDIDO = MOVNFSEM->PEDIDO
 		//	If limp := .f.
-			if SE1->E1_SALDO*1.10 >= MOVNFSEM->E5_VALOR
+		//	if SE1->E1_SALDO*1.10 >= MOVNFSEM->E5_VALOR
+			if SE1->E1_SALDO >= MOVNFSEM->E5_VALOR
 				conout("Baixado parc.dif:<"+SE1->E1_PARCELA+"> e <"+MOVNFSEM->E5_PARCELA+">")
 				nSaldoTit := SE1->E1_SALDO
 				cNum  := SE1->E1_NUM
@@ -382,7 +398,9 @@ Static Function MovBancarios()
 		 
 	//Atualiza status do título Origem
 				IF Alltrim(SE1->E1_NUM)=Alltrim(cNum) .and. SE1->E1_CLIENTE = MOVNFSEM->E5_CLIENTE
-					IF SE1->E1_SALDO*1.10 >= MOVNFSEM->E5_VALOR
+				//	IF SE1->E1_SALDO*1.10 >= MOVNFSEM->E5_VALOR
+					IF SE1->E1_SALDO >= MOVNFSEM->E5_VALOR
+				
 						RecLock("SE1",.f.)
 						SE1->E1_BASCOM5 := SE1->E1_SALDO
 						conout("Valor Saldo Anterior ="+str(SE1->E1_SALDO)+" Valliq="+str(E1_VALLIQ))
@@ -416,9 +434,13 @@ Static Function MovBancarios()
 		MOVNFSEM->(dbskip())
 	EndDo
 	dbCloseArea("MOVNFSEM")
-	
 	conout(Dtoc(date())+" "+ time()+"-Fim fase 1-Importa Movto")
-	//******************************************* 
+
+Return
+
+
+Static Function ImportaCheque()	
+///******************************************* 
 //***  3) INCLUI TITULO DO CHEQUE - SE1   ***
 //*******************************************	
 	//fecha o alias temporário 
@@ -428,16 +450,28 @@ Static Function MovBancarios()
 	EndIf
 
 	// Titulo do Cheque 
-	cQuery := "SELECT SUBSTRING(E1_PARCELA,2,1) AS E1_PARCELA, E1_NUM, E1_PREFIXO , E1_TIPO,E1_NATUREZ ,E1_CLIENTE, E1_LOJA ,  E1_NOMCLI, E1_EMISSAO, E1_VENCTO, E1_VENCREA, E1_VALOR, E1_BAIXA, E1_EMIS1, E1_HIST,
+/*	cQuery := "SELECT SUBSTRING(E1_PARCELA,2,1) AS E1_PARCELA, E1_NUM, E1_PREFIXO , E1_TIPO,E1_NATUREZ ,E1_CLIENTE, E1_LOJA ,  E1_NOMCLI, E1_EMISSAO, E1_VENCTO, E1_VENCREA, E1_VALOR, E1_BAIXA, E1_EMIS1, E1_HIST,
 	cQuery += " E1_MOVIMEN, E1_SALDO, E1_VEND1, E1_VALLIQ,E1_VENCORI,E1_OK,E1_OCORREN, E1_VLCRUZ,E1_STATUS, E1_ORIGEM, E1_FLUXO, E1_NUMLIQ, E1_EMITCHQ, E1_CTACHQ, E1_AGECHQ, E1_BCOCHQ, A.R_E_C_N_O_ AS ID"
 	cQuery += " FROM SRVPP01.DADOS12.dbo.SE1010 A INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SE5010 B ON 'T'+SUBSTRING(A.E1_NUMLIQ,2,5) = B.E5_DOCUMEN"
 	cQuery += " WHERE A.D_E_L_E_T_='' AND B.D_E_L_E_T_='' AND E1_NUMLIQ<>'' AND E1_TIPO IN ('CH','NF') AND E1_EMISSAO >='"+cDataIni +"' AND E1_EMISSAO<='"+cDataFim +"'" //dtos(ddatabase-10)
 	cQuery += " AND E1_NUM+SUBSTRING(E1_PARCELA,2,1)+E1_CLIENTE+E1_TIPO NOT IN (SELECT E1_NUM+E1_PARCELA+E1_CLIENTE+E1_TIPO FROM SRVPP03.DADOSTOTVS11.dbo.SE1010 WHERE E1_EMISSAO>='"+ cDataIni+"' AND E1_EMISSAO <='"+ cDataFim +"' )"
 	cQuery += " GROUP BY SUBSTRING(E1_PARCELA,2,1) , E1_NUM, E1_PREFIXO , E1_TIPO,E1_NATUREZ ,E1_CLIENTE, E1_LOJA ,  E1_NOMCLI, E1_EMISSAO, E1_VENCTO, E1_VENCREA, E1_VALOR, E1_BAIXA, E1_EMIS1, E1_HIST,"
 	cQuery += " E1_MOVIMEN, E1_SALDO, E1_VEND1, E1_VALLIQ,E1_VENCORI,E1_OK,E1_OCORREN, E1_VLCRUZ,E1_STATUS, E1_ORIGEM, E1_FLUXO, E1_NUMLIQ, E1_EMITCHQ, E1_CTACHQ, E1_AGECHQ, E1_BCOCHQ, A.R_E_C_N_O_"
-	  
+*/
+
+	cQuery := "SELECT SUBSTRING(E1_PARCELA,2,1) AS E1_PARCELA, E1_NUM, E1_PREFIXO , E1_TIPO,E1_NATUREZ ,E1_CLIENTE, E1_LOJA ,  E1_NOMCLI, E1_EMISSAO, E1_VENCTO, E1_VENCREA, E1_VALOR, E1_BAIXA, E1_EMIS1, E1_HIST, "
+	cQuery += " E1_MOVIMEN, E1_SALDO, E1_VEND1, E1_VALLIQ,E1_VENCORI,E1_OK,E1_OCORREN, E1_VLCRUZ,E1_STATUS, E1_ORIGEM, E1_FLUXO, E1_NUMLIQ, E1_EMITCHQ, E1_CTACHQ, E1_AGECHQ, E1_BCOCHQ, A.R_E_C_N_O_ AS ID"
+	cQuery += " FROM SRVPP01.DADOS12.dbo.SE1010 A INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SE5010 B ON 'T'+SUBSTRING(A.E1_NUMLIQ,2,5) = B.E5_DOCUMEN"
+	cQuery += " WHERE A.D_E_L_E_T_='' AND B.D_E_L_E_T_='' AND E1_NUMLIQ<>'' AND E1_TIPO IN ('CH','NF') " //AND E1_EMISSAO >='"+cDataIni +"' AND E1_EMISSAO<='"+cDataFim +"'" //dtos(ddatabase-10)
+	cQuery += " AND A.E1_PEDIDO IN ( SELECT  C5_NUM FROM SRVPP03.DADOSTOTVS11.dbo.SC5010 WHERE C5_NUM >='"+PedIni +"' AND C5_NUM <='"+PedIni +"' AND C5_ROMANEI >='"+RomIni +"' AND C5_ROMANEI <='"+RomFim +"' )"
+//	cQuery += " AND E1_NUM+SUBSTRING(E1_PARCELA,2,1)+E1_CLIENTE+E1_TIPO NOT IN (SELECT E1_NUM+E1_PARCELA+E1_CLIENTE+E1_TIPO FROM SRVPP03.DADOSTOTVS11.dbo.SE1010 WHERE E1_EMISSAO>='"+ cDataIni+"' AND E1_EMISSAO <='"+ cDataFim +"' )"
+	cQuery += " GROUP BY SUBSTRING(E1_PARCELA,2,1) , E1_NUM, E1_PREFIXO , E1_TIPO,E1_NATUREZ ,E1_CLIENTE, E1_LOJA ,  E1_NOMCLI, E1_EMISSAO, E1_VENCTO, E1_VENCREA, E1_VALOR, E1_BAIXA, E1_EMIS1, E1_HIST,"
+	cQuery += " E1_MOVIMEN, E1_SALDO, E1_VEND1, E1_VALLIQ,E1_VENCORI,E1_OK,E1_OCORREN, E1_VLCRUZ,E1_STATUS, E1_ORIGEM, E1_FLUXO, E1_NUMLIQ, E1_EMITCHQ, E1_CTACHQ, E1_AGECHQ, E1_BCOCHQ, A.R_E_C_N_O_"
+
 	TCQuery cQuery Alias TITCH New
-			
+
+	conout(cQuery)	
+		
 	dbSelectArea("TITCH")
 	TITCH->(dbGotop())
 	
@@ -534,11 +568,12 @@ Static Function MovBancarios()
 	cQuery := "SELECT EF_NUM,EF_TITULO,EF_TIPO,EF_PREFIXO,EF_PARCELA, EF_BANCO, EF_AGENCIA, EF_CONTA, EF_VALOR, EF_VALORBX, EF_DATA, EF_VENCTO, EF_BENEF, "
 	cQuery += " EF_FORNECE, EF_CLIENTE, EF_LOJA, EF_LOJACLI, EF_CPFCNPJ, EF_EMITENT, EF_HIST, EF_ALINEA1, EF_DTALIN1, EF_ALINEA2, EF_DTALIN2, EF_DTREPRE, EF_CART,"
 	cQuery += " EF_CHDEVOL, EF_ORIGEM,EF_TERCEIR, EF_USADOBX, EF_TEL, EF_SEQUENC, EF_DEPOSIT, EF_COMP, EF_GARANT, EF_IMPRESS, EF_LIBER, EF_OK, EF_PORTADO, EF_RG, R_E_C_N_O_  AS ID"
-	cQuery += " FROM SRVPP01.DADOS12.dbo.SEF010 WHERE D_E_L_E_T_='' AND EF_TIPO ='CH'  AND EF_CART='R' AND EF_DATA >='"+ cDataIni +"' AND EF_DATA <='"+ cDataFim +"' "  //dtos(ddatabase-10)
+	cQuery += " FROM SRVPP01.DADOS12.dbo.SEF010 WHERE D_E_L_E_T_='' AND EF_TIPO ='CH'  AND EF_CART='R' " //AND EF_DATA >='"+ cDataIni +"' AND EF_DATA <='"+ cDataFim +"' "  //dtos(ddatabase-10)
+	cQuery += " AND EF_TITULO IN ( SELECT  C5_NOTA FROM SRVPP03.DADOSTOTVS11.dbo.SC5010 WHERE C5_NUM >='"+PedIni +"' AND C5_NUM <='"+PedIni +"' AND C5_ROMANEI >='"+RomIni +"' AND C5_ROMANEI <='"+RomFim +"' )"
 	cQuery += " AND EF_BANCO+EF_AGENCIA+EF_CONTA+EF_NUM+EF_CLIENTE NOT IN (SELECT EF_BANCO+EF_AGENCIA+EF_CONTA+EF_NUM+EF_CLIENTE FROM SRVPP03.DADOSTOTVS11.dbo.SEF010)"
 
 	TCQuery cQuery Alias CHEQ New
-
+	conout(cQuery)
 	dbSelectArea("CHEQ")
 	CHEQ->(dbgotop())
 				
@@ -612,6 +647,7 @@ Static Function MovBancarios()
 	conout(Dtoc(date())+" "+ time()+"-Fim fase 3-Importa Cheque-SEF")
 	
 	//Caso não seja importado movimento, inclui na mensagem para enviar por email
+	/*
 	if cErroGeral = ""
 		cErroGeral :=" -------------------  MOVIMENTOS NÃO IMPORTADOS ----------------------------" +ENTER
 		cErroGeral +="Verificar os motivos da não importação, analisando as baixas do TOTVS."+ENTER
@@ -622,12 +658,13 @@ Static Function MovBancarios()
 	cErroGeral += cErroIg
 	cErroGeral += Replicate("=",80)+ENTER
 	cErroGeral += cErroSem
-				
+	*/			
 	//Envio de e-mail
 /*	if Alltrim(cErroGeral)<> ""
 		U_EnvMailimp('malotes@produtosplinc.com.br','IMPFIN - Movimentos não importados - '+ time() ,cErroGeral)
 		U_EnvMailimp('sistemas@produtosplinc.com.br','IMPFIN - Movimentos não importados - '+ time() ,cErroGeral)
-	EndIf  */
+	EndIf 
+	 */
 	
 Return
 
@@ -647,8 +684,9 @@ Static Function ImpBaixaLiq()
 	cErroGeral := ""
 	
 	//**************************************************
-	//***	EXCLUI BAIXAS NO TOTVS JA CANCELADAS	****
+	//***	EXCLUI BAIXAS NO TOTVS JA CANCELADAS	**** RETIRADO TRECHO TEMPORARIAMENTE. VERIFICAR SE CÓDIO É NECESSÁRIO
 	//***************************************************
+/*
 	If Select("EXCBX") > 0
 		dbSelectArea("EXCBX")
 		dbCloseArea()
@@ -720,6 +758,7 @@ Static Function ImpBaixaLiq()
 	dbCloseArea("EXCBX")
 	
 	conout(Dtoc(date())+" "+ time()+"-Fim fase 4-Excluindo movimentos")
+*/
 //*******************************************************
 //*** BAIXAS DE TÍTULOS DE LIQUIDAÇÃO IMPORTADOS  *******
 //*******************************************************
@@ -732,7 +771,8 @@ Static Function ImpBaixaLiq()
 	cQUery += " E5_CLIENTE, E5_VALOR,  E5_CLIFOR, E5_LOJA, E5_DTDIGIT,  E5_SEQ, E5_DTDISPO, E5_FILORIG, E5_BANCO, E5_AGENCIA, E5_CONTA , B.R_E_C_N_O_ AS ID "
 	cQuery += " FROM  SRVPP01.DADOS12.dbo.SE5010 B INNER JOIN SRVPP01.DADOS12.dbo.SE1010 TITNF ON B.E5_PREFIXO = TITNF.E1_PREFIXO AND B.E5_NUMERO = TITNF.E1_NUM AND B.E5_PARCELA = TITNF.E1_PARCELA"
 	cQuery += " WHERE B.D_E_L_E_T_='' AND TITNF.D_E_L_E_T_='' AND E5_SITUACA='' AND E5_NUMERO<>'' "
-	cQuery += " AND E5_DATA>='"+ cDataIni +"' AND E5_DATA <='"+ cDataFim +"' "  
+	//cQuery += " AND E5_DATA>='"+ cDataIni +"' AND E5_DATA <='"+ cDataFim +"' "  
+	cQuery += " AND TITNF.E1_PEDIDO IN ( SELECT  C5_NUM FROM SRVPP03.DADOSTOTVS11.dbo.SC5010 WHERE C5_NUM >='"+PedIni +"' AND C5_NUM <='"+PedIni +"' AND C5_ROMANEI >='"+RomIni +"' AND C5_ROMANEI <='"+RomFim +"' )"
 	cQuery += " AND B.R_E_C_N_O_ NOT IN (SELECT  CAST(E5_IDMOVI AS INT) FROM SRVPP03.DADOSTOTVS11.dbo.SE5010 WHERE E5_IDMOVI<>'' AND D_E_L_E_T_='')"
 	cQuery += " AND ((LEN(LTRIM(E1_PARCELA))='2' AND TITNF.E1_NUM+TITNF.E1_CLIENTE+SUBSTRING(E1_PARCELA,2,1) IN (SELECT E1_NUM+E1_CLIENTE+E1_PARCELA FROM SRVPP03.DADOSTOTVS11.dbo.SE1010 WHERE D_E_L_E_T_='' ) ) "   
 	cQuery += " OR(LEN(LTRIM(TITNF.E1_PARCELA))<='1' AND TITNF.E1_NUM+TITNF.E1_CLIENTE+TITNF.E1_PARCELA	IN (SELECT E1_NUM+E1_CLIENTE+E1_PARCELA FROM SRVPP03.DADOSTOTVS11.dbo.SE1010 WHERE D_E_L_E_T_='' )))"  		// AND E1_SALDO>0
@@ -842,11 +882,12 @@ Return
 Static Function AtualizaTitulos()
 
 //Atualizações no Título do Cheque e Fatura - Finalizado
-	cQuery := "UPDATE SRVPP03.DADOSTOTVS11.dbo.SE1010 SET E1_BAIXA = A.E1_BAIXA, E1_MOVIMEN= A.E1_MOVIMEN, E1_SALDO = A.E1_SALDO, E1_VALLIQ = A.E1_VALLIQ, E1_STATUS = A.E1_STATUS, E1_JURFAT='Atualizado '+CAST(GETDATE() AS varchar(19)) "
+/*	cQuery := "UPDATE SRVPP03.DADOSTOTVS11.dbo.SE1010 SET E1_BAIXA = A.E1_BAIXA, E1_MOVIMEN= A.E1_MOVIMEN, E1_SALDO = A.E1_SALDO, E1_VALLIQ = A.E1_VALLIQ, E1_STATUS = A.E1_STATUS, E1_JURFAT='Atualizado '+CAST(GETDATE() AS varchar(19)) "
 	cQuery += " FROM SRVPP01.DADOS12.dbo.SE1010 A  INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SE1010 B ON  A.E1_NUM=B.E1_NUM AND  A.E1_CLIENTE=B.E1_CLIENTE "
 	cQuery += " AND SUBSTRING(A.E1_NUMLIQ,2,5) = SUBSTRING(B.E1_NUMLIQ,2,5) AND SUBSTRING(A.E1_PARCELA, 2,1)=B.E1_PARCELA WHERE E1_HORIMP<>''"  //AND A.E1_NUMLIQ<>''      
 	cQuery += " AND ( A.E1_BAIXA <> B.E1_BAIXA  OR A.E1_SALDO <> B.E1_SALDO OR A.E1_VALLIQ <> B.E1_VALLIQ OR A.E1_BAIXA <> B.E1_BAIXA OR A.E1_STATUS <> B.E1_STATUS) "
 	//cQuery += "A.E1_EMISSAO >='"+ cDataIni +"' AND E5_DATA <='"+ cDataFim +"' "    //AND A.E1_BAIXA >="+ dtos(ddatabase-10)  
+	cQuery += " AND A.E1_PEDIDO IN ( SELECT  C5_NUM FROM SRVPP03.DADOSTOTVS11.dbo.SC5010 WHERE C5_NUM >='"+PedIni +"' AND C5_NUM <='"+PedIni +"' AND C5_ROMANEI >='"+RomIni +"' AND C5_ROMANEI <='"+RomFim +"' )"
 	TCSQLexec(cQuery)
 	conout(Dtoc(date())+" "+ time()+"Atualizados campos dos títulos SE1")
 
@@ -855,17 +896,19 @@ Static Function AtualizaTitulos()
 	cQueryc := "UPDATE SRVPP03.DADOSTOTVS11.dbo.SEF010 SET EF_ALINEA1=B.EF_ALINEA1, EF_DTALIN1=B.EF_DTALIN1, EF_ALINEA2=B.EF_ALINEA2, EF_DTALIN2=B.EF_DTALIN2, EF_DTREPRE=B.EF_DTREPRE, EF_CHDEVOL=B.EF_CHDEVOL, D_E_L_E_T_=B.D_E_L_E_T_ "
 	cQueryc += " FROM SRVPP03.DADOSTOTVS11.dbo.SEF010 A inner join SRVPP01.DADOS12.dbo.SEF010 B ON A.EF_BANCO+A.EF_AGENCIA+A.EF_CONTA+A.EF_NUM+A.EF_TITULO+A.EF_CLIENTE =B.EF_BANCO+B.EF_AGENCIA+B.EF_CONTA+B.EF_NUM+B.EF_TITULO+B.EF_CLIENTE"
 	cQueryc += " WHERE A.EF_TIPO IN ('CH ','FAT')  AND A.EF_HORIMP<>'' AND (A.EF_ALINEA1<>B.EF_ALINEA1 OR A.EF_DTALIN1 <> B.EF_DTALIN1 OR A.EF_ALINEA2 <> B.EF_ALINEA2 OR  A.EF_DTALIN2<>B.EF_DTALIN2 OR  A.EF_DTREPRE<>B.EF_DTREPRE OR A.EF_CHDEVOL<>B.EF_CHDEVOL OR A.D_E_L_E_T_<>B.D_E_L_E_T_)"
-	Queryc +=" AND A.EF_DATA >='"+ cDataIni+"' AND A.EF_DATA <='"+ cDataFim +"'"  
-	//cQueryc += " AND A.EF_DATA >= '20180601'" //+ dtos(ddatabase-180) +"'" //
+	//cQueryc += " AND a.EF_TITULO IN ( SELECT  C5_SERIE+C5_NUM FROM SRVPP03.DADOSTOTVS11.dbo.SC5010 WHERE C5_NUM >='"+PedIni +"' AND C5_NUM <='"+PedIni +"' AND C5_ROMANEI >='"+RomIni +"' AND C5_ROMANEI <='"+RomFim +"' )"
+	//Queryc +=" AND A.EF_DATA >='"+ cDataIni+"' AND A.EF_DATA <='"+ cDataFim +"'"  
+	cQueryc += " AND A.EF_DATA >= '" + dtos(ddatabase-180) +"'" 
  
 	TCSQLexec(cQueryc)
 	conout(Dtoc(date())+" "+ time()+"Atualizados campos dos cheques SEF")
-	
+*/	
 	
 //Atualiza condição de pagamento do TOTVS, caso for alterado no OFICIAL após importação.	
 	cQuery := "UPDATE SRVPP03.DADOSTOTVS11.dbo.SC5010 SET C5_CONDPAG=B.C5_CONDPAG FROM  SRVPP03.DADOSTOTVS11.dbo.SC5010 A INNER JOIN SRVPP01.DADOS12.dbo.SC5010 B ON A.C5_NUM=B.C5_NUM "
 	cQuery += " WHERE A.C5_NUM <'900000' AND B.C5_NUM <'900000' AND A.C5_NOTA='' AND B.C5_NOTA<>'' AND   A.C5_CONDPAG<>B.C5_CONDPAG AND A.D_E_L_E_T_='' AND B.D_E_L_E_T_='' "
-	cQuery += " AND (A.C5_EMISSAO >='"+ cDataIni +"' AND A.C5_EMISSAO <='"+ cDataFim +"') "
+	cQuery += " AND C5_NUM >='"+PedIni +"' AND C5_NUM <='"+PedIni +"' AND C5_ROMANEI >='"+RomIni +"' AND C5_ROMANEI <='"+RomFim +"'"
+	//cQuery += " AND (A.C5_EMISSAO >='"+ cDataIni +"' AND A.C5_EMISSAO <='"+ cDataFim +"') "
 	//cQuery += " OR (A.C5_EMISSAO >='"+ dtos(ddatabase-180)+"' )) "
 		//conout(cQuery)
 	TCSQLexec(cQuery)
@@ -875,8 +918,8 @@ Return
 
 Static Function ExcluiMov()
 
-//Exclusão de titulos já excluidos no OFICIAL.	
-	cQuery := 	"UPDATE SRVPP03.DADOSTOTVS11.dbo.SE1010 SET D_E_L_E_T_=A.D_E_L_E_T_ , E1_FILIAL='' "
+//Exclusão de titulos já excluidos no OFICIAL.	- 
+/*	cQuery := 	"UPDATE SRVPP03.DADOSTOTVS11.dbo.SE1010 SET D_E_L_E_T_=A.D_E_L_E_T_ , E1_FILIAL='' "
 	cQuery +=    "FROM SRVPP01.DADOS12.dbo.SE1010 A  INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SE1010 B ON  A.E1_NUM=B.E1_NUM AND  A.E1_CLIENTE=B.E1_CLIENTE "
 	cQuery += 	"AND SUBSTRING(A.E1_NUMLIQ,2,5) = SUBSTRING(B.E1_NUMLIQ,2,5) AND SUBSTRING(A.E1_PARCELA, 2,1)=B.E1_PARCELA "
 	cQuery += 	"WHERE E1_HORIMP<>'' AND  A.D_E_L_E_T_ <> B.D_E_L_E_T_ "  // A.E1_NUMLIQ<>'' AND
@@ -888,14 +931,21 @@ Static Function ExcluiMov()
 	cQuery := "DELETE FROM SRVPP03.DADOSTOTVS11.dbo.SE1010 WHERE D_E_L_E_T_='*' AND E1_NUMRA<>'' AND E1_SALDO=E1_VALOR"
 	TCSQLexec(cQuery)
 	conout(Dtoc(date())+" "+ time()+" Apagados títulos excluídos que foram importados.")
+*/
 
-	cQuery := "DELETE FROM SRVPP03.DADOSTOTVS11.dbo.SE5010 WHERE E5_HORIMP<>''  AND CAST(E5_IDMOVI AS INT) IN "
-	cQuery += " (SELECT R_E_C_N_O_  FROM SRVPP01.DADOS12.dbo.SE5010 WHERE E5_MOTBX='LIQ' AND ( D_E_L_E_T_='*' OR E5_SITUACA<>'') AND E5_DATA >='20190101') " 
+	//cQuery := "DELETE FROM SRVPP03.DADOSTOTVS11.dbo.SE5010 WHERE E5_HORIMP<>''  AND CAST(E5_IDMOVI AS INT) IN "
+	//cQuery += " (SELECT R_E_C_N_O_  FROM SRVPP01.DADOS12.dbo.SE5010 WHERE E5_MOTBX='LIQ' AND ( D_E_L_E_T_='*' OR E5_SITUACA<>'') AND E5_DATA >='20190101') " 
+	
+cQuery := "UPDATE SRVPP03.DADOSTOTVS11.dbo.SE5010 SET D_E_L_E_T_ = '*'   FROM SRVPP03.DADOSTOTVS11.dbo.SE5010 A INNER JOIN SRVPP03.DADOSTOTVS11.dbo.SC5010 B " 
+cQuery += " ON A.E5_NUMERO = B.C5_NOTA WHERE E5_HORIMP<>'' AND C5_NUM >='"+PedIni +"' AND C5_NUM <='"+PedIni +"' AND C5_ROMANEI >='"+RomIni +"' AND C5_ROMANEI <='"+RomFim +"'"
+cQuery += " AND CAST(E5_IDMOVI AS INT) IN  (SELECT R_E_C_N_O_  FROM SRVPP01.DADOS12.dbo.SE5010 WHERE E5_MOTBX='LIQ' AND ( D_E_L_E_T_='*' OR E5_SITUACA<>'') AND E5_DATA >='20190101') "
+	
 	TCSQLexec(cQuery)
 	conout(Dtoc(date())+" "+ time()+"- Apagados movimentos importados e excluídos no OFICIAL.")
 
 Return
 
+/*
 Static Function AtualizTitBol()
 
 cQuery := "UPDATE SRVPP03.DADOSTOTVS11.dbo.SE1010 SET E1_HIST='BOLETO BB GERADO'"
@@ -904,8 +954,8 @@ cQuery += " WHERE  B.D_E_L_E_T_='' AND  A.E1_SALDO > 0 AND B.E1_HIST ='BOLETO BB
 TCSQLexec(cQuery)
 	conout(Dtoc(date())+" "+ time()+"- Atualizado histórico de titulos de Boleto.")
 
-
 Return
+*/
 
 /*
 Static Function AtualizaRoman()
