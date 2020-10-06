@@ -21,7 +21,7 @@
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */ //antigo
-//User Function SIGAQIP()
+//User Function SIGAWMS()
 User Function TELAEXP()
 
 	Public cNumRom := ""
@@ -173,7 +173,7 @@ User Function carregam()
 	#define DS_MODALFRAME 128 //Desabilita fechar tela pelo X
 
 	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 000, 000  TO 550, 1200 COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
-	@ 006, 004 BUTTON oBtnFinaliz PROMPT "FINALIZAR CARGA" SIZE 060, 015 OF oDlg2 ACTION (finalizarom()) PIXEL
+	@ 006, 004 BUTTON oBtnFinaliz PROMPT "FINALIZAR CARGA" SIZE 060, 015 OF oDlg2 ACTION (FinalizaSenha()) PIXEL
 	@ 030, 004 BUTTON oBtnApont PROMPT "PAUSAR CARGA" SIZE 060, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
 	@ 030, 070 BUTTON oBtnApont PROMPT "EXCLUIR FARDOS" SIZE 060, 015 OF oDlg2 ACTION (u_retfardos()) PIXEL
 	@ 006, 070 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 060, 015 OF oDlg2 ACTION u_LOGRES() PIXEL
@@ -522,6 +522,19 @@ Static Function ExibeFinaliz()
 Return
 
 
+Static Function FinalizaSenha()
+
+	Static oDlgPwd, oGet, oBtnFinaliz 
+	Static cPassW := space(20)
+		
+	DEFINE DIALOG oDlgPwd TITLE "Senha Carga" FROM 180,180 TO 280,420 PIXEL
+	
+	@ 10,10 GET oGet VAR cPassW SIZE 100,15 OF oDlgPwd PIXEL VALID !empty(cPassW) PASSWORD
+	@ 30, 50 BUTTON oBtnFinaliz PROMPT "Confirmar" SIZE 060, 015 OF oDlgPwd ACTION (finalizarom()) PIXEL
+
+	ACTIVATE DIALOG oDlgPwd CENTERED
+
+Return
 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -539,90 +552,102 @@ Return
 */
 Static Function FinalizaRom()
 
-	cData := Dtoc(date())
-	HrFim := time()
-	aVetorReq := {}
 
-	//if nLeituras > 0
-	u_logres()
-	
-	dbSelectArea("SZ1")
-	dbGotop()
-	dbseek(xfilial("SZ1")+cNumRom+"01")
-	
-	if SZ1->(found())
-		RecLock("SZ1",.f.)
-		if  len(aFdFalta) > 0
-			If ! MSGYESNO("Carregamento incompleto. Deseja finalizar mesmo assim?" , "Confirmação")
-				Return
-			EndIf
-			SZ1->Z1_STATUS :="carga parcial"
-		Else
-			If  len(aFdExced)>0	
-				If ! MSGYESNO("Carregamento com excedentes. Deseja finalizar mesmo assim?" , "Confirmação")
+	if Alltrim(cPassW)  == "plinc123"
+		//Alert("Senha OK")
+		
+		oDlgPwd:End()
+
+		cData := Dtoc(date())
+		HrFim := time()
+		aVetorReq := {}
+
+		//if nLeituras > 0
+		//u_logres()
+
+		dbSelectArea("SZ1")
+		dbGotop()
+		dbseek(xfilial("SZ1")+cNumRom+"01")
+		
+		if SZ1->(found())
+			RecLock("SZ1",.f.)
+			if  len(aFdFalta) > 0
+				If ! MSGYESNO("Carregamento incompleto. Deseja finalizar mesmo assim?" , "Confirmação")
 					Return
 				EndIf
-				SZ1->Z1_STATUS :="carga excedente"
+				SZ1->Z1_STATUS :="carga parcial"
 			Else
-				SZ1->Z1_STATUS := "carga concluída"
-			EndIf
-		EndIf
-		SZ1->Z1_EXPFIM := date()
-		SZ1->Z1_HRFIM := HrFim
-		
-		dbSelectArea("SZ3")
-		dbSetOrder(2)
-		dbGotop()
-		dbseek(xfilial("SZ3")+cNumRom)
-		
-		cProdCar := SZ3->Z3_PRODUTO
-		nQtd := 0
-		Do While SZ3->Z3_ROMANEI == cNumRom
-			nQtd += 1
-			reclock("SZ3",.f.)
-			SZ3->Z3_REG := "R"  //Após testes definir campo e conteúdo definitivo
-			SZ3->(MsUnlock())
-			SZ3->(dbskip())
-			
-		//*************************************************************
-		//** GERA MOVTO DE REQUISIÇÃO DE PRODUTO ACABADO EXPEDIDO  ****
-		//*************************************************************
-		/*
-		if SZ3->Z3_PRODUTO <> cProdCar
-		
-			//Deve funcionar apenas quanto TES de Notas de Entrada e Devolução estiverem com Estoque=N.
-				lMsErroAuto := .F.
-					
-				aVetorReq:={ {"D3_TM","501",NIL},;
-					{"D3_COD",cProdCar,NIL},;
-					{"D3_EMISSAO",ddatabase,NIL},;
-					{"D3_DOC","R"+cNumRom,NIL},;
-					{"D3_HORA",time(),NIL},;
-					{"D3_QUANT",nQtd,NIL}}
-				MSExecAuto({|x,y| mata240(x,y)},aVetorReq,3) //Inclusao
-						
-				If lMsErroAuto
-					MSGALERT("Não foi possível requisitar os fardos.")
-					U_ENVMAILEXP('sistemas@produtosplinc.com.br',"Erro na req. para expedição" ,"Não foi possível requisitar os produtos.")
+				If  len(aFdExced)>0	
+					If ! MSGYESNO("Carregamento com excedentes. Deseja finalizar mesmo assim?" , "Confirmação")
+						Return
+					EndIf
+					SZ1->Z1_STATUS :="carga excedente"
+				Else
+					SZ1->Z1_STATUS := "carga concluída"
 				EndIf
-				
-				cProdCar := SZ3->Z3_PRODUTO
-				nQtd := 0
-			EndIf */
+			EndIf
+			SZ1->Z1_EXPFIM := date()
+			SZ1->Z1_HRFIM := HrFim
+			
+		/*	dbSelectArea("SZ3")
+			dbSetOrder(2)
+			dbGotop()
+			dbseek(xfilial("SZ3")+cNumRom)
+			
+			cProdCar := SZ3->Z3_PRODUTO
+			nQtd := 0
+			Do While SZ3->Z3_ROMANEI == cNumRom
+				nQtd += 1
+				reclock("SZ3",.f.)
+				SZ3->Z3_REG := "R"  //Após testes definir campo e conteúdo definitivo
+				SZ3->(MsUnlock())
+				SZ3->(dbskip())
+			*/	
+			//*************************************************************
+			//** GERA MOVTO DE REQUISIÇÃO DE PRODUTO ACABADO EXPEDIDO  ****
+			//*************************************************************
+			/*
+			if SZ3->Z3_PRODUTO <> cProdCar
+			
+				//Deve funcionar apenas quanto TES de Notas de Entrada e Devolução estiverem com Estoque=N.
+					lMsErroAuto := .F.
+						
+					aVetorReq:={ {"D3_TM","501",NIL},;
+						{"D3_COD",cProdCar,NIL},;
+						{"D3_EMISSAO",ddatabase,NIL},;
+						{"D3_DOC","R"+cNumRom,NIL},;
+						{"D3_HORA",time(),NIL},;
+						{"D3_QUANT",nQtd,NIL}}
+					MSExecAuto({|x,y| mata240(x,y)},aVetorReq,3) //Inclusao
+							
+					If lMsErroAuto
+						MSGALERT("Não foi possível requisitar os fardos.")
+						U_ENVMAILEXP('sistemas@produtosplinc.com.br',"Erro na req. para expedição" ,"Não foi possível requisitar os produtos.")
+					EndIf
 					
-		EndDo
-					
-		U_ENVMAILEXP('plinc.logistica@gmail.com',cAssunto ,cEmailErro)
-		U_ENVMAILEXP('vendas@produtosplinc.com.br',cAssunto ,cEmailErro)
-	//	U_ENVMAILEXP('sistemas@produtosplinc.com.br',cAssunto ,cEmailErro)
-	Else
-		MSGINFO("Não encontrado romaneio. Verificar com administrador.")
-		conout("TELAEXPED: Não encontrado romaneio"+ cNumRom +" para finalizar.")
+					cProdCar := SZ3->Z3_PRODUTO
+					nQtd := 0
+				EndIf */
+						
+			//EndDo
+						
+			U_ENVMAILEXP('plinc.logistica@gmail.com',cAssunto ,cEmailErro)
+			U_ENVMAILEXP('vendas@produtosplinc.com.br',cAssunto ,cEmailErro)
+		//	U_ENVMAILEXP('sistemas@produtosplinc.com.br',cAssunto ,cEmailErro)
+		Else
+			MSGINFO("Não encontrado romaneio. Verificar com administrador.")
+			conout("TELAEXPED: Não encontrado romaneio"+ cNumRom +" para finalizar.")
+		EndIf
+		//EndIf
+		SZ1->(MsUnlock())
+		oDlg2:End()
+		u_GridRom()
+
+	else
+		Alert("Senha Incorreta!")
+		oDlgPwd:End()
 	EndIf
-	//EndIf
-	SZ1->(MsUnlock())
-	oDlg2:End()
-	u_GridRom()
+
 Return
 
 /*
@@ -708,8 +733,8 @@ User Function DevolFardos()
 	DEFINE MSDIALOG oDlg4 TITLE "Devolução de Fardos" FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
 	@ 006, 010 SAY oSay1 PROMPT "Romaneio:" SIZE 060, 017 OF oDlg4 FONT oFont1 COLORS 0, 16777215 PIXEL
 	@ 006, 070 SAY oSay2 PROMPT cNumRom Picture "@!" SIZE 070, 010 OF oDlg4 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 006, 166 SAY oSay3 PROMPT "Veículo :" SIZE 051, 011 OF oDlg4 COLORS 0, 16777215 PIXEL
-	@ 005, 200 MSGET oGetVeic VAR cGetVeic SIZE 50, 010 OF oDlg4 COLORS 0, 16777215  PIXEL
+	//@ 006, 166 SAY oSay3 PROMPT "Veículo :" SIZE 051, 011 OF oDlg4 COLORS 0, 16777215 PIXEL
+	//@ 005, 200 MSGET oGetVeic VAR cGetVeic SIZE 50, 010 OF oDlg4 COLORS 0, 16777215  PIXEL
 	@ 030, 110 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg4 COLORS 0, 16777215 PIXEL
 	@ 029, 166 MSGET oGetCodBarFd VAR cGetEtqFd SIZE 132, 010 OF oDlg4 COLORS 0, 16777215  ON CHANGE (IncluiGridLeitor(2)) PIXEL
 	MontaGridFardo()
@@ -897,7 +922,7 @@ Static Function FardosConf(nTipoFunc)
 								
 					//Preenche vetor com somatório de fardos por Produto+Romaneio.
 					lexiste := .f.
-					if Alltrim(SZ3->Z3_REG)<>"" //Verifica se foi registrada saída do Estoque. Se não saiu pelo SD3 não devolve.
+				//	if Alltrim(SZ3->Z3_REG)<>"" //Verifica se foi registrada saída do Estoque. Se não saiu pelo SD3 não devolve.
 						For x:=1 to len(_aFardDev)
 							If Alltrim(_aFardDev[ x ][1]) == Alltrim(Z3_PRODUTO) .and. Alltrim(_aFardDev[ x ][2]) == Alltrim(cRomDev)
 	
@@ -913,10 +938,10 @@ Static Function FardosConf(nTipoFunc)
 							conout("TELAEXPED: NOVO- "+SZ3->Z3_PRODUTO+" - "+ SZ3->Z3_ROMANEI+" - "+ "1")
 						Endif
 						//LIMPAR CAMPO Z3_REG (REGISTRADO) PARA LIBERAR PARA OUTRO CARREGAMENTO
-						reclock("SZ3",.f.)
-						SZ3->Z3_REG := ""
-						msunlock()  
-					EndIF
+						//reclock("SZ3",.f.)
+						//SZ3->Z3_REG := ""
+						//msunlock()  
+				//	EndIF
 					nQtdExclui += 1
 				Else
 					MSGINFO("Etiqueta "+nEtq+" não foi carregada.")
@@ -933,7 +958,7 @@ Static Function FardosConf(nTipoFunc)
 				if nTipoFunc == 2 //Se rotina for de devolução de fardos
 					_dDoc := "R"+ time()
 				Else  ///Quando rotina for de  exclusão de fardos do romaneio.
-					_dDoc := "S"+_aFardDev[d][2]
+					_dDoc := "D"+_aFardDev[d][2]
 				EndIf
 				
 			//************************************************************

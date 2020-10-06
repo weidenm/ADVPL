@@ -176,12 +176,12 @@ STATIC FUNCTION MontaRoman()
 		
 		if nVia == 1  //1ª via =  Geral da Carga
 		//	cQuery:= "SELECT C5_ROMANEI,C5_ROMIT,C5_CLIENTE, C5_NUM,C5_EMISSAO,A1_NOME,A1_COD,A1_END,A1_MUN,A1_EST,C5_OBS,A1_CODSEG, SUM(C6_VALOR) AS VALOR"
-			cQuery:= "SELECT C5_ROMANEI,C5_ROMIT,C5_CLIENTE, C5_NUM,C5_EMISSAO,A1_NOME,A1_COD,A1_END,A1_MUN,A1_EST,C5_OBS,SUM(C6_VALOR) AS VALOR"
+			cQuery:= "SELECT C5_ROMANEI,C5_ROMIT,C5_CLIENTE, C5_NUM,C5_EMISSAO,A1_NOME,A1_COD,A1_END,A1_MUN,A1_EST,C5_OBS,A1_VEND, SUM(C6_VALOR) AS VALOR"
 			cQuery+= " FROM (" +  RetSqlName("SC5") + " A INNER JOIN " +  RetSqlName("SA1") + " B ON A.C5_CLIENTE = B.A1_COD) "
 			cQuery+= " INNER JOIN " +  RetSqlName("SC6") + " C ON A.C5_NUM = C.C6_NUM"
 			cQuery+= " WHERE A.D_E_L_E_T_ = '' AND B.D_E_L_E_T_ = '' AND C.D_E_L_E_T_ = '' AND C5_ROMANEI  ='" + SZ1->Z1_NUM + "'"
 			//cQuery+= " GROUP BY C5_ROMANEI,C5_ROMIT, A1_NOME,C5_CLIENTE, C5_NUM,C5_EMISSAO,A1_COD,A1_END,A1_MUN,A1_EST, C5_OBS, A1_CODSEG"
-			cQuery+= " GROUP BY C5_ROMANEI,C5_ROMIT, A1_NOME,C5_CLIENTE, C5_NUM,C5_EMISSAO,A1_COD,A1_END,A1_MUN,A1_EST, C5_OBS"
+			cQuery+= " GROUP BY C5_ROMANEI,C5_ROMIT, A1_NOME,C5_CLIENTE, C5_NUM,C5_EMISSAO,A1_COD,A1_END,A1_MUN,A1_EST, C5_OBS, A1_VEND"
 			cQuery+= " ORDER BY C5_ROMANEI,C5_ROMIT"
 		
 			cDestino := SZ1->Z1_DESCRI
@@ -274,7 +274,7 @@ STATIC FUNCTION MontaRoman()
 			oPrn:Say(0430,0300,"Cliente"	            	,oFont12)
 			oPrn:Say(0430,1400,"Pedido"	  	            ,oFont12) //	oPrn:Say(0330,1100,"Quantidade"	  	            ,oFont12N)
 			oPrn:Say(0430,1600,"Val.Total"		  	        ,oFont12)
-			oPrn:Say(0430,1800,"Nota Fiscal"	   	         	,oFont12)
+			oPrn:Say(0430,1800,"Vendedor"	   	         	,oFont12)
 			oPrn:Say(0430,2050,"Item Rom."	   	            	,oFont12)
 		                                                      
 		//ITENS DO ROMANEIO
@@ -314,7 +314,8 @@ STATIC FUNCTION MontaRoman()
 				oPrn:Say(nLin,0300,OemToAnsi(ROMITENS->A1_COD)+" - "+ OemToAnsi(substr(ROMITENS->A1_NOME,1,40)),			   oFont10)
 				oPrn:Say(nLin,1400,OemToAnsi(ROMITENS->C5_NUM),			   oFont10)
 				oPrn:Say(nLin,1600,Transform(ROMITENS->VALOR,"@E 9,999,999.99"),		oFont10)
-			//******** NOTA FISCAL - INCLUIR ******
+				oPrn:Say(nLin,1600,Transform(ROMITENS->VALOR,"@E 9,999,999.99"),		oFont10)
+				oPrn:Say(nLin,1850,OemToAnsi(ROMITENS->A1_VEND),			   oFont10)
 				oPrn:Say(nLin,2150,OemToAnsi(ROMITENS->C5_ROMIT),			   oFont12N)
 				oPrn:Say(nLin+50,0100,OemToAnsi(trim(ROMITENS->A1_END))+" - "+ OemToAnsi(trim(ROMITENS->A1_MUN))+" - "+ OemToAnsi(trim(ROMITENS->A1_EST)), oFont10)
 				

@@ -115,7 +115,7 @@ User Function TesInteligente
 
 				cTes:="508"
 
-			CASE ((Alltrim(SA1->A1_EST)="AL" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB) $ "001/002/003/004/005/006/007")
+			CASE ( Alltrim(SA1->A1_EST)="AL" .and. Alltrim(SA1->A1_GRPTRIB)="" .and. Alltrim(SB1->B1_GRTRIB) $"001/002/003/004/005/006/007")
 											
 				cTes:="509"
 			

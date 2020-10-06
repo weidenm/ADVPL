@@ -354,7 +354,7 @@ Static Function TelaCarga()
 //****************         MONTAGEM DA TELA            ************************
 //******************************************************************************
 	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 0, 0 TO nLinTela-170, nColTela-70 COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
-	@ 002, 002 BUTTON oBtnFinaliz PROMPT "FINALIZAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (finalizarom()) PIXEL
+	@ 002, 002 BUTTON oBtnFinaliz PROMPT "FINALIZAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (finalizaSenha()) PIXEL
 	@ 020, 002 BUTTON oBtnApont PROMPT "PAUSAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
 	@ 002, 060 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 050, 015 OF oDlg2 ACTION LOGRES() PIXEL	
 	@ 020, 060 BUTTON oBtnApont PROMPT "EXCLUIR FARDOS" SIZE 050, 015 OF oDlg2 ACTION (retfardos()) PIXEL
@@ -808,6 +808,20 @@ Static Function ExibeFinaliz()
 Return
 */
 
+Static Function FinalizaSenha()
+
+	Static oDlgPwd, oGet, oBtnFinaliz 
+	Static cPassW := space(20)
+		
+	DEFINE DIALOG oDlgPwd TITLE "Senha Carga" FROM 180,180 TO 280,420 PIXEL
+	
+	@ 10,10 GET oGet VAR cPassW SIZE 100,15 OF oDlgPwd PIXEL VALID !empty(cPassW) PASSWORD
+	@ 30, 50 BUTTON oBtnFinaliz PROMPT "Confirmar" SIZE 060, 015 OF oDlgPwd ACTION (finalizarom()) PIXEL
+
+	ACTIVATE DIALOG oDlgPwd CENTERED
+
+Return
+
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -824,12 +838,15 @@ Return
 */
 Static Function FinalizaRom()
 
+if Alltrim(cPassW)  == "plinc123"
+	//Alert("Senha OK")
+	oDlgPwd:End()
+
 	cData := Dtoc(date())
 	HrFim := time()
 	aVetorReq := {}
 
-	//if nLeituras > 0
-	logres()
+	//logres()
 	
 	dbSelectArea("SZ1")
 	dbGotop()
@@ -855,6 +872,8 @@ Static Function FinalizaRom()
 		SZ1->Z1_EXPFIM := date()
 		SZ1->Z1_HRFIM := HrFim
 		
+		//Marca fardo como registrado e finalizado
+		/*
 		dbSelectArea("SZ3")
 		dbSetOrder(2)
 		dbGotop()
@@ -868,33 +887,7 @@ Static Function FinalizaRom()
 			SZ3->Z3_REG := "R"  //Após testes definir campo e conteúdo definitivo
 			SZ3->(MsUnlock())
 			SZ3->(dbskip())
-			
-			
-			//*************************************************************
-			//** GERA MOVTO DE REQUISIÇÃO DE PRODUTO ACABADO EXPEDIDO  ****
-			//*************************************************************
-		/*	if SZ3->Z3_PRODUTO <> cProdCar
-			//Deve funcionar apenas quanto TES de Notas de Entrada e Devolução estiverem com Estoque=N.
-				lMsErroAuto := .F.
-					
-				aVetorReq:={ {"D3_TM","501",NIL},;
-					{"D3_COD",cProdCar,NIL},;
-					{"D3_EMISSAO",ddatabase,NIL},;
-					{"D3_DOC","R"+cNumRom,NIL},;
-					{"D3_HORA",time(),NIL},;
-					{"D3_QUANT",nQtd,NIL}}
-				MSExecAuto({|x,y| mata240(x,y)},aVetorReq,3) //Inclusao
-						
-				If lMsErroAuto
-					MSGALERT("Não foi possível requisitar os fardos.")
-					ENVMAILEXP('sistemas@produtosplinc.com.br',"Erro na req. para expedição" ,"Não foi possível requisitar os produtos.")
-				EndIf
-				
-				cProdCar := SZ3->Z3_PRODUTO
-				nQtd := 0
-			EndIf  */
-			
-		EndDo
+		EndDo */
 					
 	//	ENVMAILEXP('plinc.logistica@gmail.com',cAssunto ,cEmailErro)
 		//ENVMAILEXP('vendas@produtosplinc.com.br',cAssunto ,cEmailErro)
@@ -903,10 +896,14 @@ Static Function FinalizaRom()
 		MSGINFO("Não encontrado romaneio. Verificar com administrador.")
 		conout("TELAEXPED: Não encontrado romaneio"+ cNumRom +" para finalizar.")
 	EndIf
-	//EndIf
 	SZ1->(MsUnlock())
 	oDlg2:End()
 	GridRom()
+else
+	Alert("Senha Incorreta!")
+	oDlgPwd:End()
+EndIf
+
 Return
 
 /*
@@ -1058,7 +1055,6 @@ Static Function IncluiGridLeitor(nTipoRet)
 		dbSelectArea("SZ3")
 		dbgotop()
 		DbSetOrder(1)
-		//dbseek(xfilial("SZ3")+substr(Alltrim(cEtiqueta),1,8)+substr(cEtiqueta,9,3)+" "+substr(cEtiqueta,12,1))
 		dbseek(xfilial("SZ3")+substr(Alltrim(cEtiqueta),1,8)+substr(cEtiqueta,9,4)) //ALTERADO 28/07/15
 	//VERIFICA SE EXISTE O ITEM NO PRODUTO.
 	
@@ -1067,26 +1063,6 @@ Static Function IncluiGridLeitor(nTipoRet)
 			If  Trim(SZ3->Z3_ROMANEI) <> "" .or. SZ3->Z3_REG='D' //CASO FARDO FOR ENCONTRADO*
 			
 				cCodProd := SZ3->Z3_PRODUTO
-			
-				//****************************************************************************************************
-				//***  Verifica se romaneio está fechado. Só será permitido devolução em romaneios finalizados.  *****
-				//****************************************************************************************************
-		/*	dbSelectArea("SZ1")
-				DbSetOrder(1)
-				dbseek(xfilial("SZ1")+SZ3->Z3_ROMANEI+"01")	
-				
-				if SZ3->(found())
-				
-				  if SZ1->Z1_DTFECH = "" 
-				  	if  nTipoRet = 2
-				  		MSGINFO("Não é possível devolver produto de romaneio em aberto. Fechar romaneio antes de realizar a devolução.")
-				  	EndIf
-				  else
-				  	if  nTipoRet = 1 .and. //Verificar se etiqueta pertence ao Romaneio posicionado.
-				  	
-				  	Endif
-				  EndIf
-				EndIf 	*/
 				
 				dbSelectArea("SB1")
 				DbSetOrder(1)
@@ -1200,7 +1176,7 @@ Static Function FardosConf(nTipoFunc)
 								
 					//Preenche vetor com somatório de fardos por Produto+Romaneio.
 					lexiste := .f.
-					if Alltrim(SZ3->Z3_REG)<>"" //Verifica se foi registrada saída do Estoque. Se não saiu pelo SD3 não devolve.
+				//	if Alltrim(SZ3->Z3_REG)<>"" //Verifica se foi registrada saída do Estoque. Se não saiu pelo SD3 não devolve.
 						For x:=1 to len(_aFardDev)
 							If Alltrim(_aFardDev[ x ][1]) == Alltrim(Z3_PRODUTO) .and. Alltrim(_aFardDev[ x ][2]) == Alltrim(cRomDev)
 	
@@ -1216,10 +1192,10 @@ Static Function FardosConf(nTipoFunc)
 							conout("TELAEXPED: NOVO- "+SZ3->Z3_PRODUTO+" - "+ SZ3->Z3_ROMANEI+" - "+ "1")
 						Endif
 						//LIMPAR CAMPO Z3_REG (REGISTRADO) PARA LIBERAR PARA OUTRO CARREGAMENTO
-						reclock("SZ3",.f.)
-						SZ3->Z3_REG := ""
-						msunlock()
-					EndIF
+						//reclock("SZ3",.f.)
+						//SZ3->Z3_REG := ""
+						//msunlock()
+				//	EndIF
 					nQtdExclui += 1
 				Else
 					MSGINFO("Etiqueta "+nEtq+" não foi carregada.")
@@ -1229,40 +1205,6 @@ Static Function FardosConf(nTipoFunc)
 				MSGINFO("Etiqueta "+nEtq+" não encontrada.")
 				conout("TELAEXPED: Etiqueta "+nEtq+" não encontrada.linha vetor:"+ str(i))
 			endif
-		Next
-		
-		For d:=1 to len(_aFardDev)
-				
-			if nTipoFunc == 2 //Se rotina for de devolução de fardos
-				_dDoc := "D"+ time()
-			Else  ///Quando rotina for de  exclusão de fardos do romaneio.
-				_dDoc := "R"+_aFardDev[d][2]
-			EndIf
-				
-			//************************************************************
-			//** GERA MOVTO DE DEVOLUÇÃO DE PRODUTO ACABADO EXPEDIDO  **** - 
-			//************************************************************
-			/*  --Retirado dia 05/09 para utilizar no OFICIAL
-			lMsErroAuto := .F.
-					
-			aVetorReq:={ {"D3_TM","002",NIL},;
-				{"D3_COD",_aFardDev[d][1],NIL},;
-				{"D3_EMISSAO",ddatabase,NIL},;
-				{"D3_DOC","R"+_aFardDev[d][2],NIL},;
-				{"D3_HORA",time(),NIL},;
-				{"D3_QUANT",_aFardDev[d][3],NIL}}
-			MSExecAuto({|x,y| mata240(x,y)},aVetorReq,3) //Inclusao
-			conout("TELAEXPED: 3-"+_aFardDev[d][1]+"-"+"R"+_aFardDev[d][2]+"-"+str(_aFardDev[d][3]))
-			
-			If lMsErroAuto
-				ENVMAILEXP('sistemas@produtosplinc.com.br',"Erro na req. para expedição" ,"Não foi possível requisitar os produtos.")
-				MSGALERT("Não foi possível requisitar os fardos.")
-						
-				conout("TELAEXPED: FIM - Erro ao realizar requisição.")
-			Else
-				conout("TELAEXPED: FIM - Registrado com sucesso.")
-			EndIf
-			*/
 		Next
 		
 		MSGINFO("Excluídos do romaneio "+ Str(nQtdExclui) +" fardos registrados.")
@@ -1423,14 +1365,6 @@ Static Function LOGRES()
 		AADD(aTexto,cTexto1)
 	EndIf
 
-/*  DEFINE DIALOG oDlgLog TITLE "Resumo do Apontamento" FROM 180,180 TO 550,700 PIXEL
-   oTMultiget1 := TMultiget():New(01,01,{|u|if(Pcount()>0,cTexto1:=u,cTxtSucess+cTxtAnter+cTxtErro+cTxtNaoLida+cTexto1)},;
-                           oDlg,260,92,,,,,,.T.)
-	oTMultiget1:lWordWrap:= .t.
-  ACTIVATE DIALOG oDlgLog CENTERED  */
-
-/*	AADD(aButtons, { 1,.T.,{|| nOpca := 1        , FechaBatch() }})
-	FORMBATCH("Resumo do Apontamento", aTexto,aButtons,,500,500 )  */
 	cTexto1 := ""
 	FOR i:= 1 to len(aTexto)
 		cTexto1 += aTexto[i]+ENTER

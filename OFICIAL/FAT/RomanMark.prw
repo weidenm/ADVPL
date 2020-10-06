@@ -41,6 +41,7 @@ Static Function MenuDef()
 Local aRotina := {}
 
 ADD OPTION aRotina TITLE 'Gerar Romaneio' ACTION 'U_incluirom()' OPERATION 2 ACCESS 0
+//ADD OPTION aRotina TITLE 'Gerar NF Trasnferência' ACTION 'U_incluitransf()' OPERATION 2 ACCESS 0
 ADD OPTION aRotina TITLE 'Parâmetros' ACTION 'U_ParamRom()' OPERATION 2 ACCESS 0
 ADD OPTION aRotina TITLE 'Excluir' ACTION 'u_excluirom()' OPERATION 2 ACCESS 0
 ADD OPTION aRotina TITLE 'Imprimir Romaneio' ACTION 'u_ROMAN()' OPERATION 2 ACCESS 0
@@ -69,6 +70,10 @@ Local cMarca := oMark:Mark()
 Local lInverte := oMark:IsInvert()
 
 Local nCt := 0
+Local nPesoTot := 0
+Local nCapacid := 0  //DA3_CAPACN
+Local cVeiculo := "" //Z1_VEICULO
+
 
 Local nSeconds    := 0 // Segundos que iniciou a
 Local nX          := 0 // Contador de Repeticoes

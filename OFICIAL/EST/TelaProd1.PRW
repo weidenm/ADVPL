@@ -603,9 +603,11 @@ Static Function ImpSub(cTipoEtq)
 	if  MSGYESNO("Deseja realmente imprimir etiqueta para o produto "+SB1->B1_DESC+"?", "Confirmação")
 
 		if _Motivo = 1
-			cMot := "R" //Rasgada/Reenfardamento - utiliza produtos antigos com produtos novos algumas vezes.
+			cMot := "R" //Reenfardamento de produtos ou etiqueta rasgada no estoque. 
+			//Rasgada/Reenfardamento - utiliza produtos antigos com produtos novos algumas vezes.
 		ElseIf _Motivo = 2
-			cMot := "S" //Substituição - fardos devolvidos ou com etiqueta danificada
+			//cMot := "S" //Substituição - fardos devolvidos ou com etiqueta danificada
+			cMot := "D" //Devoluções - fardos devolvidos
 		EndIf
 		
 		
@@ -613,7 +615,7 @@ Static Function ImpSub(cTipoEtq)
 	
 		if Alltrim(cLoteSub) <> ""
 			IF Alltrim(cCodProd) <> ""
-				if cMot = "S"
+				if cMot = "D"
 					cOP := "55"+ strzero(val(cLoteSub),4) +"55" //alterado 16/07/18
 				Else
 					cOP := "99"+ strzero(val(cLoteSub),4) +"99" //alterado 11/04/16
@@ -779,9 +781,9 @@ Static Function ImpSub(cTipoEtq)
 			SZ3->Z3_DOCSD3 :=  _cDoc
 			SZ3->Z3_DATA   := date() // dDatabase  //DATA DE APONTAMENTO DO FARDO - INCLUIR CAMPO
 			//SZ3->Z3_LETRA  := cTurma
-		//	if cMot = "D"  //Registrar que fardo já foi carregado e tem etiqueta substituta de devolução.
-		//		SZ3->Z3_REG ='D'
-		//	EndIf
+			if cMot = "D"  //Registrar que fardo já foi carregado e tem etiqueta substituta de devolução.
+				SZ3->Z3_REG ='D'
+			EndIf
 			SZ3->Z3_DTVALID := dValid
 			SZ3->Z3_LOTE := cLoteSub
 
