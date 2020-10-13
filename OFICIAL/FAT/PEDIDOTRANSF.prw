@@ -63,13 +63,13 @@ User Function JuntaPed()
     Local cMarca := oMark:Mark()
     Local lInverte := oMark:IsInvert()
 
-    Local nCt := 0
-    Local nPesoTot := 0
-    Local nCapacid := 0  //DA3_CAPACN
-    Local cVeiculo := "" //Z1_VEICULO
+  //  Local nCt := 0
+  //  Local nPesoTot := 0
+  //  Local nCapacid := 0  //DA3_CAPACN
+  //  Local cVeiculo := "" //Z1_VEICULO
 
 
-    Local nSeconds    := 0 // Segundos que iniciou a
+   // Local nSeconds    := 0 // Segundos que iniciou a
     Local nX          := 0 // Contador de Repeticoes
     Local nTotal      := 0
 
@@ -119,12 +119,13 @@ While !SC5->( EOF() )
 					dbCloseArea()
 			EndIf
 
-            cQuery := " SELECT C6_PRODUTO,C6_DESCRI, ISNULL(DA1_PRCVEN,0) PRCTABELA,C6_UM, MAX(C6_PRCVEN) MAX_PRCVEN, SUM(C6_QTDVEN) QTDVEN "
-            cQuery += " FROM (SRVPP01.DADOS12.dbo.SC6010 A INNER JOIN SRVPP01.DADOS12.dbo.SC5010 B ON A.C6_NUM = B.C5_NUM) "
-            cQuery += " left join DA1010  C ON C.DA1_CODTAB = '007' AND C.DA1_FILIAL='01' AND C.DA1_CODPRO=A.C6_PRODUTO "
-            cQuery += "  WHERE A.D_E_L_E_T_ = '' AND  B.D_E_L_E_T_ = '' AND (C.D_E_L_E_T_ ='' OR C.DA1_CODPRO IS NULL) AND C5_OK  = '"+ cMarca +"'
-            cQuery += " GROUP BY C6_PRODUTO,C6_DESCRI, ISNULL(DA1_PRCVEN,0), C6_UM " 
-			cQuery += " ORDER BY C.B1_GRUPO,C.B1_DESC"
+            cQuery := " SELECT B1_GRUPO,C6_PRODUTO, B1_DESC, ISNULL(DA1_PRCVEN,0) PRCTABELA,C6_UM, MAX(C6_PRCVEN) MAX_PRCVEN, SUM(C6_QTDVEN) QTDVEN "
+            cQuery += " FROM ((SRVPP01.DADOS12.dbo.SC6010 A INNER JOIN SRVPP01.DADOS12.dbo.SC5010 B ON A.C6_NUM = B.C5_NUM) "
+            cQuery += " left join DA1010  C ON C.DA1_CODTAB = '007' AND C.DA1_FILIAL='01' AND C.DA1_CODPRO=A.C6_PRODUTO) "
+            cQuery += "  INNER JOIN SB1010 D ON A.C6_PRODUTO = D.B1_COD "
+			cQuery += "  WHERE A.D_E_L_E_T_ = '' AND  B.D_E_L_E_T_ = '' AND (C.D_E_L_E_T_ ='' OR C.DA1_CODPRO IS NULL) AND C5_OK  = '"+ cMarca +"'
+            cQuery += " GROUP BY B1_GRUPO,C6_PRODUTO, B1_DESC,  ISNULL(DA1_PRCVEN,0), C6_UM " 
+			cQuery += " ORDER BY B1_GRUPO,B1_DESC"
 			//conout(cQuery)
 			TCQuery cQuery Alias ITENSPED New
 			//conout("Consulta de dados concluida -"+time())
@@ -132,23 +133,21 @@ While !SC5->( EOF() )
 			dbSelectArea("ITENSPED")
 			
 			While ! ITENSPED->(Eof()) 
-	
-			//	conout("gravação item "+ITENSPED->C6_ITEM+"-"+time())
-				dbSelectArea("SC6")
-	/*			dbsetorder(1)
-				dbseek(xfilial("SC6")+ITENSPED->C6_NUM+ITENSPED->C6_ITEM)
 
+			//	conout("gravação item "+ITENSPED->C6_ITEM+"-"+time())
+			//	dbSelectArea("SC6")
+			//	dbsetorder(1)
+			//	dbseek(xfilial("SC6")+ITENSPED->C6_NUM+ITENSPED->C6_ITEM)
+	/*			
 				If ! SC6->(found())
-		//			dbSelectArea("DA1")
-			//		dbsetorder(1)
-				//	dbseek(xfilial("DA1")+SA1->A1_TABELA+ITENSPED->C6_PRODUTO)
-		*/			ItPed += 1	
+		*/
+					ItPed += 1	
 					RecLock("SC6",.t.)
 					SC6->C6_NUM:=cNumProx
 					SC6->C6_ITEM:=STRZERO(ItPed,2)        
 					SC6->C6_FILIAL:= '01'
 					SC6->C6_PRODUTO:=ITENSPED->C6_PRODUTO
-					SC6->C6_DESCRI:=ITENSPED->C6_DESCRI
+					SC6->C6_DESCRI:=ITENSPED->B1_DESC
 					SC6->C6_UM:=ITENSPED->C6_UM
 					SC6->C6_QTDVEN:=ITENSPED->QTDVEN
 					IF ITENSPED->PRCTABELA > 0
@@ -170,7 +169,6 @@ While !SC5->( EOF() )
 					SC6->C6_ENTREG:= ddatabase //STOD(ITENSPED->C6_ENTREG)
 					SC6->C6_LOJA:= '01' //ITENSPED->C6_LOJA
 					//SC6->C6_COMIS1:=ITENSPED->C6_COMIS1
-				//	SC6->C6_DESCRI:=ITENSPED->C6_DESCRI
 					SC6->C6_CLASFIS:= '010' //ITENSPED->C6_CLASFIS
 					SC6->C6_DTCRIA := cDataHora
 							
@@ -180,6 +178,7 @@ While !SC5->( EOF() )
 					
                     nTotal += ITENSPED->QTDVEN
 //				EndIf
+
 				dbSelectArea("ITENSPED")
 				ITENSPED->(dbskip())
 			EndDo

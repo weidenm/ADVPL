@@ -121,6 +121,11 @@ SetPrvt("_cFilial,_cPedido,")
 
 _cFilial:= xFilial()
 
+if _cFilial = "02" 
+   //Alert("Filial DF não libera automatico.")
+   Return
+EndIf
+
 _cPedido    := SC5->C5_NUM
 //_dDtentrega := SC5->C5_ENTREGA
 //_cTpcobranc := SC5->C5_COBRANC
@@ -132,7 +137,9 @@ dbSelectArea("SC5")
 dbSetOrder(1)
 dbSeek(xFilial("SC5")+_cPedido,.T.)
 If Found()
-   While C5_FILIAL == xFilial("SC5") .AND. C5_NUM == _cPedido
+   //While C5_FILIAL == xFilial("SC5") .AND. C5_NUM == _cPedido
+   While C5_FILIAL == "01" .AND. C5_NUM == _cPedido
+   
          RecLock("SC5",.F.)
          Replace C5_LIBEROK With "S"
          If C5_TPFRETE != "F"
@@ -147,7 +154,9 @@ dbSelectArea("SC9")
 dbSetOrder(1)
 dbSeek(xFilial("SC9")+_cPedido,.T.)
 If Found()
-   While C9_FILIAL == xFilial("SC9") .AND. C9_PEDIDO == _cPedido
+   //While C9_FILIAL == xFilial("SC9") .AND. C9_PEDIDO == _cPedido
+   While C9_FILIAL == "01" .AND. C9_PEDIDO == _cPedido
+     
          RecLock("SC9",.F.)
          Replace C9_OK With "    "
          Replace C9_BLEST   With  "  "

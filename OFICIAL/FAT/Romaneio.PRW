@@ -319,6 +319,9 @@ STATIC FUNCTION MontaRoman()
 				oPrn:Say(nLin,2150,OemToAnsi(ROMITENS->C5_ROMIT),			   oFont12N)
 				oPrn:Say(nLin+50,0100,OemToAnsi(trim(ROMITENS->A1_END))+" - "+ OemToAnsi(trim(ROMITENS->A1_MUN))+" - "+ OemToAnsi(trim(ROMITENS->A1_EST)), oFont10)
 				
+//*****************************************************
+//*** IMPORTANTE: ATIVAR QUANDO COMPILAR NO OFICIAL ***
+//*****************************************************
 		//		IF ROMITENS->A1_CODSEG ='000006' .OR. ROMITENS->A1_CODSEG ='000007'
 		//			cObsFardo:= "FARDO CODIGO DE BARRAS / "
 		//		ENDIF
