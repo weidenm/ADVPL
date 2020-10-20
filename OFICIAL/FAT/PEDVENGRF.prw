@@ -5,6 +5,22 @@
 #INCLUDE "PROTHEUS.CH"
 #INCLUDE "FONT.CH"
 #include "topconn.ch"
+
+#define DMPAPER_LETTER 1 // Letter 8 1/2 x 11 in
+#define DMPAPER_LETTERSMALL 2 // Letter Small 8 1/2 x 11 in
+#define DMPAPER_TABLOID 3 // Tabloid 11 x 17 in
+#define DMPAPER_LEDGER 4 // Ledger 17 x 11 in
+#define DMPAPER_LEGAL 5 // Legal 8 1/2 x 14 in
+#define DMPAPER_EXECUTIVE 7 // Executive 7 1/4 x 10 1/2 in
+#define DMPAPER_A3 8 // A3 297 x 420 mm
+#define DMPAPER_A4 9 // A4 210 x 297 mm
+#define DMPAPER_A4SMALL 10 // A4 Small 210 x 297 mm
+#define DMPAPER_A5 11 // A5 148 x 210 mm
+#define DMPAPER_B4 12 // B4 250 x 354
+#define DMPAPER_B5 13 // B5 182 x 257 mm
+#define DMPAPER_FOLIO 14 // Folio 8 1/2 x 13 in
+#define DMPAPER_NOTE 18 // Note 8 1/2 x 11 in
+#define DMPAPER_ENV_10 20 // Envelope #10 4 1/8 x 9 1/2
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±i
@@ -131,8 +147,10 @@ User Function PEDVENGRF()
 
 	oPrn := TMSPrinter():New(cTitulo)
 	oPrn:Setup()
+	oPrn:SetPaperSize(9)
 	oPrn:SetPortrait()//SetPortrait() //SetLansCape()
 	oPrn:StartPage()
+	
 	
 	CriaTraba() //vindo do pedven.prw
 	GravTrab() //vindo do pedven.prw
@@ -322,7 +340,7 @@ Static Function GravTrab()
 			Replace  Pedido    With  SC6->C6_NUM
 			Replace  ItemPed   With  SC6->C6_ITEM
 			Replace  CodiProd  With  SC6->C6_PRODUTO 
-			Replace  DescProd  With  SC6->C6_DESCRI //IIf(SB1->B1_TIPO == "SP",SC6->C6_DESCRI,Left(Alltrim(SC6->C6_DESCRI),40))
+			Replace  DescProd  With  SB1->B1_DESC //SC6->C6_DESCRI //IIf(SB1->B1_TIPO == "SP",SC6->C6_DESCRI,Left(Alltrim(SC6->C6_DESCRI),40))
 			Replace  CodiUnid  With  SC6->C6_UM
 			Replace  Tipo      With  SB1->B1_Tipo
 			Replace  QtdeProd  With  SC6->C6_QTDVEN
@@ -450,47 +468,46 @@ STATIC FUNCTION MontaPedido()
 
 //	dbUseArea( .T.,, cArqTrab1, "TRBI",.F.,.F.)
   //	IndRegua("TRBI",cArqTrab1,"Pedido+ItemPed+CodiProd",,,"Selecionando Registros...")
-
  // DBSelectArea("TRBC")
   //  DBGoTop()
 
 //Imprime parte superior A4
-	If nVia = 1
-		oPrn:Line( 1700,050,1700,2400 )
-		nLin := 020
-		ImprimeCabe()
-		nLin :=0440  //linha do item 
-		ImprimeItens()
-		if nVia = 1 //Se a via não foi alterada por excesso de itens ( maior que 21 ) 
-			nLin :=1300 //linha do Rodapé 
-			ImprRoda()  //Imprime rodapé
-			
-			nVia := 2
-		Else		
-			nVia := 1
-			oPrn:EndPage()
-		EndIf
-	Else
-		if nVia = 2
+		If nVia = 1
 			oPrn:Line( 1700,050,1700,2400 )
-			nLin := 1750
+			nLin := 020
 			ImprimeCabe()
-			nLin :=2170  //linha do item 
+			nLin :=0440  //linha do item 
 			ImprimeItens()
-			
-			if nVia = 2  //Se a via não foi alterada por excesso de itens ( maior que 21 ) 
-				nLin :=3050 //linha do Rodapé 
+			if nVia = 1 //Se a via não foi alterada por excesso de itens ( maior que 21 ) 
+				nLin :=1300 //linha do Rodapé 
 				ImprRoda()  //Imprime rodapé
+				
+				nVia := 2
+			Else		
 				nVia := 1
 				oPrn:EndPage()
-			Else
-				nVia := 2
 			EndIf
-			
+		Else
+			if nVia = 2
+				oPrn:Line( 1700,050,1700,2400 )
+				nLin := 1750
+				ImprimeCabe()
+				nLin :=2170  //linha do item 
+				ImprimeItens()
+				
+				if nVia = 2  //Se a via não foi alterada por excesso de itens ( maior que 21 ) 
+					nLin :=3050 //linha do Rodapé 
+					ImprRoda()  //Imprime rodapé
+					nVia := 1
+					oPrn:EndPage()
+				Else
+					nVia := 2
+				EndIf
+				
+			EndIf
 		EndIf
-	EndIf
-								
-    TRBC->(dbskip())
+									
+		TRBC->(dbskip())
 
 	EndDo
 
@@ -558,9 +575,10 @@ Static Function ImprimeCabe()
 	nLin +=20 
 			oPrn:Say(nLin,0200,"Codigo"  	            	,oFont10N)
 			oPrn:Say(nLin,0400,"Nome do Produto"	            	,oFont10N)
-			oPrn:Say(nLin,1400,"Quantidade"	  	            ,oFont10N) //	oPrn:Say(0330,1100,"Quantidade"	  	            ,oFont12N)
-			oPrn:Say(nLin,1650,"Unid."		  	            ,oFont10N)
-			oPrn:Say(nLin,1800,"Preço Unit."	   	            	,oFont10N)
+			oPrn:Say(nLin,1300,"Quant."	  	            ,oFont10N) //	oPrn:Say(0330,1100,"Quantidade"	  	            ,oFont12N)
+		//	oPrn:Say(nLin,1650,"Unid."		  	            ,oFont10N)
+			oPrn:Say(nLin,1600,"Prc.Tab."	   	            	,oFont10N)
+            oPrn:Say(nLin,1900,"Prc.Desc."	   	            	,oFont10N)
             oPrn:Say(nLin,2200,"Total"	   	            	,oFont10N)
 			
 Return
@@ -586,9 +604,13 @@ nitens :=0
 			
 			While !Eof() .AND. TRBI->Pedido == TRBC->Pedido
 			    nitens+=1
-				
-				IF  nitens > 21 .and. lMudaPag = .f.	
-						
+				//if nitens = 22 .or. nitens = 43
+				//	lMudaPag := .t.	
+				//EndIf
+
+				IF  (nitens = 22 .or. nitens = 43) //.and. lMudaPag = .f.	
+			//	IF  lMudaPag = .f.	
+		
 					If nVia = 2
 						
 						nLin := 3250
@@ -628,9 +650,10 @@ nitens :=0
 				dbSeek(xFilial("SB1")+TRBI->CodiProd)
 				oPrn:Say(nLin,0150,Transform(nitens,"@E 99"),			   oFont09)
 				oPrn:Say(nLin,0400,OemToAnsi(TRBI->DescProd),			   oFont09)
-				oPrn:Say(nLin,1400,Transform(TRBI->QtdeProd,"@E 9,999,999.99"),		oFont09)
-				oPrn:Say(nLin,1650,OemToAnsi(TRBI->CodiUnid),			   oFont09)
-				oPrn:Say(nLin,1900,Transform(TRBI->PrecoTab,"@E 9,999,999.99"),	oFont09,,,,1)   //oPrn:Say(nLin,1900,Transform(TRBI->ValrUnit,"@E 9,999,999.99"),	oFont10,,,,1)
+				oPrn:Say(nLin,1300,Transform(TRBI->QtdeProd,"@E 9,999,999.99"),		oFont09)
+				//oPrn:Say(nLin,1650,OemToAnsi(TRBI->CodiUnid),			   oFont09)
+				oPrn:Say(nLin,1700,Transform(TRBI->PrecoTab,"@E 9,999,999.99"),	oFont09,,,,1)   
+				oPrn:Say(nLin,2000,Transform(TRBI->ValrUnit,"@E 9,999,999.99"),	oFont09,,,,1)
 				oPrn:Say(nLin,2300,Transform(TRBI->PrecoTab*TRBI->QtdeProd,"@E 9,999,999.99"),	oFont09,,,,1)
 				nLin+=035
 				oPrn:Line( nLin,050,nLin,2400 )	

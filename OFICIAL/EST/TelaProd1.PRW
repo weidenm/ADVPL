@@ -101,6 +101,7 @@ User Function SIGATEC()
 	@ 010, 341 BUTTON oBtnCancel PROMPT "Cancelamento" SIZE 051, 013 OF oDlg ACTION (u_ExcFardoBarras()) PIXEL
 	@ 025, 280 BUTTON oBtnParam PROMPT "Parametros" SIZE 051, 013 OF oDlg ACTION Pergunte(cPerg,.T.,"Configuração de Impressora") PIXEL
 	@ 025, 341 BUTTON oBtnImprimir PROMPT "Impressão" SIZE 051, 013 OF oDlg ACTION (u_PrintEtq()) PIXEL
+	@ 010, 220 BUTTON oBtnImprimirTST PROMPT "Teste CodBar" SIZE 051, 013 OF oDlg ACTION (TesteCodBar()) PIXEL
 
 	ACTIVATE MSDIALOG oDlg CENTERED
 
@@ -242,7 +243,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 	Public cNumFardo	:= ""
 	Public Numerac	   := 0
 	//Public NumIni		:= 0
-	
+	cEan14	:= ""
 	cOP		   := ""
 	cFardo		:= ""
 	nQuant     := _nQuant
@@ -300,6 +301,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 		cDescProd := SB1->B1_DESC
 		cUM := SB1->B1_UM
 		cGrupo := SB1->B1_GRUPO
+		cEan14	:= "27896769801890"
 			
 		cQry := "SELECT Z3_NUMOP,Z3_ITEMOP,MAX(Z3_NUMERAC) NUM FROM SZ3010"
 		cQry += " WHERE Z3_NUMOP = '" + Substr(cOP,1,6) + "' AND Z3_ITEMOP='" + Substr(cOP,7,2)+"'"
@@ -350,7 +352,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 			cPadraoBar   := "MB07"
 		elseif  _nPadraoBar = 2 //EAN 13
 			cPadraoBar   := "MB04"
-		elseif  _nPadraoBar = 3 //Interleaved
+		elseif  _nPadraoBar = 3 //EAN 14
 			cPadraoBar := "MB01"
 		elseif _nPadraoBar = 4 //Code 39
 			cPadraoBar := "MB02"
@@ -415,11 +417,15 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 				cNumFardo := strzero(Numerac,4)
 				lote:= Alltrim(SC2->C2_NUM)+ Alltrim(SC2->C2_ITEM)
 				cb1 := left(lote+cNumFardo,13)
-				//cCodBarProd := Alltrim(SB1->B1_CODBAR)
+			
 								
 				if _nImpress = 1 //ALLEGRO
 					MSCBBEGIN(1,6)
-						MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO
+
+						//MSCBSAYBAR(nXmm, nYmm, cConteudo, cRotacao, cTypePrt, nAltura, lDigVer, lLinha, lLinBaixo, cSubSetIni, nLargura, nRelacao, lCompacta, lSerial, cIncr, lZerosL)                          
+							MSCBSAYBAR(05,05,cEan14,"N","MB01",12,.F.,.F.,.F.,,4,4,.F.)  
+						
+						//MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO - CODIGO DE BARRAS OFICIAL
 							
 					if Alltrim(cGrupo) $ "1207" //.or. Alltrim(cCodProd) == "PA8215"
 						//MSCBSAYBAR ( 05, 20 , cCodBarProd , 'N',"MB01",06,,.T.,,,2,2) //EAN14 OFICIAL												
@@ -784,7 +790,7 @@ Static Function ImpSub(cTipoEtq)
 			if cMot = "D"  //Registrar que fardo já foi carregado e tem etiqueta substituta de devolução.
 				SZ3->Z3_REG ='D'
 			EndIf
-			SZ3->Z3_DTVALID := dValid
+		//	SZ3->Z3_DTVALID := dValid   //Desenvolver trecho para cálculo de data de validade
 			SZ3->Z3_LOTE := cLoteSub
 
 			SZ3->(MsUnlock())
@@ -1464,48 +1470,76 @@ return (cDataLote)
 Static Function TesteCodBar()
 
 
-	cPrinter := "DATAMAX"
-	cPorta   := "LPT1"
+	//cPrinter := "DATAMAX"
+	//cPorta   := "LPT1"
+	cEan14	:= "27896769801890"
+	x := 1
+
+	
+		if _nImpress = 1
+			cPrinter := "DATAMAX"
+		else
+			cPrinter := "ELTRON"
+		endif
+	
+		if _nPorta   = 1
+			cPorta   := "LPT1"
+		elseif  _nPorta = 2
+			cPorta   := "LPT2" //USB mapeada pelo NET USE
+		elseif  _nPorta = 3
+			cPorta := "LPT3"
+		endif
 
 	//***** CONFIGURAÇÕES PARA TESTE EM ZEBRA *************	
 //	_nImpress:=2 			//APENAS PARA TESTES. RETIRAR ANTES DE POR EM PRODUÇÃO.
 //	cPrinter:="ELTRON"  //APENAS PARA TESTES. RETIRAR ANTES DE POR EM PRODUÇÃO.
 //*********************************************************************************
 
-if x = 1 //CODE 128
-	cPadraoBar   := "MB07"
-	aConteudo :={{'01','07893316010411'}}
-elseif  x = 2 //EAN 13
-	cPadraoBar := "C"
-	aConteudo :={{'01','07893316010411'}}
-	
-elseif  x = 3 //Interleaved
-	cPadraoBar := "MB01"
-	aConteudo 	:= '07893316010411'
-elseif x = 4 //Code 39
-	cPadraoBar := "MB02"
-	aConteudo 	:= '07893316010411'
-elseif x = 5
-	cPadraoBar   := "MB04"
-	aConteudo 	:= '07893316010411'
-elseif x = 6
-	cPadraoBar := "D"
-	aConteudo :='07893316010411'
-
-endif
 
 MSCBPRINTER(cPrinter,cPorta, , , .F., , , , ,,.f. , )
 
 MSCBCHKStatus(.f.)
 	
-	While  cont < 10
+	While  x < 7
+		
+		if x = 1 //CODE 128
+			cPadraoBar   := "MB07"
+			aConteudo :={{'01','27896769801890'}}
+		
+		elseif  x = 2 //EAN 13
+			cPadraoBar := "C"
+			aConteudo :={{'01','27896769801890'}}
+			
+		elseif  x = 3 //Interleaved
+			cPadraoBar := "MB01"
+			aConteudo 	:= '27896769801890'
+		elseif x = 4 //Code 39
+			cPadraoBar := "MB02"
+			aConteudo 	:= '27896769801890'
+		elseif x = 5
+			cPadraoBar   := "MB04"
+			aConteudo 	:= '27896769801890'
+		elseif x = 6
+			cPadraoBar := "D"
+			aConteudo :='27896769801890'
+		elseif x = 7
+			cPadraoBar := "MB07"
+			aConteudo := "(01)05391234567892(15)051231(10)APO1536Z"
+				
+		endif	
 
 		MSCBBEGIN(1,6)
-		MSCBSAYBAR ( 05, 05 , aConteudo , 'N',cPadraoBar,08,,.T.,,,3,2.5) // LOTE (OP) + FARDO
+
+		if x < 7 
+			MSCBSAYBAR ( 05, 05 , aConteudo , 'N',cPadraoBar,08,.F.,.F.,.F.,,3,2.5) // LOTE (OP) + FARDO
+		Else
+			MSCBSayBar(0010, 0131, aConteudo, "N", "MB07", 08, .F., .F., .F., "A")
+		EndIf
 		MSCBEND()
 			
 			x := x + 1
 	EndDo	
-	
+
+	MSCBCLOSEPRINTER()	
 
 Return

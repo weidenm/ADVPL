@@ -484,7 +484,8 @@ STATIC FUNCTION MontaRoman()
 				nitens+=1
 			
 			//Segunda pagina - Alterado em 13/08/2018
-			IF  nitens > 63
+			IF  nitens > 55 //alterado 16/10/2020
+					oPrn:Say(nLin,1400,OemToAnsi("CONTINUA PROX. PAGINA"),			   oFont12N)
 					nitens := 1
 					nLin := 120
 					oPrn:EndPage()
@@ -496,12 +497,12 @@ STATIC FUNCTION MontaRoman()
 		
 			If nVia == 2  //Busca pedidos do romaneio para apresentar em cada via.
 				cQuery := "SELECT C5_ROMANEI,C5_NUM, C5_OBS FROM " +  RetSqlName("SC5")
-				cQuery += "  WHERE D_E_L_E_T_ <> '*' AND C5_ROMANEI ='" + SZ1->Z1_NUM + "'"
+				cQuery += "  WHERE D_E_L_E_T_ = '' AND C5_ROMANEI ='" + SZ1->Z1_NUM + "'"
 				cQuery +=" GROUP BY C5_ROMANEI,C5_NUM, C5_OBS "
 			//	cQuery += " ORDER BY C5_ROMANEI"
 			Else
 				cQuery := "SELECT C5_ROMANEI,C5_NUM, C5_OBS FROM " +  RetSqlName("SC5")
-				cQuery += "  WHERE D_E_L_E_T_ <> '*' AND C5_ROMANEI ='" + SZ1->Z1_NUM + "' AND C5_ROMIT = '" + SZ1->Z1_ITEM + "'"
+				cQuery += "  WHERE D_E_L_E_T_ = '' AND C5_ROMANEI ='" + SZ1->Z1_NUM + "' AND C5_ROMIT = '" + SZ1->Z1_ITEM + "'"
 				cQuery +=" GROUP BY C5_ROMANEI,C5_NUM, C5_OBS "
 			//	cQuery += " ORDER BY C5_ROMANEI"
 			EndIf
