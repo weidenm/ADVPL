@@ -97,11 +97,11 @@ User Function SIGATEC()
 	u_Grid()
 	//@ 010, 220 BUTTON oBtnCancel2 PROMPT "Cancela outro Lote" SIZE 051, 013 OF oDlg ACTION (u_ExcFardoBarras()) PIXEL
 	//@ 010, 220 BUTTON oBtnReimp PROMPT "Etiq. Devolvidos" SIZE 051, 013 OF oDlg ACTION (ImpSub(2))  PIXEL
-	@ 010, 280 BUTTON oBtnReimp PROMPT "Etiq. Substituição" SIZE 051, 013 OF oDlg ACTION (ImpSub(1)) PIXEL
+	@ 010, 280 BUTTON oBtnReimp PROMPT "Substituição" SIZE 051, 013 OF oDlg ACTION (ImpSub(1)) PIXEL
 	@ 010, 341 BUTTON oBtnCancel PROMPT "Cancelamento" SIZE 051, 013 OF oDlg ACTION (u_ExcFardoBarras()) PIXEL
 	@ 025, 280 BUTTON oBtnParam PROMPT "Parametros" SIZE 051, 013 OF oDlg ACTION Pergunte(cPerg,.T.,"Configuração de Impressora") PIXEL
 	@ 025, 341 BUTTON oBtnImprimir PROMPT "Impressão" SIZE 051, 013 OF oDlg ACTION (u_PrintEtq()) PIXEL
-	@ 010, 220 BUTTON oBtnImprimirTST PROMPT "Teste CodBar" SIZE 051, 013 OF oDlg ACTION (TesteCodBar()) PIXEL
+	//@ 010, 220 BUTTON oBtnImprimirTST PROMPT "Teste CodBar" SIZE 051, 013 OF oDlg ACTION (TesteCodBar()) PIXEL
 
 	ACTIVATE MSDIALOG oDlg CENTERED
 
