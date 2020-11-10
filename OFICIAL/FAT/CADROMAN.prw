@@ -24,10 +24,12 @@ User Function CADROM()
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Declaracao de Variaveis                                             ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
+Local cFunAlt := "U_AltRom()"
+//Local cFunExc := "U_ExcRom()"
 Private cPerg   := "SZ1"
-
 Private cString := "SZ1"
+
+
 
 dbSelectArea("SZ1")
 dbSetOrder(1)
@@ -37,7 +39,7 @@ cPerg   := "SZ1"
 Pergunte(cPerg,.F.)
 SetKey(123,{|| Pergunte(cPerg,.f.)}) // Seta a tecla F12 para acionamento dos parametros
 
-AxCadastro(cString,"Cadastro de Romaneios",".t.",".t.")
+AxCadastro(cString,"Cadastro de Romaneios",.t.,cFunAlt)
 
 
 Set Key 123 To // Desativa a tecla F12 do acionamento dos parametros
@@ -139,4 +141,40 @@ User Function ITEMROM()
 return(cItem)  
                     
 
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³RERPA02   ºAutor  ³ Vinícius Moreira   º Data ³ 17/03/2014  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Aprendendo a utilizar função AxCadastro.                   º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³                                                            º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function AltRom()
 
+Local lRet := .F.
+Local cMsg := ""
+
+//ALERT(M->Z1_NUM)
+
+If INCLUI
+	//cMsg := "Confirma a inclusão do registro?"
+	
+		dbSelectArea("SZ1")
+		DbSetOrder(1)
+		dbseek(xfilial("SZ1")+M->Z1_NUM+M->Z1_ITEM)
+	
+		If  SZ1->(found())
+			MSGSTOP("Esse romaneio já existe.")
+		else
+			lRet := .t.
+		EndIf
+
+EndIf
+
+Return lRet

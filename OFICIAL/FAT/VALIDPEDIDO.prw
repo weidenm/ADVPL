@@ -12,25 +12,28 @@ User Function MTA410()
 nPosQuant := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_QTDVEN"})
 nPosQtdlb := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_QTDLIB"})
 _nPOSValor:= aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_VALOR"})  // valor final
+cFilial   := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_FILIAL"})
 
 _nTotalpedido := 0
 _TotalQuant := 0
 
+  alert(SC5->C5_FILIAL)
+
 FOR _I := 1 TO LEN(ACOLS)
 
-   _QTDPED:=ACOLS[_I][nPosQuant]
-   _QTDLIB:=ACOLS[_I][nPosQtdlb]
-   _nValor:=ACOLS[_I][_nPOSValor]
+      _QTDPED:=ACOLS[_I][nPosQuant]
+      _QTDLIB:=ACOLS[_I][nPosQtdlb]
+      _nValor:=ACOLS[_I][_nPOSValor]
 
-   _TAM:=LEN(ACOLS[_I])     
-   _DELETADO:=ACOLS[_I][_TAM]     //verifica se não é uma linha deletada
+      _TAM:=LEN(ACOLS[_I])     
+      _DELETADO:=ACOLS[_I][_TAM]     //verifica se não é uma linha deletada
 
-   if !_DELETADO 
-      acols[_I][nPosQtdlb]:= acols[_I][nPosQuant]
-      _nTotalpedido := _nTotalpedido + _nValor
-      _TotalQuant := _TotalQuant + _QTDPED
-      
-   endif
+      if !_DELETADO 
+         acols[_I][nPosQtdlb]:= acols[_I][nPosQuant]
+         _nTotalpedido := _nTotalpedido + _nValor
+         _TotalQuant := _TotalQuant + _QTDPED
+         
+      endif
 
 NEXT
  

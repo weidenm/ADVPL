@@ -96,9 +96,8 @@ User Function SIGATEC()
 	@ 040, 135 SAY oSayNmApont PROMPT pswret(1)[1][4] SIZE 060, 011 OF oDlg FONT oFont2 COLORS 0, 16777215 PIXEL
 	u_Grid()
 	//@ 010, 220 BUTTON oBtnCancel2 PROMPT "Cancela outro Lote" SIZE 051, 013 OF oDlg ACTION (u_ExcFardoBarras()) PIXEL
-	//@ 010, 220 BUTTON oBtnReimp PROMPT "Etiq. Devolvidos" SIZE 051, 013 OF oDlg ACTION (ImpSub(2))  PIXEL
 	@ 010, 280 BUTTON oBtnReimp PROMPT "Substituição" SIZE 051, 013 OF oDlg ACTION (ImpSub(1)) PIXEL
-	@ 010, 341 BUTTON oBtnCancel PROMPT "Cancelamento" SIZE 051, 013 OF oDlg ACTION (u_ExcFardoBarras()) PIXEL
+	@ 010, 341 BUTTON oBtnCancel PROMPT "Baixas" SIZE 051, 013 OF oDlg ACTION (u_ExcFardoBarras()) PIXEL
 	@ 025, 280 BUTTON oBtnParam PROMPT "Parametros" SIZE 051, 013 OF oDlg ACTION Pergunte(cPerg,.T.,"Configuração de Impressora") PIXEL
 	@ 025, 341 BUTTON oBtnImprimir PROMPT "Impressão" SIZE 051, 013 OF oDlg ACTION (u_PrintEtq()) PIXEL
 	//@ 010, 220 BUTTON oBtnImprimirTST PROMPT "Teste CodBar" SIZE 051, 013 OF oDlg ACTION (TesteCodBar()) PIXEL
@@ -332,7 +331,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 		if _nImpress = 1
 			cPrinter := "DATAMAX"
 		else
-			cPrinter := "ELTRON"
+			cPrinter := "ZEBRA"
 		endif
 	
 		if _nPorta   = 1
@@ -420,12 +419,12 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 			
 								
 				if _nImpress = 1 //ALLEGRO
+				
 					MSCBBEGIN(1,6)
 
 						//MSCBSAYBAR(nXmm, nYmm, cConteudo, cRotacao, cTypePrt, nAltura, lDigVer, lLinha, lLinBaixo, cSubSetIni, nLargura, nRelacao, lCompacta, lSerial, cIncr, lZerosL)                          
-							MSCBSAYBAR(05,05,cEan14,"N","MB01",12,.F.,.F.,.F.,,4,4,.F.)  
-						
-						//MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO - CODIGO DE BARRAS OFICIAL
+							//MSCBSAYBAR(05,05,cEan14,"N","MB01",12,.F.,.F.,.F.,,4,4,.F.)  
+					MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO - CODIGO DE BARRAS OFICIAL
 							
 					if Alltrim(cGrupo) $ "1207" //.or. Alltrim(cCodProd) == "PA8215"
 						//MSCBSAYBAR ( 05, 20 , cCodBarProd , 'N',"MB01",06,,.T.,,,2,2) //EAN14 OFICIAL												
@@ -440,22 +439,21 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 						MSCBSAY(55,18,cDataFab,"N","1","2,2")
 						MSCBSAY(50,13,"V: ","N","1","2,2")
 						MSCBSAY(55,13,cDataVal,"N","1","2,2")
-						MSCBSAY(50,8,"Lote: ","N","1","2,2")
-						
+						MSCBSAY(50,8,"Lote: ","N","1","2,2")				
 				
 						IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"
 							MSCBSAY(61,8,lote,"N","1","2,2")  //Formato DDMMAA+IT
 						Else
 							MSCBSAY(61,8,cLoteEtq,"N","1","2,2") //Formato dia do ano DDD (3 digitos)
 						EndIf
-						MSCBEND()
+					Else
+						MSCBSAY(01,30,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","3","1,0")
+						MSCBSAY(50,22,"Turma: "+ Turma,"N","1","2,2")
+						MSCBSAY(50,15,"Fabricacao: ","N","1","2,2")
+						MSCBSAY(50,10,cDataFab,"N","1","2,2")
+						MSCBSAY(50,06, _cDoc,"N","1","2,2")
 					EndIf
-									
-					MSCBSAY(01,30,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","3","1,0")
-					MSCBSAY(50,22,"Turma: "+ Turma,"N","1","2,2")
-					MSCBSAY(50,15,"Fabricacao: ","N","1","2,2")
-					MSCBSAY(50,10,cDataFab,"N","1","2,2")
-					MSCBSAY(50,06, _cDoc,"N","1","2,2")
+						
 					MSCBEND()
 					nImprEtiq := nImprEtiq + 1
 					
@@ -476,24 +474,64 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 						EndDo
 					EndIf
 					
-		/*		else
-					if _nImpress = 2 //Eltron TLP2844
+				else
+					if _nImpress = 2 //Zebra
+				
 						MSCBBEGIN(1,6)
-						MSCBSAY(19,05,cCodProd,"N","2","2")
-						MSCBSAY(30,05,cDescProd,"N","2","2")
-						MSCBSAY(63,13,"Fabricação: ","N","2","2")
-						MSCBSAY(63,18,cDataFab + " "+ _cDoc ,"N","2","2")
-					
-						if Alltrim(SB1->B1_GRUPO) == "1207"
-							MSCBSAYBAR(05,10,cCodBarProd,'N','MB07',06,.f.,.t.,,,2,2)
+						//MSCBSAYBAR(nXmm, nYmm, cConteudo, cRotacao, cTypePrt, nAltura, lDigVer, lLinha, lLinBaixo, cSubSetIni, nLargura, nRelacao, lCompacta, lSerial, cIncr, lZerosL)                          
+								
+						if Alltrim(cGrupo) $ "1207" //.or. Alltrim(cCodProd) == "PA8215"
+							//MSCBSAYBAR ( 05, 20 , cCodBarProd , 'N',"MB01",06,,.T.,,,2,2) //EAN14 OFICIAL												
+							MSCBSAYBAR ( 05, 05 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // BARRAS DO PRODUTO
 						EndIf
 						
-						MSCBSAY(65,30,"Turma: "+ Turma ,"N","1","2,2")
-						MSCBSAYBAR ( 17, 20 , cb1 , 'N',cPadraoBar,10,,,,,3,2)
+						//Imprime data de fabricação, validade e lote no grupo 1204, 1205,1203
+						if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
+							MSCBSAY(05,05,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")  //30
+							MSCBSAY(48,13,"Turma: "+ Turma,"N","B","17,13")  //22
+							MSCBSAY(48,18,"F: ","N","B","17,13") //18
+							MSCBSAY(53,18,cDataFab,"N","B","17,13") //18
+							MSCBSAY(48,23,"V: ","N","B","17,13")   //13
+							MSCBSAY(53,23,cDataVal,"N","B","17,13")  //13
+							MSCBSAY(48,28,"Lote: ","N","B","17,13")  //8
+							
+							IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"
+								MSCBSAY(48,32,lote,"N","B","17,13")  //Formato DDMMAA+IT
+							Else
+								MSCBSAY(48,32,cLoteEtq,"N","B","17,13") //Formato dia do ano DDD (3 digitos)
+							EndIf
+						else
+							MSCBSAY(05,02,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")
+							MSCBSAY(48,14,"Turma: "+ Turma,"N","B","17,13")
+							MSCBSAY(48,21,"Fabricacao: ","N","B","17,13")
+							MSCBSAY(48,25,cDataFab,"N","B","17,13")
+							//MSCBSAY(50,29, _cDoc,"N","B","17,13")
+						EndIf
+						
+						MSCBSAYBAR ( 10, 22 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO - CODIGO DE BARRAS OFICIAL
 						MSCBEND()
 						nImprEtiq := nImprEtiq + 1
+						
+						if Alltrim(cGrupo) == "1208"
+							nPcte := 1
+							while nPcte <= 5
+								MSCBBEGIN(1,6) //01/01/16 - Diminuido 2 pontos na posição da linha.
+								MSCBSAY(03,05,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")
+								MSCBSAY(44,18,"Fab.: ","N","B","17,13")
+								MSCBSAY(53,18,cDataFab,"N","B","17,13") 
+								MSCBSAY(44,23,"Val.: ","N","B","17,13")  
+								MSCBSAY(53,23,cDataVal,"N","B","17,13")  
+								MSCBSAY(44,28,"Lote: ","N","B","17,13")  
+								MSCBSAY(44,32,lote,"N","B","17,13") 	
+								MSCBSAYBAR ( 05, 22 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // original
+								MSCBEND()
+								nPcte += 1
+							EndDo
+						EndIf
+
+						
 					endif
-					*/
+					
 				endif
 				
 //*******************************************************
@@ -582,6 +620,7 @@ Static Function ImpSub(cTipoEtq)
 	cMot := ""
 	cProduto :=""
 	cTurma := Alltrim(pswret(1)[1][12])
+	nImprEtiq := 0
 	
 	Pergunte(cPerg2,.T.,"Substituição de Etiqueta")
 
@@ -595,7 +634,7 @@ Static Function ImpSub(cTipoEtq)
 
 	Numerac := "0001"
 	
-	if Alltrim(cLoteSub) <> ""
+	//if Alltrim(cLoteSub) <> ""
 		dbSelectArea("SB1")
 		DbSetOrder(1)
 		dbseek(xfilial("SB1")+cCodProd) //ALTERAR PARA PARÂMETRO DE PRODUTO
@@ -603,8 +642,8 @@ Static Function ImpSub(cTipoEtq)
 		cCodBarProd := SB1->B1_CODBAR
 		cProduto 	:= SB1->B1_COD
 		cGrupo 		:= SB1->B1_GRUPO
-	EndIF
-	
+		cDescProd	:= SB1->B1_DESC
+	//EndIF
 	
 	if  MSGYESNO("Deseja realmente imprimir etiqueta para o produto "+SB1->B1_DESC+"?", "Confirmação")
 
@@ -615,8 +654,6 @@ Static Function ImpSub(cTipoEtq)
 			//cMot := "S" //Substituição - fardos devolvidos ou com etiqueta danificada
 			cMot := "D" //Devoluções - fardos devolvidos
 		EndIf
-		
-		
 		//nTurma := "9"
 	
 		if Alltrim(cLoteSub) <> ""
@@ -633,23 +670,12 @@ Static Function ImpSub(cTipoEtq)
 			MSGINFO("Preencha o nº do lote no pacote e o cod. produto.")
 			Return
 		EndIf
-	
-		cQry := "SELECT Z3_NUMOP,Z3_ITEMOP,MAX(Z3_NUMERAC) NUM FROM SZ3010"
-		cQry += " WHERE Z3_NUMOP = '" + Substr(cOP,1,6) + "' AND Z3_ITEMOP='" + Substr(cOP,7,2)+"'"
-		cQry += " GROUP BY Z3_NUMOP,Z3_ITEMOP"
-	
-		cQry := ChangeQuery(cQry)
-		TCQUERY cQry NEW ALIAS "ULFAR"
-	
-		Numerac :=  val(ULFAR->NUM)
-
-		ULFAR->(DbCloseArea())
-	
+			
 	//SOLICITA IMPRESSÃO DE NOVAS ETIQUETAS
 		if _nImpress = 1
 			cPrinter := "DATAMAX"
 		else
-			cPrinter := "ELTRON"
+			cPrinter := "ZEBRA"
 		endif
 	
 		if _nPorta   = 1
@@ -675,129 +701,184 @@ Static Function ImpSub(cTipoEtq)
 			cPadraoBar := "MB02"
 		endif
 	
-		MSCBPRINTER(cPrinter,cPorta, , , .F., , , , ,,.f. , )
+		//MSCBCHKStatus(.f.)
+
+		While  nImprEtiq <= nQuant	
 	
-		IncProc("Imprimindo "+Alltrim(cOP)+" "+cPorta)
-	
+			cQry := "SELECT Z3_NUMOP,Z3_ITEMOP,MAX(Z3_NUMERAC) NUM FROM SZ3010"
+			cQry += " WHERE Z3_NUMOP = '" + Substr(cOP,1,6) + "' AND Z3_ITEMOP='" + Substr(cOP,7,2)+"'"
+			cQry += " GROUP BY Z3_NUMOP,Z3_ITEMOP"
 		
-		cDataFab := dtoc(date())
-		_cDoc := cMot + time() //PENSAR EM INFORMAÇÃO MELHOR PARA NUMERO DE DOCUMENTO.
+			cQry := ChangeQuery(cQry)
+			TCQUERY cQry NEW ALIAS "ULFAR"
+		
+			Numerac :=  val(ULFAR->NUM)
 
-//*******************************************************
-//**** IMPRESSÃO DE ETIQUETAS COM CÓDIGO DE BARRAS    ***
-//*******************************************************		
-		MSCBCHKStatus(.f.)
+			ULFAR->(DbCloseArea())
+
+			MSCBPRINTER(cPrinter,cPorta, , , .F., , , , ,,.f. , )
+		
+			IncProc("Imprimindo "+Alltrim(cOP)+" "+cPorta)
+		
 			
-		Numerac := Numerac + 1
-		cNumFardo := strzero(Numerac,4)
-		cb1 := left(Alltrim(cOP)+cNumFardo,12)
+			cDataFab := dtoc(date())
+			_cDoc := cMot + time() //PENSAR EM INFORMAÇÃO MELHOR PARA NUMERO DE DOCUMENTO.
 
-								
-		if _nImpress = 1
-		/*	MSCBBEGIN(1,6)
-			MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO
-					
-			if Alltrim(SB1->B1_GRUPO) $ "1207"
-						//MSCBSAYBAR ( 05, 20 , cCodBarProd , 'N',"MB04",06,,.T.,,,2,2) //EAN14 OFICIAL
-				MSCBSAYBAR ( 03, 25 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // BARRAS DO PRODUTO
-			EndIf
-			MSCBSAY(01,30,Alltrim(cProduto)+ "-"+Alltrim(SB1->B1_DESC),"N","3","1,0")
-			MSCBSAY(50,20,"Impresso em: ","N","1","2,2")
-			MSCBSAY(50,15,cDataFab,"N","1","2,2")
-			MSCBSAY(50,11, _cDoc,"N","1","2,2")
-			MSCBSAY(50,06,"Origem: "+ cMot,"N","1","2,2")
-			//MSCBSAY(50,15,"Impresso em: ","N","1","2,2")
-			//MSCBSAY(50,10,cDataFab + " " + _cDoc,"N","1","2,2")
-			//MSCBSAY(50,06,"Origem: "+ cMot,"N","1","2,2")
-			MSCBEND()
-		*/
-			MSCBBEGIN(1,6)
-						MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO
-							
-					if Alltrim(cGrupo) $ "1207" //.or. Alltrim(cCodProd) == "PA8215"
-						//MSCBSAYBAR ( 05, 20 , cCodBarProd , 'N',"MB01",06,,.T.,,,2,2) //EAN14 OFICIAL												
-						MSCBSAYBAR ( 05, 17 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // BARRAS DO PRODUTO
-					EndIf
-					
-					
-					//Imprime data de fabricação, validade e lote no grupo 1204, 1205,1203
-					if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
-						MSCBSAY(01,30,Alltrim(cProduto)+ "-"+Alltrim(SB1->B1_DESC),"N","3","1,0")
-						MSCBSAY(73,22, cMot,"N","3","2,0")
-						//MSCBSAY(50,18,"F: ","N","1","2,2")
-					//	MSCBSAY(55,18,cDataFab,"N","1","2,2")
-						MSCBSAY(50,13,"V: ","N","1","2,2")
-						MSCBSAY(55,13,dtoc(dValid),"N","1","2,2")
-						MSCBSAY(50,8,"Lote: ","N","1","2,2")
-						
-					// ALTERAR ESSA PARTE DO CODIGO PARA MOSTRAR O LOTE DA ETIQUETA SE FOR DIGITADO. SE NÃO FOR, MOSTRAR O CÓDIGO DO LOTE
-						IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209" 
-							MSCBSAY(61,8, cEtqSub,"N","1","2,2")  //Formato DDMMAA+IT
-						Else
-							MSCBSAY(61,8,cLoteSub,"N","1","2,2") //Formato dia do ano DDD (3 digitos) 
-						EndIf
-						MSCBEND()
-					EndIf
+	//*******************************************************
+	//**** IMPRESSÃO DE ETIQUETAS COM CÓDIGO DE BARRAS    ***
+	//*******************************************************		
+			Numerac := Numerac + 1
+			cNumFardo := strzero(Numerac,4)
+			cb1 := left(Alltrim(cOP)+cNumFardo,12)
 									
-					MSCBSAY(01,30,Alltrim(cProduto)+ "-"+Alltrim(SB1->B1_DESC),"N","3","1,0")
-					MSCBSAY(73,22, cMot,"N","3","2,0")
-					MSCBSAY(50,15,"Impresso em: ","N","1","2,2") //MSCBSAY(50,15,"Fabricacao: ","N","1","2,2")
-					MSCBSAY(50,10,cDataFab,"N","1","2,2")
-					//Imprime motivo de Substituição
-					//MSCBSAY(50,06, cMot,"N","1","2,2")  //MSCBSAY(50,06, _cDoc,"N","1","2,2")
-					MSCBEND()
+			if _nImpress = 1
+		
+						MSCBBEGIN(1,6)
+						MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO
+								
+						if Alltrim(cGrupo) $ "1207" //.or. Alltrim(cCodProd) == "PA8215"
+							//MSCBSAYBAR ( 05, 20 , cCodBarProd , 'N',"MB01",06,,.T.,,,2,2) //EAN14 OFICIAL												
+							MSCBSAYBAR ( 05, 17 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // BARRAS DO PRODUTO
+						EndIf
+						
+						
+						//Imprime data de fabricação, validade e lote no grupo 1204, 1205,1203
+						if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
+							MSCBSAY(01,30,Alltrim(cProduto)+ "-"+Alltrim(SB1->B1_DESC),"N","3","1,0")
+							MSCBSAY(73,22, cMot,"N","3","2,0")
+							//MSCBSAY(50,18,"F: ","N","1","2,2")
+						//	MSCBSAY(55,18,cDataFab,"N","1","2,2")
+							MSCBSAY(50,13,"V: ","N","1","2,2")
+							MSCBSAY(55,13,dtoc(dValid),"N","1","2,2")
+							MSCBSAY(50,8,"Lote: ","N","1","2,2")
+							
+						// ALTERAR ESSA PARTE DO CODIGO PARA MOSTRAR O LOTE DA ETIQUETA SE FOR DIGITADO. SE NÃO FOR, MOSTRAR O CÓDIGO DO LOTE
+							IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209" 
+								MSCBSAY(61,8, cEtqSub,"N","1","2,2")  //Formato DDMMAA+IT
+							Else
+								MSCBSAY(61,8,cLoteSub,"N","1","2,2") //Formato dia do ano DDD (3 digitos) 
+							EndIf
+						Else
+							MSCBSAY(01,30,Alltrim(cProduto)+ "-"+Alltrim(SB1->B1_DESC),"N","3","1,0")
+							MSCBSAY(73,22, cMot,"N","3","2,0")
+							MSCBSAY(50,15,"Impresso em: ","N","1","2,2") //MSCBSAY(50,15,"Fabricacao: ","N","1","2,2")
+							MSCBSAY(50,10,cDataFab,"N","1","2,2")
+							//Imprime motivo de Substituição
+							//MSCBSAY(50,06, cMot,"N","1","2,2")  //MSCBSAY(50,06, _cDoc,"N","1","2,2")
+						
+						EndIf
+										
+						MSCBEND()
+						
+						nImprEtiq := nImprEtiq + 1 //CONTADOR DE ETIQUETA CASO FOR MAIS DE UMA. ATIVAR QUANDO CRIAR O WHILE PARA VARIAS ETIQUETAS.
+						
+						if Alltrim(cGrupo) == "1208"
+							nPcte := 1
+							while nPcte <= 5
+								MSCBBEGIN(1,6) //01/01/16 - Diminuido 2 pontos na posição da linha.
+								MSCBSAYBAR ( 05, 15 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // original
+								MSCBSAY(07,08,"Lote: "+cLoteSub,"N","2","0.8,0")
+								MSCBSAY(03,28,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","2","1,0")
+								MSCBSAY(50,22,"Validade: ","N","1","2,2")
+								MSCBSAY(50,17,dtoc(dValid),"N","1","2,2")
+							//	MSCBSAY(50,09,"Fabricacao: ","N","1","2,2")
+							//	MSCBSAY(50,06,cDataFab,"N","1","2,2")
+							//Imprime motivo de Substituição
+								MSCBSAY(50,03, cMot,"N","3","1")  /// MSCBSAY(50,03, _cDoc,"N","1","2,2")  
+								MSCBEND()
+								nPcte += 1
+							EndDo
+						EndIf
+			ELSE	
+				if _nImpress = 2 //ZEBRA
 					
-					//nImprEtiq := nImprEtiq + 1 //CONTADOR DE ETIQUETA CASO FOR MAIS DE UMA. ATIVAR QUANDO CRIAR O WHILE PARA VARIAS ETIQUETAS.
-					
-					if Alltrim(cGrupo) == "1208"
-						nPcte := 1
-						while nPcte <= 5
-							MSCBBEGIN(1,6) //01/01/16 - Diminuido 2 pontos na posição da linha.
-							MSCBSAYBAR ( 05, 15 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // original
-							MSCBSAY(07,08,"Lote: "+cLoteSub,"N","2","0.8,0")
-							MSCBSAY(03,28,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","2","1,0")
-							MSCBSAY(50,22,"Validade: ","N","1","2,2")
-							MSCBSAY(50,17,dtoc(dValid),"N","1","2,2")
-						//	MSCBSAY(50,09,"Fabricacao: ","N","1","2,2")
-						//	MSCBSAY(50,06,cDataFab,"N","1","2,2")
-						//Imprime motivo de Substituição
-							MSCBSAY(50,03, cMot,"N","3","1")  /// MSCBSAY(50,03, _cDoc,"N","1","2,2")  
+							MSCBBEGIN(1,6)
+							//MSCBSAYBAR(nXmm, nYmm, cConteudo, cRotacao, cTypePrt, nAltura, lDigVer, lLinha, lLinBaixo, cSubSetIni, nLargura, nRelacao, lCompacta, lSerial, cIncr, lZerosL)                          
+									
+							if Alltrim(cGrupo) $ "1207" //.or. Alltrim(cCodProd) == "PA8215"
+								//MSCBSAYBAR ( 05, 20 , cCodBarProd , 'N',"MB01",06,,.T.,,,2,2) //EAN14 OFICIAL												
+								MSCBSAYBAR ( 05, 08 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // BARRAS DO PRODUTO
+							EndIf
+							
+							//Imprime data de fabricação, validade e lote no grupo 1204, 1205,1203
+							if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
+								MSCBSAY(05,05,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")  //30
+								MSCBSAY(50,12,"Turma: "+ cTurma,"N","B","17,13")  //22
+								MSCBSAY(50,16,"F: ","N","B","17,13") //18
+								MSCBSAY(55,16,cDataFab,"N","B","17,13") //18
+								MSCBSAY(73,25, cMot,"N","B","20,30")
+								MSCBSAY(50,21,"V: ","N","B","17,13")   //13
+								MSCBSAY(55,21,cDataVal,"N","B","17,13")  //13
+								MSCBSAY(50,26,"Lote: ","N","B","17,13")  //8
+								
+								IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"
+									MSCBSAY(61,26,lote,"N","B","17,13")  //Formato DDMMAA+IT
+								Else
+									MSCBSAY(61,26,cLoteEtq,"N","B","17,13") //Formato dia do ano DDD (3 digitos)
+								EndIf
+							else
+								MSCBSAY(05,02,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")
+								MSCBSAY(50,14,"Turma: "+ cTurma,"N","B","17,13")
+								MSCBSAY(73,25, cMot,"N","B","20,30")
+								MSCBSAY(50,21,"Fabricacao: ","N","B","17,13")
+								MSCBSAY(50,25,cDataFab,"N","B","17,13")
+								//MSCBSAY(50,29, _cDoc,"N","B","17,13")
+							EndIf
+							
+							MSCBSAYBAR ( 10, 22 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO - CODIGO DE BARRAS OFICIAL
 							MSCBEND()
-							nPcte += 1
-						EndDo
-					EndIf
-				
-		endif
-				
-//*******************************************************
-//****    INCLUSÃO DE FARDOS DE ETIQUETA IMPRESSAS ***
-//*******************************************************
-		 //Verifica se existe numeração do fardo no SZ3
-		dbSelectArea("SZ3")
-		dbGotop()
-		dbseek(xfilial("SZ3")+Alltrim(cOP)+cNumFardo)
-	
-		if !SZ3->(found())
-	//Incluir apontamentos de fardos no SZ3
-			RecLock("SZ3",.t.)
-			SZ3->Z3_PRODUTO := SB1->B1_COD
-			SZ3->Z3_NUMOP :=  SUBSTR(cb1,1,6)  // Alltrim(SC2->C2_NUM)
-			SZ3->Z3_ITEMOP := substr(cb1,7,2) //  Alltrim(SC2->C2_ITEM)
-			SZ3->Z3_NUMERAC	:= cNumFardo
-			SZ3->Z3_DOCSD3 :=  _cDoc
-			SZ3->Z3_DATA   := date() // dDatabase  //DATA DE APONTAMENTO DO FARDO - INCLUIR CAMPO
-			//SZ3->Z3_LETRA  := cTurma
-			if cMot = "D"  //Registrar que fardo já foi carregado e tem etiqueta substituta de devolução.
-				SZ3->Z3_REG ='D'
-			EndIf
-		//	SZ3->Z3_DTVALID := dValid   //Desenvolver trecho para cálculo de data de validade
-			SZ3->Z3_LOTE := cLoteSub
-
-			SZ3->(MsUnlock())
-		//Else
-//			MSGINFO("Fardo"+SZ3->Z3_NUMERAC+" já existe com documento "+SZ3->Z3_DOCSD3+". Favor informar responsavel pelo sistema.")
-
-		EndIf
+							nImprEtiq := nImprEtiq + 1
+							
+							if Alltrim(cGrupo) == "1208"
+								nPcte := 1
+								while nPcte <= 5
+									MSCBBEGIN(1,6) //01/01/16 - Diminuido 2 pontos na posição da linha.
+									MSCBSAY(03,05,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")
+									MSCBSAY(50,14,"Fabricacao: ","N","B","17,13")
+									MSCBSAY(50,18,cDataFab,"N","B","17,13")
+									//MSCBSAY(50,31, _cDoc,"N","B","17,13")				
+									MSCBSAY(50,21,"Validade: ","N","B","17,13")
+									MSCBSAY(50,25,cDataVal,"N","B","17,13")
+									MSCBSAY(73,25, cMot,"N","B","20,30")
+									MSCBSAYBAR ( 05, 22 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // original
+									MSCBSAY(07,29,"Lote: "+lote,"N","B","17,13")
+									MSCBEND()
+									nPcte += 1
+								EndDo
+							EndIf			
+				endif
+						
+	//*******************************************************
+	//****    APONTAMENTO DE FARDOS DE ETIQUETA IMPRESSAS ***
+	//*******************************************************
+			//Verifica se existe numeração do fardo no SZ3
+					dbSelectArea("SZ3")
+					dbGotop()
+					dbseek(xfilial("SZ3")+Alltrim(SC2->C2_NUM)+Alltrim(SC2->C2_ITEM)+cNumFardo)
+		
+					if ! SZ3->(found())
+		//Incluir apontamentos de fardos no SZ3
+						RecLock("SZ3",.t.)
+						SZ3->Z3_PRODUTO := cCodProd
+						SZ3->Z3_NUMOP :=  SUBSTR(cb1,1,6)  // Alltrim(SC2->C2_NUM)
+						SZ3->Z3_ITEMOP := substr(cb1,7,2) //  Alltrim(SC2->C2_ITEM)
+						SZ3->Z3_NUMERAC	:= cNumFardo
+						SZ3->Z3_DOCSD3 :=  _cDoc
+						SZ3->Z3_DATA   := dDatabase
+						SZ3->Z3_LETRA  := cTurma
+						//SZ3->Z3_LETRA  := cTurma
+						if cMot = "D"  //Registrar que fardo já foi carregado e tem etiqueta substituta de devolução.
+							SZ3->Z3_REG ='D'
+						EndIf
+					//	SZ3->Z3_DTVALID := dValid   //Desenvolver trecho para cálculo de data de validade
+						SZ3->Z3_LOTE := cLoteSub
+						SZ3->(MsUnlock())
+						nApontSucess := nApontSucess + 1
+					//Else
+						//MSGINFO("Fardo"+SZ3->Z3_NUMERAC+" já existe com documento "+SZ3->Z3_DOCSD3+". Favor informar responsavel pelo sistema.")
+					EndIf				
+			endif
+		EndDo			
  		MSCBCLOSEPRINTER()
 
 //*******************************************************
@@ -1075,15 +1156,16 @@ User Function ExcFardoBarras()
 	STATIC oMSNewApont
 	Private aFields := {}
 
-	SetPrvt("oDlg5","oBtnAponta","oBtnCancel","oSay","oSay2","oSay3","oGetCodBar")
+	SetPrvt("oDlg5","oBtnAponta","oBtnCancel","oBtnPerda", "oSay","oSay2","oSay3","oGetCodBar")
 
-	DEFINE MSDIALOG oDlg5 TITLE "Exclusão de etiquetas" FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
+	DEFINE MSDIALOG oDlg5 TITLE "Baixas de Fardos" FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
 	@ 026, 110 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg5 COLORS 0, 16777215 PIXEL
 	@ 026, 166 MSGET oGetCodBarFd VAR cGetEtqFd SIZE 132, 010 OF oDlg5 COLORS 0, 16777215  ON CHANGE (IncluiGridLeitor()) PIXEL
 	MontaGridFardo()
 	@ 025, 010 SAY oSayGrav PROMPT "ITENS:" SIZE 060, 015 OF oDlg5 FONT oFont1 COLORS 0, 16777215 PIXEL
 	@ 025, 065 SAY oSayGrav1 PROMPT nItens Picture "@E 999" SIZE 015, 015 OF oDlg5 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 024, 342 BUTTON oBtnCancel PROMPT "Excluir" SIZE 051, 013 OF oDlg5  ACTION (ExcFardo_OP(),oGetCodBarFd:SetFocus()) PIXEL
+	@ 030, 342 BUTTON oBtnCancel PROMPT "Estorno" SIZE 051, 013 OF oDlg5  ACTION (ExcFardo_OP(),oGetCodBarFd:SetFocus()) PIXEL
+	@ 010, 342 BUTTON oBtnPerda PROMPT "Perdas" SIZE 051, 013 OF oDlg5  ACTION (Perdas(),oGetCodBarFd:SetFocus()) PIXEL
 	//@ 024, 342 BUTTON oBtnCancel PROMPT "Excluir" SIZE 051, 013 OF oDlg5  ACTION (ExcFardo_OP(aColsExclui),oGetCodBarFd:SetFocus()) PIXEL
 	//@ 024, 342 BUTTON oBtnCancel PROMPT "Excluir" SIZE 051, 013 OF oDlg5  ACTION (ExcFardoGrid(),oGetCodBarFd:SetFocus()) PIXEL
 			
@@ -1189,6 +1271,8 @@ Static Function IncluiGridLeitor()
 	oMSNewApont:oBrowse:bGotFocus :=  {||oGetCodBarFd:SetFocus()}
 //Volta o foco do Grid para o edit do codigo de barras.
 Return( Nil )
+
+
 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -1393,6 +1477,120 @@ Static Function ExcFardo_OP()
 Return
 
 
+Static Function Perdas()
+
+
+	Local cOP := ""
+	Local cProd := ""
+	Local _cDoc :=""
+	Local _cDocNew :=""
+	Local contCanc := 0
+	Local contErro := 0
+	Local nQtdEntreg := 0
+	Local QtdSZ3 := 0
+	Local QtdSD3 := 0
+	Local QtdDif := 0
+	Local _aVetor := {}
+	Local cont := 0
+
+	Local nFardo := ""
+	
+	PRIVATE lMsErroAuto := .F.
+//*************************************************************
+//** CONTA FARDOS POR DOCUMENTO E ESTORNA O SD3 DOS MESMOS ****
+//*************************************************************
+	cont := 0
+	
+	if len(aColsExclui)>0
+		
+		ASORT(aColsExclui,,,{|x,y| x[5] < y[5]})
+		
+		_cDoc := ""
+		
+		For lin := 1 To len(aColsExclui)
+			conout(aColsExclui[lin][04])
+		
+			nFardo := substr(aColsExclui[lin][04],9,4)
+			cOP		:= substr(aColsExclui[lin][04],1,8)
+			dbSelectArea("SZ3")
+			dbGotop()
+			dbseek(xfilial("SZ3")+ cOP + nFardo)
+			conout("EXCFARDO_OP: "+ cOP + nFardo)
+	
+		//Estorna SD3 após somar quantidade do documento e reaponta diferença.
+			IF _cDoc <> SZ3->Z3_DOCSD3
+		
+				cProd := SZ3->Z3_PRODUTO
+				_cDoc := SZ3->Z3_DOCSD3
+				
+				//VERIFICA SE D3_DOC está no modelo antigo.
+				if substr(_cDoc,3,1)==":"
+					MSGALERT("Etiqueta "+aColsExclui[lin][04]+" no formato antigo. Solicitar cancelamento ao Administrador do sistema.")
+					Loop
+				EndIf
+				
+			//	conout("EXCFARDO_OP: cDoc válido "+_cDoc+" - DOCSD3="+SZ3->Z3_DOCSD3+" cProd="+cProd+" nFardo="+nFardo)
+			
+			//CRIAR FUNÇÃO QUE RETORNA QUANTIDADE DO DOCUMENTO SZ3.
+				QtdSZ3 := 0
+				For x := 1 To len(aColsExclui)
+					if 	Alltrim(aColsExclui[x][05]) == Alltrim(SZ3->Z3_DOCSD3)
+						QtdSZ3 += 1
+					EndIf
+				Next
+				conout("Quant do DOC Excluir:"+str(QtdSZ3))
+				//QtdSZ3 := quantDocSZ3(_cDoc,cOP, nFardoIni,nFardoFim)
+
+//********************************************************
+//** GERA MOVTO DE ESTORNO DE QUANT. SZ3 ENCONTRADA  ****
+//********************************************************	
+				lMsErroAuto := .F.
+						
+					aVetorReq:={ {"D3_TM","504",NIL},;
+						{"D3_COD",cProd,NIL},;
+						{"D3_EMISSAO",ddatabase,NIL},;
+						{"D3_DOC","P"+_cDoc,NIL},;
+						{"D3_HORA",time(),NIL},;
+						{"D3_QUANT",QtdSZ3,NIL}}
+					MSExecAuto({|x,y| mata240(x,y)},aVetorReq,3) //Inclusao
+					//INCLUIR CENTRO DE CUSTO NO OFICIAL
+
+			ENDIF //Fecha IF _cDoc <> SZ3->Z3_DOCSD3
+
+			IF !lMsErroAuto
+				//MSGALERT("Não foi possível requisitar os fardos para Perdas.")
+				//****************************************************************************
+				//***     EXCLUSÃO DE FARDOS NA SZ3 CASO CANCELAMENTO FOR BEM SUCEDIDO     ***
+				//****************************************************************************
+				dbSelectArea("SZ3")
+				dbGotop()
+				dbseek(xfilial("SZ3")+ cOP + nFardo)
+				//EXCLUI OS REGISTROS DE FARDOS NO SZ3
+				if  SZ3->(found())
+					reclock("SZ3",.f.)
+					dbdelete()
+					msunlock()
+					contCanc := contCanc+1
+					conout("EXCFARDO: Excluído SZ3 "+ nFardo)
+				else
+					contErro := contErro+1
+				endif
+			ENDIF	
+
+		Next
+
+		IF contCanc > 0
+			MSGALERT(str(contCanc)+" fardos cancelados com sucesso.")
+		EndIf
+		if contErro > 0
+			MSGALERT(str(contErro)+" fardos não encontrados.")
+		EndIf
+	EndIf
+	MontaGridFardo()
+	oDlg5:end()
+Return
+
+
 User Function TABSZ3()
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Declaracao de Variaveis                                             ³
@@ -1535,6 +1733,10 @@ MSCBCHKStatus(.f.)
 		Else
 			MSCBSayBar(0010, 0131, aConteudo, "N", "MB07", 08, .F., .F., .F., "A")
 		EndIf
+
+
+
+
 		MSCBEND()
 			
 			x := x + 1
