@@ -17,25 +17,28 @@ cFilial   := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_FILIAL"})
 _nTotalpedido := 0
 _TotalQuant := 0
 
-  alert(SC5->C5_FILIAL)
+   
+   FOR _I := 1 TO LEN(ACOLS)
 
-FOR _I := 1 TO LEN(ACOLS)
+         _QTDPED:=ACOLS[_I][nPosQuant]
+         if cFilial == "01"
+            _QTDLIB:=ACOLS[_I][nPosQtdlb]
+         EndIf
+         _nValor:=ACOLS[_I][_nPOSValor]
 
-      _QTDPED:=ACOLS[_I][nPosQuant]
-      _QTDLIB:=ACOLS[_I][nPosQtdlb]
-      _nValor:=ACOLS[_I][_nPOSValor]
+         _TAM:=LEN(ACOLS[_I])     
+         _DELETADO:=ACOLS[_I][_TAM]     //verifica se não é uma linha deletada
 
-      _TAM:=LEN(ACOLS[_I])     
-      _DELETADO:=ACOLS[_I][_TAM]     //verifica se não é uma linha deletada
+         if !_DELETADO 
+            if cFilial == "01"
+               acols[_I][nPosQtdlb]:= acols[_I][nPosQuant]
+            EndIf
+            _nTotalpedido := _nTotalpedido + _nValor
+            _TotalQuant := _TotalQuant + _QTDPED
+            
+         endif
 
-      if !_DELETADO 
-         acols[_I][nPosQtdlb]:= acols[_I][nPosQuant]
-         _nTotalpedido := _nTotalpedido + _nValor
-         _TotalQuant := _TotalQuant + _QTDPED
-         
-      endif
-
-NEXT
+   NEXT
  
  M->C5_VOLUME1 := _TotalQuant
  GETDREFRESH() 
@@ -124,10 +127,11 @@ SetPrvt("_cFilial,_cPedido,")
 
 _cFilial:= xFilial()
 
+/*
 if _cFilial = "02" 
    //Alert("Filial DF não libera automatico.")
    Return
-EndIf
+EndIf */
 
 _cPedido    := SC5->C5_NUM
 //_dDtentrega := SC5->C5_ENTREGA

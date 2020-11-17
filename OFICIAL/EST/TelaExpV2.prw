@@ -32,6 +32,7 @@ User Function Exped2()
 	Static oDlg1
 	Static BmpLogo
 	Public oBtnCarreg
+	
  
 	Static oFont1 := TFont():New("MS Sans Serif",,024,,.T.,,,,,.F.,.F.)
 	Static oFont2 := TFont():New("MS Sans Serif",,020,,.T.,,,,,.F.,.F.)
@@ -43,12 +44,9 @@ User Function Exped2()
 
 	Pergunte(cPerg,.F.)
 
-	_nMostraFinaliz := Mv_Par01
 
-
-	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 2020-06 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
-
-    @ 000, 004 BITMAP BmpLogo SIZE 143, 045 OF oDlg1 FILENAME "\\srvpp02\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
+	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 2020-11 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
+    @ 000, 004 BITMAP BmpLogo SIZE 143, 045 OF oDlg1 FILENAME "\\srvpp08\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
 	@ 025, 155 SAY oLblResp PROMPT "Separação da Carga: " SIZE 100, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 025, 250 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oDlg1 FONT oFont3 COLORS 0, 16777215 PIXEL
 	GridRom()
@@ -72,8 +70,9 @@ Static Function GridRom()
 	aFields := {}
 	cQry := ""
 	//Static	aDados := {}
-	Public aDadosRoms := {}
 	STATIC oMSNewGe1
+	Public aDadosRoms := {}
+	Public TRC
 
 	AADD(aFields,{"Romaneio" ,"ROMAN"    ,"" ,9 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Rota" ,"ROTA"    ,"" ,30 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
@@ -143,77 +142,89 @@ Return( Nil )
 */
 Static Function carregam()
 	
-	pos := oMSNewGe1:nAt
-	cNumRom :=  trim(oMSNewGe1:aCols[pos][1])
-	cRota	:= trim(oMSNewGe1:aCols[pos][2])
-	cVeic	:= trim(oMSNewGe1:aCols[pos][3])
-	cMotori	:= trim(oMSNewGe1:aCols[pos][4])
-	cDtSaida := oMSNewGe1:aCols[pos][5]
-		
-	aFdOutrRom := {}
-	aFdVenc := {}
-	aFdExced :={}  //retirado para testar solução de excedentes registrados e no grid
-	aFdNotExist := {}
-	aFdFalta	:= {}
-	nTotalGeral := 0
-	nQtSemEtq := 0
-	nApontSucess := 0
-	nLeituras := 0
+	Static aFdOutrRom := {}
+	Static aFdVenc := {}
+	Static aFdExced :={}  //retirado para testar solução de excedentes registrados e no grid
+	Static aFdNotExist := {}
+	Static aFdFalta	:= {}
+	Static nTotalGeral := 0
+	Static nQtSemEtq := 0
+	Static nApontSucess := 0
+	Static nLeituras := 0
 	Static Hoje := dtos(ddatabase)
-	 
-	Static oDlg2
-	Static BmpLogo
-	//Static oBtnAponta
-	//Static oBtnImprimir
-	Static oFont1 := TFont():New("MS Sans Serif",,024,,.T.,,,,,.F.,.F.)
-	Static oFont2 := TFont():New("MS Sans Serif",,020,,.T.,,,,,.F.,.F.)
-	Static oFont3 := TFont():New("MS Sans Serif",,020,,.F.,,,,,.F.,.F.)
-	Static oFont4 := TFont():New("MS Sans Serif",,026,,.T.,,,,,.F.,.F.)
-	Private cGetCodBar := Space(13)
-	Static oCbxFinalizados
-	Static lCbxFinalizados := .T.
-	HrInicio := time()
-	HrFim := ""
-	cStatus := ""
-	nQtdTotal := 0
-	#define DS_MODALFRAME 128 //Desabilita fechar tela pelo X
 
-// Local aSize := {}
- //Local bOk := {|| }
- //Local bCancel:= {|| }
-	aSize := MsAdvSize(.F.)
- /*
- MsAdvSize (http://tdn.totvs.com/display/public/mp/MsAdvSize+-+Dimensionamento+de+Janelas)
- aSize[1] = 1 -> Linha inicial área trabalho.
- aSize[2] = 2 -> Coluna inicial área trabalho.
- aSize[3] = 3 -> Linha final área trabalho.
- aSize[4] = 4 -> Coluna final área trabalho.
- aSize[5] = 5 -> Coluna final dialog (janela).
- aSize[6] = 6 -> Linha final dialog (janela).
- aSize[7] = 7 -> Linha inicial dialog (janela).
- */
+	cQry := ""
+	Static aDadosC := {}
+	Static cProdGrid := ""
+	Static nQtdFardo:=0
+	Static _nResta := 0
+	Static _nExced := 0
+	Static _cMotFalta :=""
+	Static nPesoCarr := 0
+	Static nQtdCarr := 0
+	Static TRC2
 
-//Agora montamos uma array com os elementos da tela:
-//Aonde devemos informar
-//AAdd( aObjects, { Tamanho X (horizontal) , Tamanho Y (vertical), Dimensiona X , Dimensiona Y, Retorna dimensões X e Y ao invés de linha / coluna final } )
-	aObjects := {}
-	AAdd( aObjects, { 330 , 120, .T. , .T. , .F. } ) //Botão Grid
-	AAdd( aObjects, { 330 , 100, .T. , .T. , .F. } )
+cQry := " SELECT ISNULL(D.B1_GRUPO,'') B1_GRUPO, ISNULL(A.C6_PRODUTO,'') C6_PRODUTO, ISNULL(B.Z3_PRODUTO,'') Z3_PRODUTO, ISNULL(D.B1_ORDEM,'') B1_ORDEM "
+cQry += " ,ISNULL(D.B1_PRVALID,0) B1_PRVALID,ISNULL(D.B1_DESC,'') B1_DESC, ISNULL(SUM(A.QTDPED),0) AS QTDVEN,  ISNULL(SUM(QTDROM),0) QTDROM,  ISNULL(SUM(QTDROM),0)*D.B1_PESO AS PESO "
+cQry += " FROM EXP_ROMPEDIDO A LEFT JOIN EXP_ROMFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO "
+cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD"
+cQry += " WHERE  A.Z1_NUM='"+cNumRom+"' "
+cQry += " GROUP BY A.Z1_NUM, A.C6_PRODUTO, A.Z1_EXPINI, B1_GRUPO, Z3_PRODUTO, B1_ORDEM,B1_PRVALID, B1_DESC, B1_PESO"
+cQry += " ORDER BY B1_ORDEM,C6_PRODUTO"  
 
-//Montamos a array com o valor da tela, aonde:
-//aInfo := { 1=Linha inicial, 2=Coluna Inicial, 3=Linha Final, 4=Coluna Final, Separação X, Separação Y, Separação X da borda (Opcional), Separação Y da borda (Opcional) }
-	aInfo := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 5 , 5 , 5 , 5 }
+cQry := ChangeQuery(cQry)
+TCQUERY cQry NEW ALIAS "TRC2"
 
-//Passamos agora todas as informações para o calculo das dimenções:
-//MsObjSize( aInfo, aObjects, Mantem Proporção , Disposição Horizontal )
-	aPosObj := MsObjSize( aInfo, aObjects, .T. , .F. )
+DBSelectArea("SZ3")
 
-////Define MsDialog oDialog TITLE "Titulo" STYLE DS_MODALFRAME From aSize[7],0 To aSize[6],aSize[5] OF oMainWnd PIXEL
- //Se não utilizar o MsAdvSize, pode-se utilizar a propriedade lMaximized igual a T para maximizar a janela
- //oDialog:lMaximized := .T. //Maximiza a janela
- //Usando o estilo STYLE DS_MODALFRAME, remove o botão X
+While !TRC2->(Eof())  
 
-	TelaCarga()
+	nQtdFardo := TRC2->QTDROM //Quantidade carregada no romaneio
+	nQtdCarr := nQtdCarr + TRC2->QTDROM  //Total Quantidade carregada
+	nPesoCarr:= nPesoCarr + TRC2->PESO   //Total peso carregado
+
+	if nQtdFardo <= TRC2->QTDVEN
+		_nResta := TRC2->QTDVEN-nQtdFardo
+		_nExced := 0
+	else
+		_nResta := 0
+		_nExced := nQtdFardo-TRC2->QTDVEN
+	EndIf
+	
+	if Alltrim(TRC2->C6_PRODUTO)<>""
+		cProdGrid := TRC2->C6_PRODUTO
+		cDescGrid := TRC2->B1_DESC
+	Else
+		cProdGrid := TRC2->Z3_PRODUTO
+		dbSelectArea("SB1")
+		dbGotop()
+		DbSetOrder(1)
+		dbseek(xfilial("SB1")+cProdGrid)
+		cDescGrid := SB1->B1_DESC
+		SB1->(DbCloseArea())
+	End If
+
+
+	Aadd(aDadosC,{cProdGrid,;
+		cDescGrid,;
+		TRC2->QTDVEN,;
+		nQtdFardo,;
+		_nResta,;
+		_nExced,;
+		_cMotFalta,;
+		TRC2->B1_GRUPO,;
+		TRC2->PESO })
+		
+		//dDtLoteOk,; //incluir no vetor caso for informar proximo lote a carregar
+	
+	TRC2->(DbSkip())
+EndDo
+
+TRC2->(DbCloseArea())
+
+
+//MONTAR TELA DE CARREGAMENTO DO ROMANEIO
+TelaCarga()
 
 
 Return
@@ -225,15 +236,15 @@ Static Function TelaCarga()
 
 	Local aList := {}
 
-	pos := oMSNewGe1:nAt
-	cNumRom :=  trim(oMSNewGe1:aCols[pos][1])
-	cRota	:= trim(oMSNewGe1:aCols[pos][2])
-	cVeic	:= trim(oMSNewGe1:aCols[pos][3])
-	cMotori	:= trim(oMSNewGe1:aCols[pos][4])
-	cDtSaida := oMSNewGe1:aCols[pos][5]
-	nPesoTotal := 0
+	Public pos := oMSNewGe1:nAt
+	Public cNumRom :=  trim(oMSNewGe1:aCols[pos][1])
+	Public cRota	:= trim(oMSNewGe1:aCols[pos][2])
+	Public cVeic	:= trim(oMSNewGe1:aCols[pos][3])
+	Public cMotori	:= trim(oMSNewGe1:aCols[pos][4])
+	Public cDtSaida := oMSNewGe1:aCols[pos][5]
+
 		
-	aFdOutrRom := {}
+/*	aFdOutrRom := {}
 	aFdVenc := {}
 	aFdExced :={}  //retirado para testar solução de excedentes registrados e no grid
 	aFdNotExist := {}
@@ -243,7 +254,7 @@ Static Function TelaCarga()
 	nApontSucess := 0
 	nLeituras := 0
 	Static Hoje := dtos(ddatabase)
-	 
+*/	 
 	Static oDlg2
 	Static BmpLogo
 	//Static oBtnAponta
@@ -254,31 +265,29 @@ Static Function TelaCarga()
 	Static oFont3 := TFont():New("Arial",,024,,.F.,,,,,.F.,.F.)
 	Static oFont4 := TFont():New("Arial",,026,,.T.,,,,,.F.,.F.)
 	Static oFont5 := TFont():New("Arial",,028,,.T.,,,,,.F.,.F.)
-	Static oFontGrid
-	Static nTamCod
-	Static nTamDesc
-	Static nColTela
-	Static nLinTela
-	Static nTamTela    //1= 15"  2=21" 3=32" 4=42"
-	Static nColG1
-	Static nLinG1
-	Static nColG2
-	Static nLinG2
-	Static nLinh
-	Static nTamProd
+	Public oFontGrid
+	Public nTamCod
+	Public nTamDesc
+	Public nColTela
+	Public nLinTela
+	Public nTamTela    //1= 15"  2=21" 3=32" 4=42"
+	Public nColG1
+	Public nLinG1
+	Public nColG2
+	Public nLinG2
+	Public nLinh
+	Public nTamProd
 
 //Parametros TFonte ("Tipo Fonte", ,Tamanho Fonte , , ,Italico (.T./.F.))
 //oFont1      := TFont():New("Arial",09,20,     ,.T.,,,,,.F.)
 
-
-	Private cGetCodBar := Space(13)
-	Private nPeso := 0
-	Static oCbxFinalizados
-	Static lCbxFinalizados := .T.
+	Public oGetCodBar
+	Public cGetCodBar := Space(13)
+	Public oCbxFinalizados
+	Public lCbxFinalizados := .T.
 	HrInicio := time()
 	HrFim := ""
 	cStatus := ""
-	nQtdTotal := 0
 	nCod := 0
 	#define DS_MODALFRAME 128 //Desabilita fechar tela pelo X
 
@@ -294,12 +303,9 @@ Static Function TelaCarga()
 	aSize := MsAdvSize(.F.)
  /*
  MsAdvSize (http://tdn.totvs.com/display/public/mp/MsAdvSize+-+Dimensionamento+de+Janelas)
- aSize[1] = 1 -> Linha inicial área trabalho.
- aSize[2] = 2 -> Coluna inicial área trabalho.
- aSize[3] = 3 -> Linha final área trabalho.
- aSize[4] = 4 -> Coluna final área trabalho.
- aSize[5] = 5 -> Coluna final dialog (janela).
- aSize[6] = 6 -> Linha final dialog (janela).
+ https://tdn.totvs.com/pages/releaseview.action?pageId=6815046
+  aSize[1] = 1 -> Linha inicial área trabalho.  aSize[2] = 2 -> Coluna inicial área trabalho.	 aSize[3] = 3 -> Linha final área trabalho. 	
+  aSize[4] = 4 -> Coluna final área trabalho.	aSize[5] = 5 -> Coluna final dialog (janela).	aSize[6] = 6 -> Linha final dialog (janela).
  aSize[7] = 7 -> Linha inicial dialog (janela).
  */
 
@@ -357,23 +363,18 @@ Static Function TelaCarga()
 //******************************************************************************
 	
 	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 0, 0 TO nLinTela-170, nColTela-70 COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
-//	@ 002, 002 BUTTON oBtnFinaliz PROMPT "FINALIZAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (finalizaSenha()) PIXEL
-//	@ 020, 002 BUTTON oBtnApont PROMPT "PAUSAR CARGA" SIZE 055, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
-//	@ 002, 060 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 050, 015 OF oDlg2 ACTION LOGRES() PIXEL	
-//	@ 020, 060 BUTTON oBtnApont PROMPT "EXCLUIR FARDOS" SIZE 050, 015 OF oDlg2 ACTION (retfardos()) PIXEL
 	@ 002, 002 BUTTON oBtnFinaliz PROMPT "FINALIZAR" SIZE 050, 015 OF oDlg2 ACTION (finalizaSenha()) PIXEL
 	@ 002, 060 BUTTON oBtnApont PROMPT "PAUSAR" SIZE 050, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
 	@ 002, 120 GROUP oGroup1 TO 020, 410 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
 	@ 004, 125 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 004, 160 SAY oTxtVeic PROMPT 	cVeic SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 004, 200 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 004, 222 SAY oTxtRota PROMPT cRota SIZE 200, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
+	//@ 004, 160 SAY oTxtVeic PROMPT 	cVeic SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	@ 004, 160 SAY oTxtVeic PROMPT 	"010" SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	@ 004, 180 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 004, 210 SAY oTxtRota PROMPT cRota SIZE 200, 011 OF oGroup1 FONT oFont1 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
 	@ 004, 335 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 004, 360 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 002, 420 BUTTON oBtnApont PROMPT "EXC.FARDOS" SIZE 050, 015 OF oDlg2 ACTION (retfardos()) PIXEL
 	@ 002, 470 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 050, 015 OF oDlg2 ACTION LOGRES() PIXEL	
-
-	//@ 003, 380 SAY oTxtRota1 PROMPT substr(cRota,21,25) SIZE 070, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
 	//@ 115, 010 SAY oLblMot PROMPT "Motorista:" SIZE 049, 012 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	//@ 115, 040 SAY oTxtMot PROMPT cMotori SIZE 035, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
 	//@ 130, 010 SAY oLblResp PROMPT "Conferente: " SIZE 100, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -382,16 +383,16 @@ Static Function TelaCarga()
 	//@ 145, 085 SAY oLblResp PROMPT HrInicio SIZE 150, 011 OF oGroup1 FONT oFont3  CfOLORS 0, 16777215 PIXEL
 	@ 007, nColG1+10 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
 	@ 005, nColG1+56 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
-	@ 020, 150 SAY oLblPeso PROMPT "PESO TOTAL"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 020, 180 SAY oLblTotPeso PROMPT str(nPesoTotal)   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 030, 120 SAY oLblPend PROMPT "PENDENTES"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 030, nColG1+200 SAY oLblPeso PROMPT "PESO: "   SIZE 060, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
+	@ 030, nColG1+210 SAY oLblTotPeso PROMPT str(nPesoCarr)   SIZE 060, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
+	@ 030, nColG1+300 SAY oLblStatus1 PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
+	@ 030, nColG1+306 SAY oTxtStatus PROMPT str(nQtdCarr) OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
+	@ 030, 010 SAY oLblPend PROMPT "PENDENTES"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 030, nColG1+20 SAY oLblConc PROMPT "CONCLUÍDOS"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-//@ 030, nColG1-40 SAY oLblStatus1 PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
-	//@ 030, nColG1-20 SAY oTxtStatus PROMPT str(nQtdTotal) OF oDlg2 FONT oFont3 COLORS 0, 16777215 PIXEL
-
+	GridCarga()	
 	ACTIVATE MSDIALOG oDlg2 CENTERED
 	
-	GridCarga()	
+	
 
 Return
 
@@ -400,16 +401,18 @@ Static Function GridCarga()
 Public aFieldsCg := {}
 Public aColsExCg := {}
 Public aColsConc := {}
-Static oBrowse := {}
-Static oBrwFinaliz := {}
+Public oBrowse := {}
+Public oBrwFinaliz := {}
 
-	cQry := ""
+// COPIADO PARA CARREGAM. EXCLUIR SE NÃO DER ERRO
+/*	cQry := ""
 	aDadosC := {}
 	cProdGrid := ""
 	nQtdFardo:=0
-	_nResta := 0
-	_nExced := 0
-	_cMotFalta :=""
+//	_nResta := 0
+//	_nExced := 0
+//	_cMotFalta :=""
+*/
 	
 //******************************************************************************
 //****************         MONTAGEM DOS DADOS           ************************
@@ -424,67 +427,6 @@ AADD(aFieldsCg,{"EXCEDENTE"  ,"EXCEDENTE"   ,"" ,09 ,2, ,"û","N","" ,"V",  ,  ,"
 AADD(aFieldsCg,{"MOTIVO FALTA"  ,"MOTFALTA"   ,"" ,08 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 AADD(aFieldsCg,{"GRUPO" ,"GRUPO"    ,"" ,6 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 //AADD(aFieldsCg,{"CARREGAR LOTE"  ,"LOTECARR"   ,"" ,08 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
-
-	
-cQry := " SELECT ISNULL(D.B1_GRUPO,'') B1_GRUPO, ISNULL(A.C6_PRODUTO,'') C6_PRODUTO, ISNULL(B.Z3_PRODUTO,'') Z3_PRODUTO, ISNULL(D.B1_ORDEM,'') B1_ORDEM "
-cQry += " ,ISNULL(D.B1_PRVALID,0) B1_PRVALID,ISNULL(D.B1_DESC,'') B1_DESC, ISNULL(SUM(A.QTDPED),0) AS QTDVEN,  ISNULL(SUM(QTDROM),0) QTDROM,  ISNULL(SUM(A.QTDPED),0)*D.B1_PESO AS PESO "
-cQry += " FROM EXP_ROMPEDIDO A LEFT JOIN EXP_ROMFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO "
-cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD"
-cQry += " WHERE  A.Z1_NUM='"+cNumRom+"' "
-cQry += " GROUP BY A.Z1_NUM, A.C6_PRODUTO, A.Z1_EXPINI, B1_GRUPO, Z3_PRODUTO, B1_ORDEM,B1_PRVALID, B1_DESC, B1_PESO"
-cQry += " ORDER BY B1_ORDEM,C6_PRODUTO"  
-
-cQry := ChangeQuery(cQry)
-TCQUERY cQry NEW ALIAS "TRC2"
-
-DBSelectArea("SZ3")
-nQtdTotal := 0
-While !TRC2->(Eof())  
-
-	nQtdFardo := TRC2->QTDROM
-	nQtdTotal +=1
-
-	if nQtdFardo <= TRC2->QTDVEN
-		_nResta := TRC2->QTDVEN-nQtdFardo
-		_nExced := 0
-	else
-		_nResta := 0
-		_nExced := nQtdFardo-TRC2->QTDVEN
-	EndIf
-	
-	if Alltrim(TRC2->C6_PRODUTO)<>""
-		cProdGrid := TRC2->C6_PRODUTO
-		cDescGrid := TRC2->B1_DESC
-	Else
-		cProdGrid := TRC2->Z3_PRODUTO
-		dbSelectArea("SB1")
-		dbGotop()
-		DbSetOrder(1)
-		dbseek(xfilial("SB1")+cProdGrid)
-		cDescGrid := SB1->B1_DESC
-		SB1->(DbCloseArea())
-	End If
-
-	//Soma Peso Total
-	nPesoTotal += nPesoTotal
-
-
-	Aadd(aDadosC,{cProdGrid,;
-		cDescGrid,;
-		TRC2->QTDVEN,;
-		nQtdFardo,;
-		_nResta,;
-		_nExced,;
-		_cMotFalta,;
-		TRC2->B1_GRUPO,;
-		TRC2->PESO })
-		
-		//dDtLoteOk,; //incluir no vetor caso for informar proximo lote a carregar
-	
-	TRC2->(DbSkip())
-EndDo
-
-TRC2->(DbCloseArea())
 
 //Preenche matrix de Itens a carregar
 For I:= 1 To Len(aDadosC)
@@ -504,6 +446,7 @@ For I:= 1 To Len(aDadosC)
 		aColsExCg[nLin,09] := Transform(aDadosC[i][9],"@E 9999")  
 		
 		aColsExCg[nLin,Len(aFieldsCg)+1] := .F.
+
 	ENDIF
 
 Next
@@ -1452,7 +1395,7 @@ Return nRet
 Static Function TotalFardos()
 	aFdFalta := {}
 	aFdExced := {}
-	nTotalGeral := 0
+	//nTotalGeral := 0
 	nQtSemEtq := 0
 	//aFdTotal := {} //Para caso necessite ver todos os produtos carregados.
 	

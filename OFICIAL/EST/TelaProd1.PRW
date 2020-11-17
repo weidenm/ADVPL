@@ -48,6 +48,9 @@ User Function SIGATEC()
 	Public _nImpress
 	Public _nPorta
 	Public _nPadraoBar
+	Public cPrinter
+	Public cPorta 
+	Public cPadraoBar
 	Static cTurma
 //	Private cFechEst := GETNEWPAR( "MV_ULMES", "20200101", <Filial> )
 
@@ -62,6 +65,33 @@ User Function SIGATEC()
 	_nPorta   := 	Mv_Par02
 	_nPadraoBar:= 	Mv_Par03
 
+//*********************************************** 
+//***** CONFIGURAÇÕES DE IMPRESSORA *************	
+//*********************************************** 
+		if _nImpress = 1
+			cPrinter := "DATAMAX"
+		else
+			cPrinter := "ZEBRA"
+		endif
+	
+		if _nPorta   = 1
+			cPorta   := "LPT1"
+		elseif  _nPorta = 2
+			cPorta   := "LPT2" //USB mapeada pelo NET USE
+		elseif  _nPorta = 3
+			cPorta := "LPT3"
+		endif
+	
+		if _nPadraoBar  = 1 //CODE 128
+			cPadraoBar   := "MB07"
+		elseif  _nPadraoBar = 2 //EAN 13
+			cPadraoBar   := "MB04"
+		elseif  _nPadraoBar = 3 //EAN 14
+			cPadraoBar := "MB01"
+		elseif _nPadraoBar = 4 //Code 39
+			cPadraoBar := "MB02"
+		endif
+	
 // sintaxe para o acionar uma função a partir de uma tecla de atalho... Função utilizada: SetKey
 
 	//SetKey(115 ,{|| u_PrintEtq() })  // Habilita com F4
@@ -83,9 +113,9 @@ User Function SIGATEC()
 	NumOP := OP->C2_NUM
 	cTurma := pswret(1)[1][12]
 
-	DEFINE MSDIALOG oDlg TITLE "Etiquetamento e apontamento de Produção  v.2020-06 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
+	DEFINE MSDIALOG oDlg TITLE "Etiquetamento e apontamento de Produção  v.2020-11 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
 
-	@ 000, 004 BITMAP BmpLogo SIZE 143, 045 OF oDlg1 FILENAME "\\srvpp02\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
+	@ 000, 004 BITMAP BmpLogo SIZE 150, 050 OF oDlg1 FILENAME "\\srvpp08\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
 	@ 008, 090 SAY oSay1 PROMPT "OP:" SIZE 022, 017 OF oDlg FONT oFont4 COLORS 0, 16777215 PIXEL
 	@ 008, 110 SAY oSay2 PROMPT NumOP SIZE 049, 010 OF oDlg FONT oFont4 COLORS 0, 16777215 PIXEL
 	@ 025, 090 SAY oSayResp PROMPT "Encarregado:" SIZE 060, 011 OF oDlg FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -236,9 +266,6 @@ Return
 */
 Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 
-	Local cPorta
-	Local cPrinter
-
 	Public cNumFardo	:= ""
 	Public Numerac	   := 0
 	//Public NumIni		:= 0
@@ -272,7 +299,6 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 			Return
 		EndIf
 	ENDIF
-
 
 //VERIFICAÇÕES PARA CONFIRMAR REIMPRESSÃO.
 //Caso campo da etiqueta não tenha sido preenchido.
@@ -327,36 +353,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 		EndIf
 		
 		ULDOC->(DbCloseArea())
-		
-		if _nImpress = 1
-			cPrinter := "DATAMAX"
-		else
-			cPrinter := "ZEBRA"
-		endif
-	
-		if _nPorta   = 1
-			cPorta   := "LPT1"
-		elseif  _nPorta = 2
-			cPorta   := "LPT2" //USB mapeada pelo NET USE
-		elseif  _nPorta = 3
-			cPorta := "LPT3"
-		endif
 
-//***** CONFIGURAÇÕES PARA TESTE EM ZEBRA *************	
-//	_nImpress:=2 			//APENAS PARA TESTES. RETIRAR ANTES DE POR EM PRODUÇÃO.
-//	cPrinter:="ELTRON"  //APENAS PARA TESTES. RETIRAR ANTES DE POR EM PRODUÇÃO.
-//*********************************************************************************
-	
-		if _nPadraoBar  = 1 //CODE 128
-			cPadraoBar   := "MB07"
-		elseif  _nPadraoBar = 2 //EAN 13
-			cPadraoBar   := "MB04"
-		elseif  _nPadraoBar = 3 //EAN 14
-			cPadraoBar := "MB01"
-		elseif _nPadraoBar = 4 //Code 39
-			cPadraoBar := "MB02"
-		endif
-	
 		MSCBPRINTER(cPrinter,cPorta, , , .F., , , , ,,.f. , )
 	
 		IncProc("Imprimindo "+Alltrim(SC2->C2_NUM)+" "+Alltrim(SC2->C2_ITEM)+" "+cPorta)
@@ -568,7 +565,6 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 				MSGINFO("Favor cancelar etiquetas não impressas e imprimir novamente.")
 				FormExcFardo()
 			EndIf
-		
 
 		ELSE //CASO MSEXEC DÊ ERRO
 			nApontErro := nApontErro + 1
@@ -611,6 +607,7 @@ Return
 //**********************************************
 //*** IMPRESSÃO DE SUBSTITUIÇÃO DE ETIQUETA  *** 
 //**********************************************
+
 Static Function ImpSub(cTipoEtq)
 //CRIA PARAMETROS PARA IMPRIMIR ETIQUETAS
 	aPerg2 := {}
@@ -621,6 +618,7 @@ Static Function ImpSub(cTipoEtq)
 	cProduto :=""
 	cTurma := Alltrim(pswret(1)[1][12])
 	nImprEtiq := 0
+	nApontSucess := 0
 	
 	Pergunte(cPerg2,.T.,"Substituição de Etiqueta")
 
@@ -631,7 +629,6 @@ Static Function ImpSub(cTipoEtq)
 	dValid	:= MV_PAR05  //Data de Validade caso for produtos com esse tipo de controle
 	nQuant	:= MV_PAR06 
 	
-
 	Numerac := "0001"
 	
 	//if Alltrim(cLoteSub) <> ""
@@ -655,7 +652,7 @@ Static Function ImpSub(cTipoEtq)
 			cMot := "D" //Devoluções - fardos devolvidos
 		EndIf
 		//nTurma := "9"
-	
+
 		if Alltrim(cLoteSub) <> ""
 			IF Alltrim(cCodProd) <> ""
 				if cMot = "D"
@@ -670,39 +667,11 @@ Static Function ImpSub(cTipoEtq)
 			MSGINFO("Preencha o nº do lote no pacote e o cod. produto.")
 			Return
 		EndIf
-			
-	//SOLICITA IMPRESSÃO DE NOVAS ETIQUETAS
-		if _nImpress = 1
-			cPrinter := "DATAMAX"
-		else
-			cPrinter := "ZEBRA"
-		endif
 	
-		if _nPorta   = 1
-			cPorta   := "LPT1"
-		elseif  _nPorta = 2
-			cPorta   := "LPT2" //USB mapeada pelo NET USE
-		elseif  _nPorta = 3
-			cPorta := "LPT3"
-		endif
+		MSCBPRINTER(cPrinter,cPorta, , , .F., , , , ,,.f. , )
+		MSCBCHKStatus(.f.)
 
-//***** CONFIGURAÇÕES PARA TESTE EM ZEBRA *************	
-//	_nImpress:=2 			//APENAS PARA TESTES. RETIRAR ANTES DE POR EM PRODUÇÃO.
-//	cPrinter:="ELTRON"  //APENAS PARA TESTES. RETIRAR ANTES DE POR EM PRODUÇÃO.
-//*********************************************************************************
-	
-		if _nPadraoBar  = 1 //CODE 128
-			cPadraoBar   := "MB07"
-		elseif  _nPadraoBar = 2 //EAN 13
-			cPadraoBar   := "MB04"
-		elseif  _nPadraoBar = 3 //Interleaved
-			cPadraoBar := "MB01"
-		elseif _nPadraoBar = 4 //Code 39
-			cPadraoBar := "MB02"
-		endif
-	
-		//MSCBCHKStatus(.f.)
-
+		nImprEtiq := 1
 		While  nImprEtiq <= nQuant	
 	
 			cQry := "SELECT Z3_NUMOP,Z3_ITEMOP,MAX(Z3_NUMERAC) NUM FROM SZ3010"
@@ -716,11 +685,8 @@ Static Function ImpSub(cTipoEtq)
 
 			ULFAR->(DbCloseArea())
 
-			MSCBPRINTER(cPrinter,cPorta, , , .F., , , , ,,.f. , )
-		
 			IncProc("Imprimindo "+Alltrim(cOP)+" "+cPorta)
-		
-			
+				
 			cDataFab := dtoc(date())
 			_cDoc := cMot + time() //PENSAR EM INFORMAÇÃO MELHOR PARA NUMERO DE DOCUMENTO.
 
@@ -732,7 +698,6 @@ Static Function ImpSub(cTipoEtq)
 			cb1 := left(Alltrim(cOP)+cNumFardo,12)
 									
 			if _nImpress = 1
-		
 						MSCBBEGIN(1,6)
 						MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO
 								
@@ -791,7 +756,7 @@ Static Function ImpSub(cTipoEtq)
 						EndIf
 			ELSE	
 				if _nImpress = 2 //ZEBRA
-					
+			//Alert("Impressão etiqueta Zebra")			
 							MSCBBEGIN(1,6)
 							//MSCBSAYBAR(nXmm, nYmm, cConteudo, cRotacao, cTypePrt, nAltura, lDigVer, lLinha, lLinBaixo, cSubSetIni, nLargura, nRelacao, lCompacta, lSerial, cIncr, lZerosL)                          
 									
@@ -799,7 +764,7 @@ Static Function ImpSub(cTipoEtq)
 								//MSCBSAYBAR ( 05, 20 , cCodBarProd , 'N',"MB01",06,,.T.,,,2,2) //EAN14 OFICIAL												
 								MSCBSAYBAR ( 05, 08 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // BARRAS DO PRODUTO
 							EndIf
-							
+			//	Alert("Impr.1")			
 							//Imprime data de fabricação, validade e lote no grupo 1204, 1205,1203
 							if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
 								MSCBSAY(05,05,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")  //30
@@ -810,26 +775,30 @@ Static Function ImpSub(cTipoEtq)
 								MSCBSAY(50,21,"V: ","N","B","17,13")   //13
 								MSCBSAY(55,21,cDataVal,"N","B","17,13")  //13
 								MSCBSAY(50,26,"Lote: ","N","B","17,13")  //8
-								
+			//	Alert("Impr.2")							
 								IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"
 									MSCBSAY(61,26,lote,"N","B","17,13")  //Formato DDMMAA+IT
 								Else
 									MSCBSAY(61,26,cLoteEtq,"N","B","17,13") //Formato dia do ano DDD (3 digitos)
 								EndIf
 							else
+			//	Alert("Impr.3")					
 								MSCBSAY(05,02,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")
 								MSCBSAY(50,14,"Turma: "+ cTurma,"N","B","17,13")
-								MSCBSAY(73,25, cMot,"N","B","20,30")
 								MSCBSAY(50,21,"Fabricacao: ","N","B","17,13")
 								MSCBSAY(50,25,cDataFab,"N","B","17,13")
+								MSCBSAY(73,25, cMot,"N","B","20,30")
 								//MSCBSAY(50,29, _cDoc,"N","B","17,13")
 							EndIf
-							
-							MSCBSAYBAR ( 10, 22 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO - CODIGO DE BARRAS OFICIAL
+			//	Alert("Impr.4")				
+							MSCBSAYBAR ( 10, 20 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO - CODIGO DE BARRAS OFICIAL
+			//	Alert("Impr.5")	
 							MSCBEND()
 							nImprEtiq := nImprEtiq + 1
 							
 							if Alltrim(cGrupo) == "1208"
+							
+						//Alert("Impr.6")			
 								nPcte := 1
 								while nPcte <= 5
 									MSCBBEGIN(1,6) //01/01/16 - Diminuido 2 pontos na posição da linha.
@@ -845,13 +814,15 @@ Static Function ImpSub(cTipoEtq)
 									MSCBEND()
 									nPcte += 1
 								EndDo
-							EndIf			
+							EndIf	
+			//Alert("Impr.7")			
 				endif
 						
 	//*******************************************************
 	//****    APONTAMENTO DE FARDOS DE ETIQUETA IMPRESSAS ***
 	//*******************************************************
 			//Verifica se existe numeração do fardo no SZ3
+		//	Alert("Iniciado inclusão etiqueta")
 					dbSelectArea("SZ3")
 					dbGotop()
 					dbseek(xfilial("SZ3")+Alltrim(SC2->C2_NUM)+Alltrim(SC2->C2_ITEM)+cNumFardo)
@@ -879,6 +850,7 @@ Static Function ImpSub(cTipoEtq)
 					EndIf				
 			endif
 		EndDo			
+	//	Alert("Fechando Impressora")
  		MSCBCLOSEPRINTER()
 
 //*******************************************************
@@ -899,10 +871,10 @@ Return
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³REIMP    ºAutor  ³Microsiga           º Data ³  10/13/11   º±±
+±±ºPrograma  ³EXCFARDO ºAutor  ³Microsiga           º Data ³  10/25/11   º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºDesc.     ³ Reimpressao de etiquetas.                                  º±±
-±±º          ³                                                            º±±
+±±ºDesc.     ³ ESTORNA FARDOS JÁ INCLUIDOS NO SISTEMA    			   º±±
+±±º          ³ com erros e acertos.                             	      º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºUso       ³ AP                                                        º±±
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
@@ -935,20 +907,6 @@ Static Function FormExcFardo()
 	ACTIVATE MSDIALOG oDlg4 CENTERED
 Return
 
-/*
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³EXCLFARDO ºAutor  ³Microsiga           º Data ³  10/25/11   º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºDesc.     ³ ESTORNA FARDOS JÁ INCLUIDOS NO SISTEMA    			   º±±
-±±º          ³ com erros e acertos.                             	      º±±
-±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºUso       ³ AP                                                        º±±
-±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
-*/
 
 Static Function ExcFardo(_nOPexc,_nFardoIni2,_nFardoFim2, _turma)
 
@@ -1125,10 +1083,10 @@ Return
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³MONTAGRIDLEITOR ºAutor ³Weiden M. Mendesº Data ³  10/14/11  º±±
+±±ºPrograma  ³ExcFardoBarras ºAutor ³Weiden M. Mendesº Data ³  10/14/11  º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºDesc.     ³ Exclui etiquetas lidas por código de barras.         	  º±±
-±±º          ³                                                            º±±
+±±º          ³  (Estorno ou Perdas)                                       º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºUso       ³ AP                                                        º±±
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
@@ -1275,18 +1233,9 @@ Return( Nil )
 
 
 /*
-ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³EXCLFARDO_OP ºAutor  ³Microsiga        º Data ³  04/10/16   º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºDesc.     ³ ESTORNA FARDOS JÁ INCLUIDOS NO SISTEMA    			   º±±
-±±º          ³                                                   	      º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
-±±ºUso       ³ AP                                                        º±±
-±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
-±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 Static Function ExcFardo_OP()
 
@@ -1376,7 +1325,7 @@ Static Function ExcFardo_OP()
 //********************************************************	
 				
 				_aVetor:={ {"D3_DOC" ,cDocEst+cProd ,NIL},;
-					{"INDEX" ,2 ,NIL}}
+						{"INDEX" ,2 ,NIL}}
 	
 				MSExecAuto({|x,y| MATA250(x,y)},_aVetor,5) //Estorno
 					
@@ -1743,5 +1692,71 @@ MSCBCHKStatus(.f.)
 	EndDo	
 
 	MSCBCLOSEPRINTER()	
+
+Return
+
+
+Static Funcion Estorno()
+
+Return
+//INCLUSAO 
+User Function RMATA250() 
+	Local aVetor := {}          
+	Local dData
+	Local nOpc   := 3 
+	//-Opção de execução da rotina, informado nos parametros quais as opções possiveis
+	lMsErroAuto := .F.          
+	RpcSetEnv( "99","01",,,,,,,,,)
+	dData:=dDataBase
+	aVetor := {;                
+	{"D3_OP"		,"00000501001  "  	,NIL},;
+	{"D3_TM"		,"010"				,NIL}}                                                     	
+	MSExecAuto({|x, y| mata250(x, y)},aVetor, nOpc )  
+	If lMsErroAuto    
+		Mostraerro()
+	else    
+		Alert("Ok")
+	Endif
+
+Return     
+
+//ESTORNO 
+User Function REMAT250() 
+
+	Local aVetor := {} 
+	Local nOpc := 5 //-Opção de execução da rotina, informado nos parametros quais as opções possiveis 
+	Local cOp := "00000301001 " 
+	Local cCod := "2396 " 
+	Local cLocal:= "01" 
+	Local cChave:= "" 
+	lMsErroAuto := .F.  
+
+	RpcSetEnv( "99","01",,,,,,,,,) 
+	cChave:= xFilial("SD3") + cOp + cCod + cLocal 
+	SD3->(DbSetOrder(1)) 
+
+	If SD3->(DbSeek(cChave)) 
+
+		While !(SD3->(Eof())) .And. SD3->(D3_FILIAL + D3_OP + D3_COD + D3_LOCAL) == cChave    
+
+			If SD3->D3_ESTORNO == " "  
+
+				aVetor := { {"D3_OP" ,cOp ,NIL},;  
+				{"D3_QUANT" ,10 ,NIL},;  
+				{"D3_TM" ,"001" ,NIL}}    
+
+				MSExecAuto({|x, y| mata250(x, y)},aVetor, nOpc )     
+
+				If lMsErroAuto   
+					Mostraerro()  
+				Else  
+					Alert("Ok")  
+				Endif  
+				Exit  
+
+			EndIf  
+			SD3->(DbSkip())  
+		EndDo 
+	EndIf 
 
 Return
