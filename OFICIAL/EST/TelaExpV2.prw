@@ -27,11 +27,19 @@
 //User Function SIGAWMS
 User Function Exped2()
 
-	Public cNumRom := ""
+	Public oMSNewGe1
+	Static cNumRom := ""
 	Static Hoje := dtos(ddatabase)
 	Static oDlg1
 	Static BmpLogo
-	Public oBtnCarreg
+	Static oBtnCarreg
+	Static pos 
+	Static cNumRom 
+	Static cRota	
+	Static cVeic	
+	Static cMotori
+	Static cDtSaida
+
 	
  
 	Static oFont1 := TFont():New("MS Sans Serif",,024,,.T.,,,,,.F.,.F.)
@@ -70,7 +78,7 @@ Static Function GridRom()
 	aFields := {}
 	cQry := ""
 	//Static	aDados := {}
-	STATIC oMSNewGe1
+	//Public oMSNewGe1
 	Public aDadosRoms := {}
 	Public TRC
 
@@ -141,7 +149,7 @@ Return( Nil )
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 Static Function carregam()
-	
+
 	Static aFdOutrRom := {}
 	Static aFdVenc := {}
 	Static aFdExced :={}  //retirado para testar solução de excedentes registrados e no grid
@@ -163,6 +171,14 @@ Static Function carregam()
 	Static nPesoCarr := 0
 	Static nQtdCarr := 0
 	Static TRC2
+
+
+	pos := oMSNewGe1:nAt
+	cNumRom :=  trim(oMSNewGe1:aCols[pos][1])
+	cRota	:= trim(oMSNewGe1:aCols[pos][2])
+	cVeic	:= trim(oMSNewGe1:aCols[pos][3])
+	cMotori	:= trim(oMSNewGe1:aCols[pos][4])
+	cDtSaida := oMSNewGe1:aCols[pos][5]
 
 cQry := " SELECT ISNULL(D.B1_GRUPO,'') B1_GRUPO, ISNULL(A.C6_PRODUTO,'') C6_PRODUTO, ISNULL(B.Z3_PRODUTO,'') Z3_PRODUTO, ISNULL(D.B1_ORDEM,'') B1_ORDEM "
 cQry += " ,ISNULL(D.B1_PRVALID,0) B1_PRVALID,ISNULL(D.B1_DESC,'') B1_DESC, ISNULL(SUM(A.QTDPED),0) AS QTDVEN,  ISNULL(SUM(QTDROM),0) QTDROM,  ISNULL(SUM(QTDROM),0)*D.B1_PESO AS PESO "
@@ -216,7 +232,7 @@ While !TRC2->(Eof())
 		TRC2->PESO })
 		
 		//dDtLoteOk,; //incluir no vetor caso for informar proximo lote a carregar
-	
+	//Alert(cProdGrid)
 	TRC2->(DbSkip())
 EndDo
 
@@ -234,15 +250,15 @@ Return
 //***********************************************
 Static Function TelaCarga()
 
-	Local aList := {}
-
+	
+/*	Local aList := {}
 	Public pos := oMSNewGe1:nAt
 	Public cNumRom :=  trim(oMSNewGe1:aCols[pos][1])
 	Public cRota	:= trim(oMSNewGe1:aCols[pos][2])
 	Public cVeic	:= trim(oMSNewGe1:aCols[pos][3])
 	Public cMotori	:= trim(oMSNewGe1:aCols[pos][4])
 	Public cDtSaida := oMSNewGe1:aCols[pos][5]
-
+*/
 		
 /*	aFdOutrRom := {}
 	aFdVenc := {}
@@ -367,8 +383,7 @@ Static Function TelaCarga()
 	@ 002, 060 BUTTON oBtnApont PROMPT "PAUSAR" SIZE 050, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
 	@ 002, 120 GROUP oGroup1 TO 020, 410 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
 	@ 004, 125 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	//@ 004, 160 SAY oTxtVeic PROMPT 	cVeic SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 004, 160 SAY oTxtVeic PROMPT 	"010" SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	@ 004, 160 SAY oTxtVeic PROMPT 	cVeic SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
 	@ 004, 180 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 004, 210 SAY oTxtRota PROMPT cRota SIZE 200, 011 OF oGroup1 FONT oFont1 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
 	@ 004, 335 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -430,11 +445,11 @@ AADD(aFieldsCg,{"GRUPO" ,"GRUPO"    ,"" ,6 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 
 //Preenche matrix de Itens a carregar
 For I:= 1 To Len(aDadosC)
-
+	
 	IF aDadosC[i][5] <> 0  .or.  aDadosC[i][6] > 0
 		AADD(aColsExCg,Array(Len(aFieldsCg)+1))
 		nLin := Len(aColsExCg)
-	
+
 		aColsExCg[nLin,01] := aDadosC[i][1]
 		aColsExCg[nLin,02] := aDadosC[i][2]
 		aColsExCg[nLin,03] := Transform(aDadosC[i][3],"@E 9999") 	
