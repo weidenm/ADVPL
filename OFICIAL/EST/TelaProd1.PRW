@@ -21,7 +21,7 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
-//User Function FormAponta()
+//User Function ApontaProd()
 User Function SIGATEC()
  	//DECLARAR COMO STATIC TODAS VARIAVEIS DE PARÂMETRO DE FUNÇÃO.
 	Static NumOP
@@ -269,7 +269,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 	Public cNumFardo	:= ""
 	Public Numerac	   := 0
 	//Public NumIni		:= 0
-	cEan14	:= ""
+	//cEan14	:= ""
 	cOP		   := ""
 	cFardo		:= ""
 	nQuant     := _nQuant
@@ -283,7 +283,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 	nImprEtiq := 0
 	nQtdTotal := 0
 	aProd := {}
-	cLoteEtq:= DataLoteEtq()
+	cLoteEtq:= ""  
 	
 //Validação de quantidade permitida a imprimir por vez.
 	IF SUBSTR(SB1->B1_GRUPO,1,2)<>'13'
@@ -326,8 +326,14 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 		cDescProd := SB1->B1_DESC
 		cUM := SB1->B1_UM
 		cGrupo := SB1->B1_GRUPO
-		cEan14	:= "27896769801890"
-			
+		//cEan14	:= "27896769801890"
+
+		if Alltrim(SC2->C2_PROGRAM) <> ""
+			cLoteEtq:= SC2->C2_PROGRAM
+		Else
+			cLoteEtq:= DataLoteEtq()
+		EndIf
+
 		cQry := "SELECT Z3_NUMOP,Z3_ITEMOP,MAX(Z3_NUMERAC) NUM FROM SZ3010"
 		cQry += " WHERE Z3_NUMOP = '" + Substr(cOP,1,6) + "' AND Z3_ITEMOP='" + Substr(cOP,7,2)+"'"
 		cQry += " GROUP BY Z3_NUMOP,Z3_ITEMOP"
@@ -438,7 +444,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 						MSCBSAY(55,13,cDataVal,"N","1","2,2")
 						MSCBSAY(50,8,"Lote: ","N","1","2,2")				
 				
-						IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"
+						IF Alltrim(cGrupo) =="1209"
 							MSCBSAY(61,8,lote,"N","1","2,2")  //Formato DDMMAA+IT
 						Else
 							MSCBSAY(61,8,cLoteEtq,"N","1","2,2") //Formato dia do ano DDD (3 digitos)
@@ -492,7 +498,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 							MSCBSAY(53,23,cDataVal,"N","B","17,13")  //13
 							MSCBSAY(48,28,"Lote: ","N","B","17,13")  //8
 							
-							IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"
+							IF  Alltrim(cGrupo) =="1209"
 								MSCBSAY(48,32,lote,"N","B","17,13")  //Formato DDMMAA+IT
 							Else
 								MSCBSAY(48,32,cLoteEtq,"N","B","17,13") //Formato dia do ano DDD (3 digitos)
@@ -1619,7 +1625,7 @@ Static Function TesteCodBar()
 
 	//cPrinter := "DATAMAX"
 	//cPorta   := "LPT1"
-	cEan14	:= "27896769801890"
+	//cEan14	:= "27896769801890"
 	x := 1
 
 	
@@ -1696,9 +1702,6 @@ MSCBCHKStatus(.f.)
 Return
 
 
-Static Funcion Estorno()
-
-Return
 //INCLUSAO 
 User Function RMATA250() 
 	Local aVetor := {}          

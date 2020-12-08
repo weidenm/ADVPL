@@ -28,7 +28,7 @@
 User Function Exped2()
 
 	Public oMSNewGe1
-	Static cNumRom := ""
+	//Static cNumRom := ""
 	Static Hoje := dtos(ddatabase)
 	Static oDlg1
 	Static BmpLogo
@@ -37,11 +37,10 @@ User Function Exped2()
 	Static cNumRom 
 	Static cRota	
 	Static cVeic	
-	Static cMotori
+	Static cRomIt
+	//Static cMotori
 	Static cDtSaida
-
-	
- 
+	 
 	Static oFont1 := TFont():New("MS Sans Serif",,024,,.T.,,,,,.F.,.F.)
 	Static oFont2 := TFont():New("MS Sans Serif",,020,,.T.,,,,,.F.,.F.)
 	Static oFont3 := TFont():New("MS Sans Serif",,020,,.F.,,,,,.F.,.F.)
@@ -49,9 +48,7 @@ User Function Exped2()
 
 	aPerg := {}
 	cPerg := "EXPETQ"
-
 	Pergunte(cPerg,.F.)
-
 
 	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 2020-11 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
     @ 000, 004 BITMAP BmpLogo SIZE 143, 045 OF oDlg1 FILENAME "\\srvpp08\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
@@ -83,39 +80,42 @@ Static Function GridRom()
 	Public TRC
 
 	AADD(aFields,{"Romaneio" ,"ROMAN"    ,"" ,9 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
+	AADD(aFields,{"Item" ,"ITEM"    ,"" ,3 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Rota" ,"ROTA"    ,"" ,30 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Veiculo" ,"VEICULO"    ,"" ,7 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
-	AADD(aFields,{"Motorista" ,"MOTORISTA"    ,"" ,15 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Data Saida" ,"DTSAIDA"    ,"" ,10 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Data Saida" ,"DTINICIO"    ,"" ,10 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Status" ,"STATUS"    ,"" ,20 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
+	AADD(aFields,{"Item" ,"PROX.ITEM"    ,"" ,3 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
  
 //CONSULTA DE DADOS PARA O GRID
-	cQry:="SELECT *,'' AS DA3_COD, '' AS DA4_NOME " //INCLUIR MOTORISTA NA VISUALIZAÇÃO
-	cQry += "FROM SZ1010 "
-	cQry += "WHERE D_E_L_E_T_='' "
-	cQry +=" AND Z1_EXPFIM='' AND Z1_DTSAIDA >='20200101'"      //+ Hoje +"' "
-	//cQry +=" AND Z1_DTFECH='' " //Verifica se Romaneio já foi finalizado.
-	
-	cQry := ChangeQuery(cQry)
-	TCQUERY cQry NEW ALIAS "TRC"
+cQry := "SELECT A.Z1_NUM, A.Z1_ROTA, A.Z1_DESCRI, A.Z1_DTSAIDA, LTRIM(A.Z1_VEICULO) AS Z1_VEICULO, A.Z1_DTFECH, "
+cQry += " A.Z1_MOTORI, A.Z1_STATUS, A.Z1_EXPINI,  MITEM, PROXIT  "
+cQry += " FROM SZ1010 A INNER JOIN ROMITEM B ON A.Z1_ITEM='01' AND A.Z1_NUM = B.Z1_NUM"
+cQry += " WHERE A.D_E_L_E_T_='' AND A.Z1_DTFECH='' AND A.Z1_EXPFIM='' AND A.Z1_DTSAIDA >='20190101'  "
+cQry += " GROUP BY A.Z1_NUM, A.Z1_ROTA, A.Z1_DESCRI, A.Z1_DTSAIDA, A.Z1_VEICULO, A.Z1_DTFECH, "
+cQry += "  A.Z1_MOTORI, A.Z1_STATUS, A.Z1_EXPINI,MITEM,  PROXIT   "
+cQry += " ORDER BY A.Z1_NUM "
+
+cQry := ChangeQuery(cQry)
+TCQUERY cQry NEW ALIAS "TRC"
 
 	aDadosRom :={}
 	
 	While !TRC->(Eof())
 		Aadd(aDadosRoms,{ TRC->Z1_NUM,;
+			TRC->MITEM,;
 			TRC->Z1_DESCRI,;
-			TRC->Z1_MOTORI,;
-			TRC->DA4_NOME,;
+			TRC->Z1_VEICULO,;
 			stod(TRC->Z1_DTSAIDA),;
 			stod(TRC->Z1_EXPINI),;
-			TRC->Z1_STATUS})
+			TRC->Z1_STATUS,;
+			TRC->PROXIT})
 		TRC->(DbSkip())
 	End
 
 	TRC->(DbCloseArea())
-	
-	
+		
 	For I:= 1 To Len(aDadosRoms)
 		AADD(aColsEx,Array(Len(aFields)+1))
 		nLin := Len(aColsEx)
@@ -125,6 +125,8 @@ Static Function GridRom()
 		aColsEx[nLin,04] := aDadosRoms[i][4]
 		aColsEx[nLin,05] := aDadosRoms[i][5]
 		aColsEx[nLin,06] := aDadosRoms[i][6]
+		aColsEx[nLin,07] := aDadosRoms[i][7]
+		aColsEx[nLin,08] := aDadosRoms[i][8]
 		aColsEx[nLin,Len(aFields)+1] := .F.
 	Next
 		
@@ -132,7 +134,6 @@ Static Function GridRom()
 	oMSNewGe1:oBrowse:refresh()
 	oMSNewGe1:oBrowse:setfocus()
 	
-
 Return( Nil )
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -148,7 +149,7 @@ Return( Nil )
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
-Static Function carregam()
+Static Function carregam(nItem)
 
 	Static aFdOutrRom := {}
 	Static aFdVenc := {}
@@ -170,16 +171,25 @@ Static Function carregam()
 	Static _cMotFalta :=""
 	Static nPesoCarr := 0
 	Static nQtdCarr := 0
+	Static nPesoRom := 0
+	Static nPesoPedTot := 0 
 	Static TRC2
-
 
 	pos := oMSNewGe1:nAt
 	cNumRom :=  trim(oMSNewGe1:aCols[pos][1])
-	cRota	:= trim(oMSNewGe1:aCols[pos][2])
-	cVeic	:= trim(oMSNewGe1:aCols[pos][3])
-	cMotori	:= trim(oMSNewGe1:aCols[pos][4])
+	if nItem = 2  //campo Item 2 (proximo)
+		cRomIt	:= trim(oMSNewGe1:aCols[pos][8])
+	else
+		cRomIt	:= trim(oMSNewGe1:aCols[pos][2])
+	EndIF
+	cRota	:= trim(oMSNewGe1:aCols[pos][3])
+	cVeic	:= trim(oMSNewGe1:aCols[pos][4])
+	//cMotori	:= trim(oMSNewGe1:aCols[pos][5])
 	cDtSaida := oMSNewGe1:aCols[pos][5]
+	
 
+//PRODUTO POR ITEM DE ROMANEIO PARA CARREGAMENTO
+/*  //SQL QUE BUSCA GERAL DO ROMANEIO
 cQry := " SELECT ISNULL(D.B1_GRUPO,'') B1_GRUPO, ISNULL(A.C6_PRODUTO,'') C6_PRODUTO, ISNULL(B.Z3_PRODUTO,'') Z3_PRODUTO, ISNULL(D.B1_ORDEM,'') B1_ORDEM "
 cQry += " ,ISNULL(D.B1_PRVALID,0) B1_PRVALID,ISNULL(D.B1_DESC,'') B1_DESC, ISNULL(SUM(A.QTDPED),0) AS QTDVEN,  ISNULL(SUM(QTDROM),0) QTDROM,  ISNULL(SUM(QTDROM),0)*D.B1_PESO AS PESO "
 cQry += " FROM EXP_ROMPEDIDO A LEFT JOIN EXP_ROMFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO "
@@ -187,6 +197,23 @@ cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD"
 cQry += " WHERE  A.Z1_NUM='"+cNumRom+"' "
 cQry += " GROUP BY A.Z1_NUM, A.C6_PRODUTO, A.Z1_EXPINI, B1_GRUPO, Z3_PRODUTO, B1_ORDEM,B1_PRVALID, B1_DESC, B1_PESO"
 cQry += " ORDER BY B1_ORDEM,C6_PRODUTO"  
+*/
+
+/*cQry := "  SELECT A.Z1_NUM,  A.Z1_ITEM, A.C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, SUM(A.QTDPED) AS QTDVEN, SUM(QTDROM) AS QTDROM"
+cQry += " FROM EXP_ROMITPEDIDO A LEFT OUTER JOIN EXP_ROMITFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO AND A.Z1_ITEM=B.Z1_ITEM "
+cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD WHERE  A.Z1_NUM='"+cNumRom+"' AND A.Z1_ITEM='"+cRomIt+"' "
+cQry += "  GROUP BY A.Z1_NUM,  A.Z1_ITEM, A.C6_PRODUTO, B1_GRUPO, B1_ORDEM, B1_DESC, B1_PESO "
+cQry += "  ORDER BY B1_ORDEM,C6_PRODUTO "
+*/
+
+cQry := " SELECT  Z3_ROMANEI AS Z1_NUM,  Z1_ITEM, Z3_PRODUTO AS C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, 0 AS QTDVEN, QTDROM "
+cQry += " FROM  EXP_ROMITFARDOS B INNER JOIN  SB1010 AS D ON B.Z3_PRODUTO = D.B1_COD WHERE  B.Z3_ROMANEI='"+cNumRom+"' AND Z1_ITEM='"+cRomIt+"' "
+cQry += " AND Z3_PRODUTO NOT IN (SELECT C6_PRODUTO FROM EXP_ROMITPEDIDO WHERE Z1_NUM='"+cNumRom+"' AND Z1_ITEM='"+cRomIt+"' )" 
+cQry += " UNION SELECT A.Z1_NUM,  A.Z1_ITEM, A.C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, A.QTDPED AS QTDVEN, QTDROM "
+cQry += " FROM EXP_ROMITPEDIDO A LEFT OUTER JOIN EXP_ROMITFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO AND A.Z1_ITEM=B.Z1_ITEM "
+cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD WHERE  A.Z1_NUM='"+cNumRom+"' AND A.Z1_ITEM='"+cRomIt+"' " 
+cQry += " ORDER BY B1_ORDEM,C6_PRODUTO "
+
 
 cQry := ChangeQuery(cQry)
 TCQUERY cQry NEW ALIAS "TRC2"
@@ -196,8 +223,12 @@ DBSelectArea("SZ3")
 While !TRC2->(Eof())  
 
 	nQtdFardo := TRC2->QTDROM //Quantidade carregada no romaneio
+	nPesoRom :=  TRC2->B1_PESO*TRC2->QTDROM
+	nPesoPed := TRC2->B1_PESO*TRC2->QTDVEN
 	nQtdCarr := nQtdCarr + TRC2->QTDROM  //Total Quantidade carregada
-	nPesoCarr:= nPesoCarr + TRC2->PESO   //Total peso carregado
+	
+	nPesoCarr:= nPesoCarr + nPesoRom  //Total peso carregado
+	nPesoPedTot := nPesoPedTot + nPesoPed
 
 	if nQtdFardo <= TRC2->QTDVEN
 		_nResta := TRC2->QTDVEN-nQtdFardo
@@ -220,7 +251,6 @@ While !TRC2->(Eof())
 		SB1->(DbCloseArea())
 	End If
 
-
 	Aadd(aDadosC,{cProdGrid,;
 		cDescGrid,;
 		TRC2->QTDVEN,;
@@ -229,7 +259,7 @@ While !TRC2->(Eof())
 		_nExced,;
 		_cMotFalta,;
 		TRC2->B1_GRUPO,;
-		TRC2->PESO })
+		nPesoRom })
 		
 		//dDtLoteOk,; //incluir no vetor caso for informar proximo lote a carregar
 	//Alert(cProdGrid)
@@ -249,28 +279,7 @@ Return
 //  Grid da tela inicial - Ordem de Produção
 //***********************************************
 Static Function TelaCarga()
-
-	
-/*	Local aList := {}
-	Public pos := oMSNewGe1:nAt
-	Public cNumRom :=  trim(oMSNewGe1:aCols[pos][1])
-	Public cRota	:= trim(oMSNewGe1:aCols[pos][2])
-	Public cVeic	:= trim(oMSNewGe1:aCols[pos][3])
-	Public cMotori	:= trim(oMSNewGe1:aCols[pos][4])
-	Public cDtSaida := oMSNewGe1:aCols[pos][5]
-*/
-		
-/*	aFdOutrRom := {}
-	aFdVenc := {}
-	aFdExced :={}  //retirado para testar solução de excedentes registrados e no grid
-	aFdNotExist := {}
-	aFdFalta	:= {}
-	nTotalGeral := 0
-	nQtSemEtq := 0
-	nApontSucess := 0
-	nLeituras := 0
-	Static Hoje := dtos(ddatabase)
-*/	 
+	 
 	Static oDlg2
 	Static BmpLogo
 	//Static oBtnAponta
@@ -376,38 +385,29 @@ Static Function TelaCarga()
 
 ///******************************************************************************
 //****************         MONTAGEM DA TELA            ************************
-//******************************************************************************
-	
+//*****************************************************************************
 	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 0, 0 TO nLinTela-170, nColTela-70 COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
-	@ 002, 002 BUTTON oBtnFinaliz PROMPT "FINALIZAR" SIZE 050, 015 OF oDlg2 ACTION (finalizaSenha()) PIXEL
-	@ 002, 060 BUTTON oBtnApont PROMPT "PAUSAR" SIZE 050, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
-	@ 002, 120 GROUP oGroup1 TO 020, 410 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
-	@ 004, 125 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 004, 160 SAY oTxtVeic PROMPT 	cVeic SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	@ 004, 180 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 004, 210 SAY oTxtRota PROMPT cRota SIZE 200, 011 OF oGroup1 FONT oFont1 COLORS 0, 16777215 PIXEL //Nome do responsável pela programação da produção
-	@ 004, 335 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 004, 360 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 002, 420 BUTTON oBtnApont PROMPT "EXC.FARDOS" SIZE 050, 015 OF oDlg2 ACTION (retfardos()) PIXEL
-	@ 002, 470 BUTTON oBtnResumo PROMPT "RESUMO" SIZE 050, 015 OF oDlg2 ACTION LOGRES() PIXEL	
-	//@ 115, 010 SAY oLblMot PROMPT "Motorista:" SIZE 049, 012 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	//@ 115, 040 SAY oTxtMot PROMPT cMotori SIZE 035, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	//@ 130, 010 SAY oLblResp PROMPT "Conferente: " SIZE 100, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	//@ 130, 060 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
-	//@ 145, 010 SAY oLblResp PROMPT "Início Separação: " SIZE 150, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	//@ 145, 085 SAY oLblResp PROMPT HrInicio SIZE 150, 011 OF oGroup1 FONT oFont3  CfOLORS 0, 16777215 PIXEL
-	@ 007, nColG1+10 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
-	@ 005, nColG1+56 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
+	@ 002, 003 SAY oLblNum PROMPT cNumRom + "-" +cRomIt   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 007, 050 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
+	@ 005, 100 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
+	@ 002, 250 GROUP oGroup1 TO 020, 600 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
+	@ 004, 255 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 004, 290 SAY oTxtVeic PROMPT 	cVeic SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	@ 004, 310 SAY oLblRota PROMPT "Rota:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 004, 340 SAY oTxtRota PROMPT cRota SIZE 200, 011 OF oGroup1 FONT oFont1 COLORS 0, 16777215 PIXEL 
+	@ 004, 460 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 004, 500 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 002, nColG1+175 BUTTON oBtnResumo PROMPT "MUDAR ITEM" SIZE 040, 015 OF oDlg2 ACTION  ItemSenha() PIXEL	
+	@ 002, nColG1+220 BUTTON oBtnExc PROMPT "EXC.FARDOS" SIZE 040, 015 OF oDlg2 ACTION (retfardos()) PIXEL
+	@ 002, nColG1+265 BUTTON oBtnApont PROMPT "PAUSAR" SIZE 040, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
+	@ 002, nColG1+310 BUTTON oBtnFinaliz PROMPT "FINALIZAR" SIZE 040, 015 OF oDlg2 ACTION (finalizaSenha()) PIXEL
+	@ 030, 010 SAY oLblPend PROMPT "PENDENTES"   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 030, nColG1+200 SAY oLblPeso PROMPT "PESO: "   SIZE 060, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
 	@ 030, nColG1+210 SAY oLblTotPeso PROMPT str(nPesoCarr)   SIZE 060, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 030, nColG1+300 SAY oLblStatus1 PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 030, nColG1+306 SAY oTxtStatus PROMPT str(nQtdCarr) OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 030, 010 SAY oLblPend PROMPT "PENDENTES"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 030, nColG1+20 SAY oLblConc PROMPT "CONCLUÍDOS"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 030, nColG1+300 SAY oLblTotal PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
+	@ 030, nColG1+306 SAY oTxtValTot PROMPT str(nQtdCarr) OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
 	GridCarga()	
-	ACTIVATE MSDIALOG oDlg2 CENTERED
-	
-	
+	ACTIVATE MSDIALOG oDlg2 CENTERED	
 
 Return
 
@@ -418,16 +418,6 @@ Public aColsExCg := {}
 Public aColsConc := {}
 Public oBrowse := {}
 Public oBrwFinaliz := {}
-
-// COPIADO PARA CARREGAM. EXCLUIR SE NÃO DER ERRO
-/*	cQry := ""
-	aDadosC := {}
-	cProdGrid := ""
-	nQtdFardo:=0
-//	_nResta := 0
-//	_nExced := 0
-//	_cMotFalta :=""
-*/
 	
 //******************************************************************************
 //****************         MONTAGEM DOS DADOS           ************************
@@ -544,8 +534,8 @@ Return
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 Static Function IncluiLeitor()
-	Public cCodProdBar := ""
-	//cDescProd := ""
+	Static cCodProdBar := ""
+	Static cDescProd := ""
 	//Private oMSNewApont
 	cHrApont := ""
 	
@@ -564,13 +554,14 @@ Static Function IncluiLeitor()
 			IF Trim(SZ3->Z3_ROMANEI)=""
 				
 				cCodProdBar := SZ3->Z3_PRODUTO
-				/*	dbSelectArea("SB1")
+					dbSelectArea("SB1")
 					DbSetOrder(1)
 					dbseek(xfilial("SB1")+SZ3->Z3_PRODUTO)
 					cDescProd := SB1->B1_DESC  
-				*/
+				
 				RecLock("SZ3",.f.)
 				SZ3->Z3_ROMANEI 	:= cNumRom   //CRIAR OUTRO CAMPO CHAMADO Z3_ROMANEIO PARA SUBSTITUIR
+				SZ3->Z3_LOTE 	:= cNumRom+cRomIt
 				SZ3->Z3_HREXP  		:= time()
 				SZ3->Z3_DATEXP  	:= dDatabase  //DATA DE APONTAMENTO DO FARDO - INCLUIR CAMPO
 				SZ3->(MsUnlock())
@@ -681,14 +672,14 @@ Static Function atual()
 			if  val(aColsExCg[nLin,05])=0 .and. val(aColsExCg[nLin,06])=0
 				AADD(aColsConc,Array(Len(aFieldsCg)+1))
 				Linew := Len(aColsConc)
-				aColsConc[Linew,01] := aColsExCg[nLin,01]
-				aColsConc[Linew,02] := aColsExCg[nLin,02]
-				aColsConc[Linew,03] := aColsExCg[nLin,03]
-				aColsConc[Linew,04] := aColsExCg[nLin,04]
-				aColsConc[Linew,05] := aColsExCg[nLin,05]
-				aColsConc[Linew,06] := aColsExCg[nLin,06]
-				aColsConc[Linew,07] := aColsExCg[nLin,07]
-				aColsConc[Linew,08] := aColsExCg[nLin,08]
+				aColsConc[Linew,01] := aColsExCg[nLin,01]  //Produto
+				aColsConc[Linew,02] := aColsExCg[nLin,02]  //Descrição
+				aColsConc[Linew,03] := aColsExCg[nLin,03]  //Quantidade total
+				aColsConc[Linew,04] := aColsExCg[nLin,04]  //Registrado
+				aColsConc[Linew,05] := aColsExCg[nLin,05]  //Restante
+				aColsConc[Linew,06] := aColsExCg[nLin,06]  //Excedente
+				aColsConc[Linew,07] := aColsExCg[nLin,07]  //Motivo Falta
+				aColsConc[Linew,08] := aColsExCg[nLin,08]  //Grupo
 				lConcAtu := .t.
 			EndIf
 			exit
@@ -707,7 +698,7 @@ Static Function atual()
 				else
 					aColsConc[nLin,06] :=   Transform(val(aColsConc[nLin,06])+1,"@E 9999") //str(val(aColsConc[nLin,06])+1)
 				EndIf
-				lExisteIt := .t.
+				lGrid1 := .t.
 				
 				if  val(aColsConc[nLin,04])>val(aColsConc[nLin,03])
 					AADD(aColsExCg,Array(Len(aFieldsCg)+1))
@@ -721,12 +712,12 @@ Static Function atual()
 					aColsExCg[Linew,07] := aColsConc[nLin,07]
 					aColsExCg[Linew,08] := aColsConc[nLin,08]
 				End If
-				//exit
+				exit
 			EndIf
 		Next   
 	EndIf
 
-	//Exclui registros de arrays dos grids
+	//Exclui registros concluídos de array do Grid Pendentes
 	nLin := 1			
 	While nLin <= Len(aColsExCg) 
 		if	Trim(aColsExCg[nLin,03]) == Trim(aColsExCg[nLin,04])
@@ -737,7 +728,7 @@ Static Function atual()
 		EndIf
 		nLin++
 	EndDo
-
+	//Exclui registros pendentes do array do Grid Concluidos
 	nLin := 1
 	While nLin <= Len(aColsConc)  //Exclui registros do array
 		if	Trim(aColsConc[nLin,03]) <> Trim(aColsConc[nLin,04])
@@ -748,6 +739,21 @@ Static Function atual()
 		EndIf
 		nLin++
 	EndDo
+
+	//Caso item lido não estar em nenhum Grid (fora do romaneio)
+	if lGrid1 = .f.
+			AADD(aColsExCg,Array(Len(aFieldsCg)+1))
+			Linew := Len(aColsExCg)
+			aColsExCg[Linew,01] := cCodProdBar
+			aColsExCg[Linew,02] := cDescProd
+			aColsExCg[Linew,03] := 0
+			aColsExCg[Linew,04] := 1
+			aColsExCg[Linew,05] := 0 
+			aColsExCg[Linew,06] := 1
+			aColsExCg[Linew,07] := ""
+			aColsExCg[Linew,08] := ""
+	EndIf
+
 
 	obrowse:SetArray(aColsExCg)  
 	obrowse:Refresh()
@@ -847,6 +853,7 @@ if Alltrim(cPassW)  == "plinc123"
 		EndIf
 		SZ1->Z1_EXPFIM := date()
 		SZ1->Z1_HRFIM := HrFim
+	//	SZ1->Z1_ITROM := cRomIt
 		
 		//Marca fardo como registrado e finalizado
 		/*
@@ -1146,6 +1153,7 @@ Static Function FardosConf(nTipoFunc)
 						SZ3->Z3_VEICDEV := cGetVeic  //Veículo de devolução
 					EndIf
 					SZ3->Z3_ROMANEI:=""
+					SZ3->Z3_LOTE:=""
 					SZ3->Z3_HREXP:=""
 				//	SZ3->Z3_DATEXP:="" //INCLUIR FUNCAO PARA LIMPAR CAMPO.
 					msunlock()
@@ -1384,7 +1392,7 @@ Static Function GETDCLR2(nLinha)
 	Local nCor2 := 16777215 
 	 
 	nRet := nCor3
-/*	
+	/*
 if len(aColsConc) > 0
  	if Alltrim(aColsConc[nLinha][5])<>""  //_nResta
 		If val(aColsConc[nLinha][5])>0 //.AND. aLinha[nLinha][nUsado]
@@ -1402,8 +1410,8 @@ if len(aColsConc) > 0
 	Else
 		Return
 	EndIf
-EndIf  */
-
+EndIf  
+*/
 Return nRet
 
 
@@ -1448,3 +1456,146 @@ Static Function TotalFardos()
 	Next
 */
 Return
+
+
+
+Static Function ItemSenha()
+
+	Static oDlgPwd, oGet, oBtnFinaliz 
+	Static cPassW2 := space(20)
+	Static cItem := space(2)
+
+	Alert("tela senha")	
+	DEFINE DIALOG oDlgPwd2 TITLE "Separar outro Item Romaneio" FROM 180,180 TO 280,420 PIXEL
+	//@ 10,10 GET oGet VAR cItem SIZE 100,15 OF oDlgPwd2 PIXEL  
+	@ 10,20 GET oGet VAR cPassW2 SIZE 100,15 OF oDlgPwd2 PIXEL VALID !empty(cPassW2) PASSWORD
+	@ 30, 50 BUTTON oBtnFinaliz PROMPT "Confirmar" SIZE 060, 015 OF oDlgPwd2 ACTION (MudaItRom()) PIXEL
+
+	ACTIVATE DIALOG oDlgPwd2 CENTERED
+
+Return
+
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ MUDAITROM	   Autor: Weiden        º Data ³  30/01/2015  º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³ Finaliza carregamento e inclusão de intens no romaneio.    º±±
+±±º          ³                                                            º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ AP                                                         º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+Static Function MudaItRom()
+
+	/*	Static aFdOutrRom := {}
+			Static aFdVenc := {}
+			Static aFdExced :={}  //retirado para testar solução de excedentes registrados e no grid
+			Static aFdNotExist := {}
+			Static aFdFalta	:= {}
+			Static nTotalGeral := 0
+			Static nQtSemEtq := 0
+			Static nApontSucess := 0
+			Static nLeituras := 0
+			//Static Hoje := dtos(ddatabase)
+
+			cQry := ""
+			Static aDadosC := {}
+			Static cProdGrid := ""
+			Static nQtdFardo:=0
+			Static _nResta := 0
+			Static _nExced := 0
+			Static _cMotFalta :=""
+			Static nPesoCarr := 0
+			Static nQtdCarr := 0
+			Static TRC2
+*/
+		//	pos := oMSNewGe1:nAt
+		//	cNumRom :=  trim(oMSNewGe1:aCols[pos][1])
+		//	cRomIt	:= trim(oMSNewGe1:aCols[pos][2])
+		//	cRota	:= trim(oMSNewGe1:aCols[pos][3])
+		//	cVeic	:= trim(oMSNewGe1:aCols[pos][4])
+			//cMotori	:= trim(oMSNewGe1:aCols[pos][5])
+		//	cDtSaida := oMSNewGe1:aCols[pos][5]
+
+
+
+if Alltrim(cPassW2)  == "ronso"
+	
+	oDlgPwd2:End()
+	carregam(2)
+/*
+	cData := Dtoc(date())
+	HrFim := time()
+	aVetorReq := {}
+
+	cQry := " SELECT A.Z1_ITEM, ISNULL(D.B1_GRUPO,'') B1_GRUPO, ISNULL(A.C6_PRODUTO,'') C6_PRODUTO, ISNULL(B.Z3_PRODUTO,'') Z3_PRODUTO, ISNULL(D.B1_ORDEM,'') B1_ORDEM "
+cQry += " ,ISNULL(D.B1_PRVALID,0) B1_PRVALID,ISNULL(D.B1_DESC,'') B1_DESC, ISNULL(SUM(A.QTDPED),0) AS QTDVEN,  ISNULL(SUM(QTDROM),0) QTDROM,  ISNULL(SUM(QTDROM),0)*D.B1_PESO AS PESO "
+cQry += "  FROM EXP_ROMITPEDIDO A LEFT OUTER JOIN EXP_ROMITFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO AND A.Z1_ITEM = B.Z1_ITEM "
+cQry += "  INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD  WHERE  A.Z1_NUM='"+cNumRom+"' AND A.Z1_ITEM='"+cRomIt+"' "
+cQry += " GROUP BY A.Z1_ITEM, A.Z1_NUM, A.C6_PRODUTO, A.Z1_EXPINI, B1_GRUPO, Z3_PRODUTO, B1_ORDEM,B1_PRVALID, B1_DESC, B1_PESO"
+cQry += "  ORDER BY B1_ORDEM,C6_PRODUTO"
+
+
+		cQry := ChangeQuery(cQry)
+		TCQUERY cQry NEW ALIAS "TRC2"
+
+		DBSelectArea("SZ3")
+
+		While !TRC2->(Eof())  
+
+			nQtdFardo := TRC2->QTDROM //Quantidade carregada no romaneio
+			nQtdCarr := nQtdCarr + TRC2->QTDROM  //Total Quantidade carregada
+			nPesoCarr:= nPesoCarr + TRC2->PESO   //Total peso carregado
+
+			if nQtdFardo <= TRC2->QTDVEN
+				_nResta := TRC2->QTDVEN-nQtdFardo
+				_nExced := 0
+			else
+				_nResta := 0
+				_nExced := nQtdFardo-TRC2->QTDVEN
+			EndIf
+			
+			if Alltrim(TRC2->C6_PRODUTO)<>""
+				cProdGrid := TRC2->C6_PRODUTO
+				cDescGrid := TRC2->B1_DESC
+			Else
+				cProdGrid := TRC2->Z3_PRODUTO
+				dbSelectArea("SB1")
+				dbGotop()
+				DbSetOrder(1)
+				dbseek(xfilial("SB1")+cProdGrid)
+				cDescGrid := SB1->B1_DESC
+				SB1->(DbCloseArea())
+			End If
+
+			Aadd(aDadosC,{cProdGrid,;
+				cDescGrid,;
+				TRC2->QTDVEN,;
+				nQtdFardo,;
+				_nResta,;
+				_nExced,;
+				_cMotFalta,;
+				TRC2->B1_GRUPO,;
+				TRC2->PESO })
+				
+				//dDtLoteOk,; //incluir no vetor caso for informar proximo lote a carregar
+			//Alert(cProdGrid)
+			TRC2->(DbSkip())
+		EndDo
+
+		TRC2->(DbCloseArea())
+
+		//MONTAR TELA DE CARREGAMENTO DO ROMANEIO
+		TelaCarga()
+	*/
+else
+	Alert("Senha Incorreta!")
+	oDlgPwd2:End()
+EndIf
+
+Return
+

@@ -93,147 +93,6 @@ Processa({||AtualizaPedido(2)},"Aguarde...","Atualizando Pedidos...")
 	TCSETCONN(nCon2) 
 
 /*
-Static Function gravaPedido(emp)
-
-	QryAtualiza := ""
-
-	cPedIni  := MV_PAR01
-	cPedFim  := MV_PAR02
-	cDataIni := dtos(MV_PAR03)
-	cDataFim := dtos(MV_PAR04)
-	cData := Dtoc(date())
-	cHora := time()
-	Public DataHora := cData + " " + cHora
-	
-
-//PEDIDOS N√O EXCLUÕDOS, MENORES QUE 900000 OU J¡ HOUVER SIDO IMPORTADO.   
-	If Select("CABPED") > 0
-		dbSelectArea("CABPED")
-		dbCloseArea()
-	EndIf
-	
-		cQuery := "SELECT C5_FILIAL,C5_NUM,C5_TIPO,substring(LC.COD_CLIENTE,1,6) as C5_CLIENTE,substring(LC.COD_CLIENTE,7,2) as C5_LOJACLI, substring(LC.COD_CLIENTE,1,6) as C5_CLIENT, substring(LC.COD_CLIENTE,7,2) as C5_LOJAENT,"
-		cQuery += " C5_TIPOCLI,C5_CONDPAG,C5_TABELA,C5_VEND1,C5_COMIS1, C5_DESC1,C5_EMISSAO,C5_VOLUME1,C5_PBRUTO,C5_PESOL,C5_ESPECI1,C5_OBS, C5_MENNOTA,C5_MENPAD,C5_TIPLIB,C5_DESCONT,C5_TXMOEDA,C5_TPCARGA,C5_NUMLDX,"
-		cQuery += " C5_ROMANEI, C5_ROMIT,C5_DTSAIDA,C5_TPFRETE,C5_IMPRESS FROM SRVPP01.DADOS12.dbo.SC5010 A  "
-		cQuery += " INNER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C5_NUMLDX)+A.C5_CLIENTE+A.C5_LOJACLI = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
-		cQuery += "  WHERE D_E_L_E_T_ = '' AND C5_NUM < '900000'  AND C5_EMISSAO >= '"+ cDataIni +"' and C5_EMISSAO <= '"+ cDataFim +"' "
-		cQuery += "  AND C5_NUM >= '"+ cPedIni +"' and C5_NUM <= '"+ cPedFim +"' "
-		cQuery += " AND C5_EMISSAO >'"+ dtos(ddatabase-30) +"' " //and C5_FILIAL='01'"
-		cQuery += " 	AND substring(LC.COD_CLIENTE,1,6) COLLATE Latin1_General_BIN  IN (SELECT A1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SA1010 WHERE D_E_L_E_T_ ='' )"
-		//cQuery += " AND C5_NUM NOT IN (SELECT C5_NUM FROM SRVPP01.DADOS12.dbo.SC5010 WHERE D_E_L_E_T_='' GROUP BY C5_NUM HAVING COUNT(*) > 1) "   //N„o importa duplicados
-		cQuery += " ORDER BY C5_NUM "
-
-
-	TCQuery cQuery Alias CABPED New
-	
-Return
-*/  
-/*
-Static Function gravaFornecedor()
-	If Select("FORNECE") > 0
-		dbSelectArea("FORNECE")
-		dbCloseArea()
-	EndIf
-
-	cQuery := " SELECT A2_FILIAL,A2_COD,A2_LOJA,A2_NOME,A2_NREDUZ,A2_END,A2_NR_END,A2_BAIRRO,A2_EST,A2_ESTADO,A2_COD_MUN,A2_MUN,A2_CEP,A2_CX_POST,A2_TIPO,A2_CGC,A2_PFISICA,A2_DDD,"
-	cQuery +=" A2_TEL,A2_FAX,A2_INSCR,A2_INSCRM,A2_CONTATO,A2_NATUREZ,A2_PRIOR,A2_RISCO,A2_COND,A2_DESVIO,A2_CONTA,A2_RECISS,A2_PAIS,A2_STATUS,A2_VINCULA,A2_EMAIL,  "
-	cQuery +=" A2_HPAGE,A2_CODMUN,A2_DTAVA,A2_DTVAL,A2_OK,A2_RECINSS,A2_GRPTRIB,A2_CONTAB,A2_CLIQF,A2_CODBLO,A2_PAISORI,A2_B2B,A2_PLCRRES,A2_DATBLO,A2_CBO,A2_CNAE,A2_PAGAMEN,"
-	cQuery +=" A2_MSBLQL,A2_LOGRADO FROM SRVPP01.DADOS12.dbo.SA2010 WHERE D_E_L_E_T_ = '' AND A2_IMP = 'S'"
-
-	TCQuery cQuery Alias FORNECE New
-
-Return
-*/
-/*
-Static Function gravaCliente()
-	If Select("CLIENTES") > 0
-		dbSelectArea("CLIENTES")
-		dbCloseArea()
-	EndIf
-
-//Importa ou atualiza clientes n„o excluÌdos
-	cQuery := "SELECT A1_FILIAL,A1_COD,A1_LOJA,A1_NOME,A1_PESSOA,A1_TPJ, A1_IENCONT, A1_CONTRIB, A1_NREDUZ,A1_TIPO,A1_EST,A1_COD_MUN,A1_MUN,A1_NATUREZ,A1_END,A1_COND,"
-	cQuery += " A1_BAIRRO,A1_CEP, A1_DDD, A1_TEL,A1_PAIS,A1_CGC,A1_INSCR, A1_INSCRM,A1_VEND,A1_COMIS, A1_RISCO, A1_CNAE,A1_CONDPAG, "
-	cQuery +=" A1_MSBLQL,A1_DTINIV, A1_COMPLEM, A1_LOGRADO, A1_NR_END,A1_EMAIL, A1_HPAGE,A1_CONTA,A1_CEL,A1_CODPAIS, A1_OBS, A1_OBSVEND FROM SRVPP01.DADOS12.dbo.SA1010"
-	cQuery += " WHERE D_E_L_E_T_ = '' AND A1_CGC <> '' AND A1_CGC NOT LIKE '000000%' AND A1_MSBLQL<>'1'"
-
-	TCQuery cQuery Alias CLIENTES New
-
-Return */
-
-/*
-Static Function gravaProduto()
-
-	If Select("PRODUTOS") > 0
-		dbSelectArea("PRODUTOS")
-		dbCloseArea()
-	EndIf
-
-//IMPORTA ou atualiza PRODUTOS N√O EXCLUIDOS E COM O CAMPO B1_IMPOR igual a SIM.
-	cQuery := "SELECT B1_COD,B1_DESC,B1_TIPO,B1_UM,B1_LOCPAD,B1_GRUPO,B1_POSIPI,B1_TS,B1_PICMRET,B1_PICMENT,B1_SEGUM,  "
-	cQuery += " B1_CONV,B1_TIPCONV,B1_GRTRIB,B1_CC, B1_ORIGEM, B1_CONTA, B1_CODBAR FROM SRVPP01.DADOS12.dbo.SB1010 "
-	cQuery += " WHERE D_E_L_E_T_ = ''  "
-	cQuery += " AND B1_COD NOT IN (SELECT B1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SB1010 WHERE D_E_L_E_T_='' AND B1_FILIAL='01')"
-
-//Grava dados da base 2
-	TCQuery cQuery Alias PRODUTOS New
-
-Return
-*/
-/*
-Static Function gravaMotorista()
-
-	If Select("MOTORISTA") > 0
-		dbSelectArea("MOTORISTA")
-		dbCloseArea()
-	EndIf
-
-	cQuery := "SELECT DA4_COD, DA4_NOME, DA4_NREDUZ,  DA4_CGC, DA4_TEL, DA4_NUMCNH,DA4_REGCNH, DA4_DTVCNH"
-	cQuery += ", DA4_MUNCNH, DA4_ESTCNH, DA4_CATCNH, DA4_DATNAS, DA4_BLQMOT, DA4_VNCART, DA4_ADMISS"
-//cQuery += ", DA4_END, DA4_BAIRRO, DA4_MUN, DA4_EST, DA4_CEP"
-	cQuery += " FROM SRVPP01.DADOS12.dbo.DA4010 WHERE D_E_L_E_T_=''"
-	
-	TCQuery cQuery Alias MOTORISTA New
-	
-	If Select("VEICULO") > 0
-		dbSelectArea("VEICULO")
-		dbCloseArea()
-	EndIf
-	
-	cQuery := "SELECT DA3_COD, DA3_DESC, DA3_PLACA, DA3_MUNPLA, DA3_ESTPLA, DA3_CAPACN, "
-	cQuery += " DA3_CAPACM, DA3_VOLMAX, DA3_MOTORI, DA3_ATIVO,DA3_CODFOR, DA3_LOJFOR  "
-	cQuery += " FROM SRVPP01.DADOS12.dbo.DA3010 WHERE D_E_L_E_T_=''  "
-
-	TCQuery cQuery Alias VEICULO New
-
-Return
-
-Static Function gravaTabela()
-	
-	If Select("CABTAB") > 0
-		dbSelectArea("CABTAB")
-		dbCloseArea()
-	EndIf
-
-cQuery := " SELECT DA0_CODTAB, DA0_DESCRI, DA0_DATDE, DA0_HORADE, DA0_DATATE, DA0_HORATE,DA0_CONDPG, DA0_TPHORA, DA0_ATIVO  "
-cQuery +=" FROM SRVPP01.DADOS12.dbo.DA0010 WHERE ((DA1_CODTAB='007' AND DA1_FILIAL='02') OR (DA1_CODTAB<>'007' AND DA1_FILIAL='01')) AND "
-cQuery +=" WHERE D_E_L_E_T_='' AND DA0_CODTAB COLLATE latin1_General_BIN  IN (SELECT DA0_CODTAB FROM SRVPP03.DADOSTOTVS11.dbo.DA0010 )"
-TCQuery cQuery Alias CABTAB New
-
-	If Select("CABITE") > 0
-		dbSelectArea("CABITE")
-		dbCloseArea()
-	EndIf
-
-cQuery := " SELECT DA1_ITEM, DA1_CODTAB, DA1_CODPRO, DA1_PRCVEN, DA1_ATIVO, DA1_ESTADO,DA1_TPOPER, DA1_QTDLOT,DA1_INDLOT, DA1_MOEDA, DA1_DATVIG, DA1_PCDSMX  "
-cQuery +=" FROM SRVPP01.DADOS12.dbo.DA1010 WHERE ((DA1_CODTAB='007' AND DA1_FILIAL='02') OR (DA1_CODTAB<>'007' AND DA1_FILIAL='01')) AND"
-cQuery +="  DA1_CODTAB+DA1_CODPRO COLLATE latin1_General_BIN NOT IN (SELECT DA1_CODTAB+DA1_CODPRO FROM SRVPP03.DADOSTOTVS11.dbo.DA1010 )"
-TCQuery cQuery Alias ITETAB New
-
-Return
-*/
-
-/*
 ‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹‹
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±…ÕÕÕÕÕÕÕÕÕÕ—ÕÕÕÕÕÕÕÕÕÕÀÕÕÕÕÕÕÕ—ÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÕÀÕÕÕÕÕÕ—ÕÕÕÕÕÕÕÕÕÕÕÕÕª±±
@@ -633,7 +492,7 @@ Static Function AtualizaCliente()
 //Importa ou atualiza clientes n„o excluÌdos
 	cQuery := "SELECT A1_FILIAL,A1_COD,A1_LOJA,A1_NOME,A1_PESSOA,A1_TPJ, A1_IENCONT, A1_CONTRIB, A1_NREDUZ,A1_TIPO,A1_EST,A1_COD_MUN,A1_MUN,A1_NATUREZ,A1_END,A1_COND,"
 	cQuery += " A1_BAIRRO,A1_CEP, A1_DDD, A1_TEL,A1_PAIS,A1_CGC,A1_INSCR, A1_INSCRM,A1_VEND,A1_COMIS, A1_RISCO, A1_CNAE,A1_CONDPAG, "
-	cQuery +=" A1_MSBLQL,A1_DTINIV, A1_COMPLEM, A1_LOGRADO, A1_NR_END,A1_EMAIL, A1_HPAGE,A1_CONTA,A1_CEL,A1_CODPAIS, A1_OBS, A1_OBSVEND FROM SRVPP01.DADOS12.dbo.SA1010"
+	cQuery +=" A1_MSBLQL,A1_DTINIV, A1_COMPLEM, A1_LOGRADO, A1_NR_END,A1_EMAIL, A1_HPAGE,A1_CONTA,A1_CEL,A1_CODPAIS, A1_OBS, A1_OBSVEND,A1_OBSERV FROM SRVPP01.DADOS12.dbo.SA1010"
 	cQuery += " WHERE D_E_L_E_T_ = '' AND A1_CGC <> '' AND A1_CGC NOT LIKE '000000%' AND A1_MSBLQL<>'1'"
 
 	TCQuery cQuery Alias CLIENTES New
@@ -712,7 +571,7 @@ Static Function AtualizaCliente()
 		SA1->A1_CONTA	:=CLIENTES->A1_CONTA
 		SA1->A1_OBS		:= CLIENTES->A1_OBS
 		SA1->A1_OBSVEND	:=CLIENTES->A1_OBSVEND
-		
+		SA1->A1_OBSERV	:=CLIENTES->A1_OBSERV
 //	SA1->A1_DTCRIA  := DataHora
 	
 		SA1->(MsUnlock())

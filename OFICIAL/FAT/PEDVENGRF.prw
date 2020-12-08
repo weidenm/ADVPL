@@ -654,13 +654,16 @@ nitens :=0
 				//oPrn:Say(nLin,1650,OemToAnsi(TRBI->CodiUnid),			   oFont09)
 				oPrn:Say(nLin,1700,Transform(TRBI->PrecoTab,"@E 9,999,999.99"),	oFont09,,,,1)   
 				oPrn:Say(nLin,2000,Transform(TRBI->ValrUnit,"@E 9,999,999.99"),	oFont09,,,,1)
-				oPrn:Say(nLin,2300,Transform(TRBI->PrecoTab*TRBI->QtdeProd,"@E 9,999,999.99"),	oFont09,,,,1)
+				oPrn:Say(nLin,2300,Transform(TRBI->ValrUnit*TRBI->QtdeProd,"@E 9,999,999.99"),	oFont09,,,,1)	
+				//oPrn:Say(nLin,2300,Transform(TRBI->PrecoTab*TRBI->QtdeProd,"@E 9,999,999.99"),	oFont09,,,,1)
 				nLin+=035
 				oPrn:Line( nLin,050,nLin,2400 )	
 				
 				QtdeTotal	+= TRBI->QtdeProd
 				ValrBru 	+= TRBI->PrecoTab*TRBI->QtdeProd
-				ValrTotal	+= TRBI->ValrTota
+				ValrTotal	:= ValrTotal + (TRBI->ValrUnit*TRBI->QtdeProd)
+				//ValrTotal	+= TRBI->ValrTota
+
 		
 			//CALCULO DO VOLUME DO PEDIDO
 				dbSelectArea("SB5")
@@ -753,7 +756,7 @@ Static Function ImprRoda()
 //	EndIf
 
 	//TOTAL A PAGAR
-	//nLin += 10
+	//nLin += 10	
 	oPrn:Say(nLin,1800,"Total:",oFont11N)
 	oPrn:Say(nLin,2300,Transform(ValrTotal,"@E 9,999,999.99"),	oFont11N,,,,1)
 	nLin += 50 //+210

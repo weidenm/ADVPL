@@ -3,40 +3,45 @@
 #Include "Protheus.ch"      
 
 //----------------------------------------------------------------------------
-// PONTO DE ENTRADA PARA SUGERIR QUANTIDADE LIBERADA AUTOMATICAMENTE NO
-// DE PEDIDOS DE VENDA  -  12.1.25
+// PONTO DE ENTRADA PARA SUGERIR QUANTIDADE LIBERADA AUTOMATICAMENTE NO PV
+// VALIDA TODA TELA DE DIGITAÇÃO DO PEDIDO  -  12.1.25
 //----------------------------------------------------------------------------
 
 User Function MTA410()        
+
+ if SC6->C6_FILIAL <> "01"
+   Return
+ EndIf
 
 nPosQuant := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_QTDVEN"})
 nPosQtdlb := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_QTDLIB"})
 _nPOSValor:= aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_VALOR"})  // valor final
 cFilial   := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_FILIAL"})
 
+
 _nTotalpedido := 0
 _TotalQuant := 0
 
-   
    FOR _I := 1 TO LEN(ACOLS)
 
+  //alert(SC6->C6_FILIAL)
+
          _QTDPED:=ACOLS[_I][nPosQuant]
-         if cFilial == "01"
+      
             _QTDLIB:=ACOLS[_I][nPosQtdlb]
-         EndIf
+         
          _nValor:=ACOLS[_I][_nPOSValor]
 
          _TAM:=LEN(ACOLS[_I])     
          _DELETADO:=ACOLS[_I][_TAM]     //verifica se não é uma linha deletada
 
          if !_DELETADO 
-            if cFilial == "01"
-               acols[_I][nPosQtdlb]:= acols[_I][nPosQuant]
-            EndIf
+            acols[_I][nPosQtdlb]:= acols[_I][nPosQuant]
             _nTotalpedido := _nTotalpedido + _nValor
             _TotalQuant := _TotalQuant + _QTDPED
             
          endif
+
 
    NEXT
  
@@ -131,7 +136,7 @@ _cFilial:= xFilial()
 if _cFilial = "02" 
    //Alert("Filial DF não libera automatico.")
    Return
-EndIf */
+EndIf   */
 
 _cPedido    := SC5->C5_NUM
 //_dDtentrega := SC5->C5_ENTREGA
