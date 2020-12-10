@@ -21,8 +21,8 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
-//User Function ApontaProd()
-User Function SIGATEC()
+User Function ApontaProd()
+//User Function SIGATEC()
  	//DECLARAR COMO STATIC TODAS VARIAVEIS DE PARÂMETRO DE FUNÇÃO.
 	Static NumOP
 	Static _NumOP
@@ -1447,14 +1447,12 @@ Static Function Perdas()
 	Local QtdDif := 0
 	Local _aVetor := {}
 	Local cont := 0
-
+	Local lin := 0
 	Local nFardo := ""
-	
 	PRIVATE lMsErroAuto := .F.
 //*************************************************************
 //** CONTA FARDOS POR DOCUMENTO E ESTORNA O SD3 DOS MESMOS ****
 //*************************************************************
-	cont := 0
 	
 	if len(aColsExclui)>0
 		
@@ -1550,11 +1548,9 @@ User Function TABSZ3()
 //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //³ Declaracao de Variaveis                                             ³
 //ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
 	Private cPerg   := "SZ3"
-
 	Private cString := "SZ3"
-
+	x:= 0	
 	dbSelectArea("SZ3")
 	dbSetOrder(1)
 
