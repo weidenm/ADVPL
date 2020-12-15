@@ -21,8 +21,8 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
-User Function ApontaProd()
-//User Function SIGATEC()
+//User Function ApontaProd()
+User Function SIGATEC()
  	//DECLARAR COMO STATIC TODAS VARIAVEIS DE PARÂMETRO DE FUNÇÃO.
 	Static NumOP
 	Static _NumOP
@@ -676,9 +676,9 @@ Static Function ImpSub(cTipoEtq)
 	
 		MSCBPRINTER(cPrinter,cPorta, , , .F., , , , ,,.f. , )
 		MSCBCHKStatus(.f.)
-
+	
 		nImprEtiq := 1
-		While  nImprEtiq <= nQuant	
+		
 	
 			cQry := "SELECT Z3_NUMOP,Z3_ITEMOP,MAX(Z3_NUMERAC) NUM FROM SZ3010"
 			cQry += " WHERE Z3_NUMOP = '" + Substr(cOP,1,6) + "' AND Z3_ITEMOP='" + Substr(cOP,7,2)+"'"
@@ -699,6 +699,7 @@ Static Function ImpSub(cTipoEtq)
 	//*******************************************************
 	//**** IMPRESSÃO DE ETIQUETAS COM CÓDIGO DE BARRAS    ***
 	//*******************************************************		
+		While  nImprEtiq <= nQuant	
 			Numerac := Numerac + 1
 			cNumFardo := strzero(Numerac,4)
 			cb1 := left(Alltrim(cOP)+cNumFardo,12)
@@ -821,19 +822,19 @@ Static Function ImpSub(cTipoEtq)
 									nPcte += 1
 								EndDo
 							EndIf	
-			//Alert("Impr.7")			
-				endif
-						
+			 	endif
+			EndIf		
 	//*******************************************************
 	//****    APONTAMENTO DE FARDOS DE ETIQUETA IMPRESSAS ***
 	//*******************************************************
 			//Verifica se existe numeração do fardo no SZ3
-		//	Alert("Iniciado inclusão etiqueta")
-					dbSelectArea("SZ3")
-					dbGotop()
-					dbseek(xfilial("SZ3")+Alltrim(SC2->C2_NUM)+Alltrim(SC2->C2_ITEM)+cNumFardo)
-		
-					if ! SZ3->(found())
+	
+			//		dbSelectArea("SZ3")
+			//		dbGotop()
+				
+			//		dbseek(xfilial("SZ3")+cOP+cNumFardo)
+
+			//		if ! SZ3->(found())
 		//Incluir apontamentos de fardos no SZ3
 						RecLock("SZ3",.t.)
 						SZ3->Z3_PRODUTO := cCodProd
@@ -843,7 +844,6 @@ Static Function ImpSub(cTipoEtq)
 						SZ3->Z3_DOCSD3 :=  _cDoc
 						SZ3->Z3_DATA   := dDatabase
 						SZ3->Z3_LETRA  := cTurma
-						//SZ3->Z3_LETRA  := cTurma
 						if cMot = "D"  //Registrar que fardo já foi carregado e tem etiqueta substituta de devolução.
 							SZ3->Z3_REG ='D'
 						EndIf
@@ -853,8 +853,8 @@ Static Function ImpSub(cTipoEtq)
 						nApontSucess := nApontSucess + 1
 					//Else
 						//MSGINFO("Fardo"+SZ3->Z3_NUMERAC+" já existe com documento "+SZ3->Z3_DOCSD3+". Favor informar responsavel pelo sistema.")
-					EndIf				
-			endif
+					//EndIf				
+			//endif
 		EndDo			
 	//	Alert("Fechando Impressora")
  		MSCBCLOSEPRINTER()

@@ -99,7 +99,7 @@ User Function NUMROM()
 	Private cNumRom := ""
 
 	cQuery := "SELECT MAX(Z1_NUM) AS Z1_NUM FROM " +  RetSqlName("SZ1") + " "
-	cQuery += "WHERE  D_E_L_E_T_ <> '*'"
+	cQuery += "WHERE  D_E_L_E_T_ = ''"
 
 	TCQuery cQuery Alias ULTNUMZ1 New
 
@@ -174,7 +174,8 @@ If INCLUI
 		else
 			lRet := .t.
 		EndIf
-
+else
+	lRet := .t.
 EndIf
 
 Return lRet

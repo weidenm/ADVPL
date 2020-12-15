@@ -27,7 +27,7 @@
 //User Function SIGAWMS
 User Function Exped2()
 
-	Public oMSNewGe1
+	Static oMSNewGe1
 	//Static cNumRom := ""
 	Static Hoje := dtos(ddatabase)
 	Static oDlg1
@@ -42,12 +42,19 @@ User Function Exped2()
 	//Static cMotori
 	Static cDtSaida
 	Static aDadosRoms := {}
+
+	Static oFont1 := TFont():New("Arial",,018,,.T.,,,,,.F.,.F.)
+	Static oFont2 := TFont():New("Arial",,020,,.T.,,,,,.F.,.F.)
+	Static oFont3 := TFont():New("Arial",,024,,.F.,,,,,.F.,.F.)
+	Static oFont4 := TFont():New("Arial",,026,,.T.,,,,,.F.,.F.)
+	Static oFont5 := TFont():New("Arial",,028,,.T.,,,,,.F.,.F.)
 	 
+	/*
 	Static oFont1 := TFont():New("MS Sans Serif",,024,,.T.,,,,,.F.,.F.)
 	Static oFont2 := TFont():New("MS Sans Serif",,020,,.T.,,,,,.F.,.F.)
-	Static oFont3 := TFont():New("MS Sans Serif",,020,,.F.,,,,,.F.,.F.)
+	Static oFont3 := TFont():New("MS Sans Serif",,020,,.F.,,,,,.F.,.F.) 
 	Static oFont4 := TFont():New("MS Sans Serif",,026,,.T.,,,,,.F.,.F.)
-
+*/
 	nProxIt := 0
 	aPerg := {}
 	cPerg := "EXPETQ"
@@ -56,7 +63,7 @@ User Function Exped2()
 	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 2020-11 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
     @ 000, 004 BITMAP BmpLogo SIZE 143, 045 OF oDlg1 FILENAME "\\srvpp08\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
 	@ 025, 155 SAY oLblResp PROMPT "Separação da Carga: " SIZE 100, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 025, 250 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oDlg1 FONT oFont3 COLORS 0, 16777215 PIXEL
+	@ 025, 250 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	GridRom()
 	@ 010, 341 BUTTON oBtnCarreg PROMPT "Carregar" SIZE 051, 013 OF oDlg1 ACTION (carregam()) PIXEL
 	IF  LEN(aDadosRoms)==0
@@ -75,14 +82,14 @@ Return
 Static Function GridRom()
 
 	Local I
-	aColsEx := {}
-	aFields := {}
+	Static TRC
+	
+	Static aColsEx := {}
+	Static aFields := {}
 	cQry := ""
 	//Static	aDados := {}
 	//Public oMSNewGe1
 	
-	Static TRC
-
 	AADD(aFields,{"Romaneio" ,"ROMAN"    ,"" ,9 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Item" ,"ITEM"    ,"" ,3 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Rota" ,"ROTA"    ,"" ,30 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
@@ -133,11 +140,29 @@ TCQUERY cQry NEW ALIAS "TRC"
 		aColsEx[nLin,08] := aDadosRoms[i][8]
 		aColsEx[nLin,Len(aFields)+1] := .F.
 	Next
-		
-	oMSNewGe1 := MsNewGetDados():New( 057, 005, 250, 396,, "AllwaysTrue", "AllwaysTrue", "+Field1+Field2",,, 999, "AllwaysTrue", "", "AllwaysTrue", oDlg1, aFields, aColsEx)
-	oMSNewGe1:oBrowse:refresh()
-	oMSNewGe1:oBrowse:setfocus()
+
+	//oMSNewGe1 := MsNewGetDados():New( 057, 005, 250, 396,, "AllwaysTrue", "AllwaysTrue", "+Field1+Field2",,, 999, "AllwaysTrue", "", "AllwaysTrue", oDlg1, aFields, aColsEx)
+	//oMSNewGe1 :=TCBrowse():New( 057, 005, 250, 396,, "AllwaysTrue", "AllwaysTrue", "+Field1+Field2",,, 999, "AllwaysTrue", "", "AllwaysTrue", oDlg1, aFields, aColsEx)
+	//oMSNewGe1:oBrowse:refresh()
+	//oMsNewGe1:Refresh()
+	//oMSNewGe1:oBrowse:setfocus()
 	
+oMSNewGe1 := TCBrowse():New(057, 005, 395, 185,,{'Romaneio','Item','Rota','Veiculo','Data Saida','Data Inicio', 'Status'},{35,20,130,30,45,45,40},oDlg1,,,,,,,oFont1,,,,,.F.,,.T.,,.F.,,,.T.)
+oMSNewGe1 :AddColumn(TCColumn():New("ROMANEIO"	, {|| aColsEx[oMSNewGe1:nAt,01]},"@!",,,"CENTER", 35,.F.,.F.,,{|| .F. },,.F., ) )
+oMSNewGe1 :AddColumn(TCColumn():New("ITEM"	,{|| aColsEx[oMSNewGe1:nAt,02]},"@!",,,"CENTER", 20,.F.,.F.,,{|| .F. },,.F., ) )
+oMSNewGe1 :AddColumn(TCColumn():New("ROTA"	, {|| aColsEx[oMSNewGe1:nAt,03]},"@!",,,"CENTER",130,.F.,.F.,,{|| .F. },,.F., ) )
+oMSNewGe1 :AddColumn(TCColumn():New("VEICULO"	, {|| aColsEx[oMSNewGe1:nAt,04]},"@!",,,"CENTER", 30,.F.,.F.,,{|| .F. },,.F., ) )
+oMSNewGe1 :AddColumn(TCColumn():New("DATA SAIDA"	, {|| aColsEx[oMSNewGe1:nAt,05]},"@!",,,"CENTER", 45,.F.,.F.,,{|| .F. },,.F., ) )
+oMSNewGe1 :AddColumn(TCColumn():New("DATA INICIO"	, {|| aColsEx[oMSNewGe1:nAt,06]},"@!",,,"CENTER", 45,.F.,.F.,,{|| .F. },,.F., ) )
+oMSNewGe1 :AddColumn(TCColumn():New("STATUS"	, {|| aColsEx[oMSNewGe1:nAt,07]},"@!",,,"CENTER", 40,.F.,.F.,,{|| .F. },,.F., ) )
+
+oMSNewGe1:nLinhas := 1
+oMSNewGe1:SetArray(aColsEx)
+//oMSNewGe1:lUseDefaultColors := .F.
+//oMSNewGe1:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
+oMSNewGe1:Refresh()
+
+
 Return( Nil )
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -179,25 +204,24 @@ Static Function carregam(nItem)
 	Static nPesoPedTot := 0 
 	Static TRC2 := {}
 	
-
 	pos := oMSNewGe1:nAt
-	cNumRom :=  trim(oMSNewGe1:aCols[pos][1])
+	cNumRom :=  trim(oMSNewGe1:aArray[pos][1])
 	if nItem = 2  //campo Item 2 (proximo)
 		//cRomIt	:= val(trim(oMSNewGe1:aCols[pos][8]))
 		if nProxIt == 1
-			nProxIt := val(trim(oMSNewGe1:aCols[pos][2]))
+			nProxIt := val(trim(oMSNewGe1:aArray[pos][2]))
 		else
 			nProxIt := nProxIt - 1
 		EndIf
 		cRomIt := strzero(nProxIt,2,0)
 	else
-		nProxIt := val(trim(oMSNewGe1:aCols[pos][2]))
-		cRomIt	:= trim(oMSNewGe1:aCols[pos][2])
+		nProxIt := val(trim(oMSNewGe1:aArray[pos][2]))
+		cRomIt	:= trim(oMSNewGe1:aArray[pos][2])
 	EndIF
-	cRota	:= trim(oMSNewGe1:aCols[pos][3])
-	cVeic	:= trim(oMSNewGe1:aCols[pos][4])
+	cRota	:= trim(oMSNewGe1:aArray[pos][3])
+	cVeic	:= trim(oMSNewGe1:aArray[pos][4])
 	//cMotori	:= trim(oMSNewGe1:aCols[pos][5])
-	cDtSaida := oMSNewGe1:aCols[pos][5]
+	cDtSaida := oMSNewGe1:aArray[pos][5]
 	
 
 //PRODUTO POR ITEM DE ROMANEIO PARA CARREGAMENTO
@@ -296,12 +320,8 @@ Static Function TelaCarga()
 	Static BmpLogo
 	//Static oBtnAponta
 	//Static oBtnImprimir
- 	//Static oFont1 := TFont():New("MS Sans Serif",,018,,.T.,,,,,.F.,.F.)
-	Static oFont1 := TFont():New("Arial",,018,,.T.,,,,,.F.,.F.)
-	Static oFont2 := TFont():New("Arial",,020,,.T.,,,,,.F.,.F.)
-	Static oFont3 := TFont():New("Arial",,024,,.F.,,,,,.F.,.F.)
-	Static oFont4 := TFont():New("Arial",,026,,.T.,,,,,.F.,.F.)
-	Static oFont5 := TFont():New("Arial",,028,,.T.,,,,,.F.,.F.)
+
+
 	Public oFontGrid
 	Public nTamCod
 	Public nTamDesc
@@ -411,7 +431,7 @@ Static Function TelaCarga()
 	@ 004, 500 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 002, nColG1+175 BUTTON oBtnResumo PROMPT "PROX. ITEM" SIZE 040, 015 OF oDlg2 ACTION  ItemSenha() PIXEL	
 	@ 002, nColG1+220 BUTTON oBtnExc PROMPT "EXC.FARDOS" SIZE 040, 015 OF oDlg2 ACTION (retfardos()) PIXEL
-	@ 002, nColG1+265 BUTTON oBtnApont PROMPT "PAUSAR" SIZE 040, 015 OF oDlg2 ACTION (oDlg2:End()) PIXEL // Alterado 07/03/16
+	@ 002, nColG1+265 BUTTON oBtnApont PROMPT "PAUSAR" SIZE 040, 015 OF oDlg2 ACTION (PausaRom()) PIXEL  
 	@ 002, nColG1+310 BUTTON oBtnFinaliz PROMPT "FINALIZAR" SIZE 040, 015 OF oDlg2 ACTION (finalizaSenha()) PIXEL
 	@ 030, 010 SAY oLblPend PROMPT "PENDENTES"   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 030, nColG1+200 SAY oLblPeso PROMPT "PESO: "   SIZE 060, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
@@ -903,7 +923,8 @@ if Alltrim(cPassW)  == "plinc123"
 	EndIf
 	SZ1->(MsUnlock())
 	oDlg2:End()
-	GridRom()
+	//GridRom()
+	carregam(2)
 else
 	Alert("Senha Incorreta!")
 	oDlgPwd:End()
@@ -1514,112 +1535,82 @@ Return
 */
 Static Function MudaItRom()
 
-	/*	Static aFdOutrRom := {}
-			Static aFdVenc := {}
-			Static aFdExced :={}  //retirado para testar solução de excedentes registrados e no grid
-			Static aFdNotExist := {}
-			Static aFdFalta	:= {}
-			Static nTotalGeral := 0
-			Static nQtSemEtq := 0
-			Static nApontSucess := 0
-			Static nLeituras := 0
-			//Static Hoje := dtos(ddatabase)
+	if Alltrim(cPassW2)  == "ronso"
+		
+		oDlgPwd2:End()
+		oDlg2:End()
+		carregam(2)
 
-			cQry := ""
-			Static aDadosC := {}
-			Static cProdGrid := ""
-			Static nQtdFardo:=0
-			Static _nResta := 0
-			Static _nExced := 0
-			Static _cMotFalta :=""
-			Static nPesoCarr := 0
-			Static nQtdCarr := 0
-			Static TRC2
-*/
-		//	pos := oMSNewGe1:nAt
-		//	cNumRom :=  trim(oMSNewGe1:aCols[pos][1])
-		//	cRomIt	:= trim(oMSNewGe1:aCols[pos][2])
-		//	cRota	:= trim(oMSNewGe1:aCols[pos][3])
-		//	cVeic	:= trim(oMSNewGe1:aCols[pos][4])
-			//cMotori	:= trim(oMSNewGe1:aCols[pos][5])
-		//	cDtSaida := oMSNewGe1:aCols[pos][5]
-
-
-
-if Alltrim(cPassW2)  == "ronso"
-	
-	oDlgPwd2:End()
-	oDlg2:End()
-	carregam(2)
-/*
-	cData := Dtoc(date())
-	HrFim := time()
-	aVetorReq := {}
-
-	cQry := " SELECT A.Z1_ITEM, ISNULL(D.B1_GRUPO,'') B1_GRUPO, ISNULL(A.C6_PRODUTO,'') C6_PRODUTO, ISNULL(B.Z3_PRODUTO,'') Z3_PRODUTO, ISNULL(D.B1_ORDEM,'') B1_ORDEM "
-cQry += " ,ISNULL(D.B1_PRVALID,0) B1_PRVALID,ISNULL(D.B1_DESC,'') B1_DESC, ISNULL(SUM(A.QTDPED),0) AS QTDVEN,  ISNULL(SUM(QTDROM),0) QTDROM,  ISNULL(SUM(QTDROM),0)*D.B1_PESO AS PESO "
-cQry += "  FROM EXP_ROMITPEDIDO A LEFT OUTER JOIN EXP_ROMITFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO AND A.Z1_ITEM = B.Z1_ITEM "
-cQry += "  INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD  WHERE  A.Z1_NUM='"+cNumRom+"' AND A.Z1_ITEM='"+cRomIt+"' "
-cQry += " GROUP BY A.Z1_ITEM, A.Z1_NUM, A.C6_PRODUTO, A.Z1_EXPINI, B1_GRUPO, Z3_PRODUTO, B1_ORDEM,B1_PRVALID, B1_DESC, B1_PESO"
-cQry += "  ORDER BY B1_ORDEM,C6_PRODUTO"
-
-
-		cQry := ChangeQuery(cQry)
-		TCQUERY cQry NEW ALIAS "TRC2"
-
-		DBSelectArea("SZ3")
-
-		While !TRC2->(Eof())  
-
-			nQtdFardo := TRC2->QTDROM //Quantidade carregada no romaneio
-			nQtdCarr := nQtdCarr + TRC2->QTDROM  //Total Quantidade carregada
-			nPesoCarr:= nPesoCarr + TRC2->PESO   //Total peso carregado
-
-			if nQtdFardo <= TRC2->QTDVEN
-				_nResta := TRC2->QTDVEN-nQtdFardo
-				_nExced := 0
-			else
-				_nResta := 0
-				_nExced := nQtdFardo-TRC2->QTDVEN
-			EndIf
-			
-			if Alltrim(TRC2->C6_PRODUTO)<>""
-				cProdGrid := TRC2->C6_PRODUTO
-				cDescGrid := TRC2->B1_DESC
-			Else
-				cProdGrid := TRC2->Z3_PRODUTO
-				dbSelectArea("SB1")
-				dbGotop()
-				DbSetOrder(1)
-				dbseek(xfilial("SB1")+cProdGrid)
-				cDescGrid := SB1->B1_DESC
-				SB1->(DbCloseArea())
-			End If
-
-			Aadd(aDadosC,{cProdGrid,;
-				cDescGrid,;
-				TRC2->QTDVEN,;
-				nQtdFardo,;
-				_nResta,;
-				_nExced,;
-				_cMotFalta,;
-				TRC2->B1_GRUPO,;
-				TRC2->PESO })
-				
-				//dDtLoteOk,; //incluir no vetor caso for informar proximo lote a carregar
-			//Alert(cProdGrid)
-			TRC2->(DbSkip())
-		EndDo
-
-		TRC2->(DbCloseArea())
-
-		//MONTAR TELA DE CARREGAMENTO DO ROMANEIO
-		TelaCarga()
-	*/
-else
-	Alert("Senha Incorreta!")
-	oDlgPwd2:End()
-EndIf
+	else
+		Alert("Senha Incorreta!")
+		oDlgPwd2:End()
+	EndIf
 
 Return
 
+Static Function PausaRom()
+
+	oDlg2:End()
+	AtuaRom()
+
+Return
+
+
+Static Function AtuaRom()
+
+	//Local I
+	Static TRCA
+	
+	aColsEx := {}
+
+//CONSULTA DE DADOS PARA O GRID
+cQry := "SELECT A.Z1_NUM, A.Z1_ROTA, A.Z1_DESCRI, A.Z1_DTSAIDA, LTRIM(A.Z1_VEICULO) AS Z1_VEICULO, A.Z1_DTFECH, "
+cQry += " A.Z1_MOTORI, A.Z1_STATUS, A.Z1_EXPINI,  MITEM, PROXIT  "
+cQry += " FROM SZ1010 A INNER JOIN ROMITEM B ON  A.Z1_NUM = B.Z1_NUM"
+cQry += " WHERE A.D_E_L_E_T_='' AND A.Z1_DTSAIDA >='20190101'  "
+cQry += " GROUP BY A.Z1_NUM, A.Z1_ROTA, A.Z1_DESCRI, A.Z1_DTSAIDA, A.Z1_VEICULO, A.Z1_DTFECH, "
+cQry += "  A.Z1_MOTORI, A.Z1_STATUS, A.Z1_EXPINI,MITEM,  PROXIT   "
+cQry += " ORDER BY A.Z1_NUM "
+
+cQry := ChangeQuery(cQry)
+TCQUERY cQry NEW ALIAS "TRCA"
+
+	aDadosRom :={}
+	
+	While !TRCA->(Eof())
+		//Aadd(aDadosRoms,{ TRCA->Z1_NUM,;
+		Aadd(aColsEx,{ TRCA->Z1_NUM,;
+			TRCA->MITEM,;
+			TRCA->Z1_DESCRI,;
+			TRCA->Z1_VEICULO,;
+			stod(TRCA->Z1_DTSAIDA),;
+			stod(TRCA->Z1_EXPINI),;
+			TRCA->Z1_STATUS,;
+			TRCA->PROXIT})
+		TRCA->(DbSkip())
+		
+	End
+
+	TRCA->(DbCloseArea())
+
+	/*	
+	For I:= 1 To Len(aDadosRoms)
+		AADD(aColsEx,Array(Len(aFields)+1))
+		nLin := Len(aColsEx)
+		aColsEx[nLin,01] := aDadosRoms[i][1]
+		aColsEx[nLin,02] := aDadosRoms[i][2]
+		aColsEx[nLin,03] := aDadosRoms[i][3]
+		aColsEx[nLin,04] := aDadosRoms[i][4]
+		aColsEx[nLin,05] := aDadosRoms[i][5]
+		aColsEx[nLin,06] := aDadosRoms[i][6]
+		aColsEx[nLin,07] := aDadosRoms[i][7]
+		aColsEx[nLin,08] := aDadosRoms[i][8]
+		aColsEx[nLin,Len(aFields)+1] := .F.
+	Next 
+*/	
+
+	oMSNewGe1:SetArray(aColsEx)
+	oMsNewGe1:Refresh()
+	
+	
+Return( Nil )
