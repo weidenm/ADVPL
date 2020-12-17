@@ -11,13 +11,14 @@
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
-±±ºPrograma  ³TELAEXPV2 ver. 7.0 ºAutor  ³ Weiden Mendes + Data³ 03/10/11 º±±
+±±ºPrograma  ³TELAEXPV2 ver. 8.0 ºAutor  ³ Weiden Mendes + Data³ 03/10/11 º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºDesc.     ³ Programa para realizar expedição de produtos  e            º±±
 ±±º          ³  baixa de estoque simultaneamente.                         º±±
 ±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
 ±±ºVersão    ³  Nova tela e layout para itens concluídos.  				  º±±
 ±± 12.1.25	 ³	Tamanho e fonte dos textos melhorados		              º±±
+±± 8.0 		 ³	Carregamento de romaneio por item. Marca excedente vermelhoº±±
 ±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
@@ -60,7 +61,7 @@ User Function Exped2()
 	cPerg := "EXPETQ"
 	Pergunte(cPerg,.F.)
 
-	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 2020-11 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
+	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 2020-12 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
     @ 000, 004 BITMAP BmpLogo SIZE 143, 045 OF oDlg1 FILENAME "\\srvpp08\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
 	@ 025, 155 SAY oLblResp PROMPT "Separação da Carga: " SIZE 100, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 025, 250 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -478,10 +479,10 @@ For I:= 1 To Len(aDadosC)
 
 		aColsExCg[nLin,01] := aDadosC[i][1]
 		aColsExCg[nLin,02] := aDadosC[i][2]
-		aColsExCg[nLin,03] := Transform(aDadosC[i][3],"@E 9999") 	
-		aColsExCg[nLin,04] := Transform(aDadosC[i][4],"@E 9999")  
-		aColsExCg[nLin,05] := Transform(aDadosC[i][5],"@E 9999")  
-		aColsExCg[nLin,06] := Transform(aDadosC[i][6],"@E 9999")  
+		aColsExCg[nLin,03] := Transform(aDadosC[i][3],"@E 9999") 	//Quantidade
+		aColsExCg[nLin,04] := Transform(aDadosC[i][4],"@E 9999")	//Registrado 	 
+		aColsExCg[nLin,05] := Transform(aDadosC[i][5],"@E 9999")	//Restante  
+		aColsExCg[nLin,06] := Transform(aDadosC[i][6],"@E 9999")	//Excedente
 		aColsExCg[nLin,07] := aDadosC[i][7]
 		aColsExCg[nLin,08] := aDadosC[i][8]
 		aColsExCg[nLin,09] := Transform(aDadosC[i][9],"@E 9999")  
@@ -607,8 +608,6 @@ Static Function IncluiLeitor()
 				atual()
 				nLeituras += 1
 				nApontSucess += 1
-				
-	
 			else
 				if Trim(SZ3->Z3_ROMANEI)<>Trim(cNumRom)  //Caso número registrado for diferente do romaneio atual.
 					MSGSTOP("Fardo registrado em outro romaneio. Informar gerência.")
@@ -710,7 +709,6 @@ Static Function atual()
 				aColsExCg[nLin,06] := Transform(val(aColsExCg[nLin,06])+1,"@E 9999")  //str(val(aColsExCg[nLin,06])+1)
 			EndIf
 			
-
 			if  val(aColsExCg[nLin,05])=0 .and. val(aColsExCg[nLin,06])=0
 				AADD(aColsConc,Array(Len(aFieldsCg)+1))
 				Linew := Len(aColsConc)
@@ -796,16 +794,21 @@ Static Function atual()
 			aColsExCg[Linew,08] := ""
 	EndIf
 
-	obrowse:SetArray(aColsExCg)  
-	obrowse:Refresh()
+	//oBrowse:nLinhas := nLinh
+	oBrowse:SetArray(aColsExCg)
+	oBrowse:lUseDefaultColors := .F.
 	oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
-	
+	oBrowse:Refresh()
+		
+	//oBrwFinaliz:nLinhas := nLinh
 	oBrwFinaliz:SetArray(aColsConc)
+	//oBrwFinaliz:lUseDefaultColors := .F.
+	//oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
 	oBrwFinaliz:Refresh()
-	oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
-	
+
 	oGetCodBar:SetFocus()
 	oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}	
+
 Return
 
 /*
@@ -1407,25 +1410,19 @@ Static Function GETDCLR(nLinha)
 	Local nCor3 := 16776960 // Verde Claro - RGB(0,255,255) //Local nCor3 := 65280 //VERDE
 	Local nCor4 :=  5070329 //fVERMELHO
 	Local nCor2 := 16777215 //branco
-	
-	if len(aColsExCg) > 0
-		if Alltrim(aColsExCg[nLinha][5])<>""  //_nResta
-			If val(aColsExCg[nLinha][5])>0 //.AND. aLinha[nLinha][nUsado]
-				nRet := nCor2
-			Else
-				If val(aColsExCg[nLinha][5])=0
-					If val(aColsExCg[nLinha][6])>0  //_nExced
-						nRet := nCor4
-					Else 
-						nRet := nCor3
-					Endif
-				EndIf
-			EndIf	
-		Else
-			Return
-		EndIf
-	EndIf
 
+	if len(aColsExCg) > 0
+		if Alltrim(aColsExCg[nLinha][5])<>"" 
+			If val(aColsExCg[nLinha][6])>0  .and. aColsExCg[nLinha][6]<>"" //_nExced
+				nRet := nCor4
+			Else 
+				nRet := nCor3 
+			Endif
+		else
+			nRet := nCor4
+		EndIF
+	EndIf
+	
 Return nRet
 
 

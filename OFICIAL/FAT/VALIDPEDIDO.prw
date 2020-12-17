@@ -9,9 +9,12 @@
 
 User Function MTA410()        
 
- if SC6->C6_FILIAL <> "01"
-   Return
+ if SC6->C6_FILIAL <> "01" .or. SC5->C5_TIPO <> "N"
+ //  Alert("Não executou")
+   Return .t. 
  EndIf
+
+ //Alert("Executou")
 
 nPosQuant := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_QTDVEN"})
 nPosQtdlb := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_QTDLIB"})
@@ -41,7 +44,6 @@ _TotalQuant := 0
             _TotalQuant := _TotalQuant + _QTDPED
             
          endif
-
 
    NEXT
  
@@ -114,8 +116,6 @@ ENDIF
 */
 Return .T.
 
-
-
 /*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
@@ -126,17 +126,18 @@ Return .T.
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
 
-User Function mta410t()     
+User Function mta410t()   
 
 SetPrvt("_cFilial,_cPedido,")
 
 _cFilial:= xFilial()
 
-/*
-if _cFilial = "02" 
-   //Alert("Filial DF não libera automatico.")
-   Return
-EndIf   */
+if _cFilial <> "01" .or. SC5->C5_TIPO <> "N"
+  // Alert("Não executou T")
+   Return .T.
+   
+ EndIf
+ //  Alert("Executou T")
 
 _cPedido    := SC5->C5_NUM
 //_dDtentrega := SC5->C5_ENTREGA
