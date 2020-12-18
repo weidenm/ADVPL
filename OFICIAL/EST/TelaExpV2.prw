@@ -50,12 +50,6 @@ User Function Exped2()
 	Static oFont4 := TFont():New("Arial",,026,,.T.,,,,,.F.,.F.)
 	Static oFont5 := TFont():New("Arial",,028,,.T.,,,,,.F.,.F.)
 	 
-	/*
-	Static oFont1 := TFont():New("MS Sans Serif",,024,,.T.,,,,,.F.,.F.)
-	Static oFont2 := TFont():New("MS Sans Serif",,020,,.T.,,,,,.F.,.F.)
-	Static oFont3 := TFont():New("MS Sans Serif",,020,,.F.,,,,,.F.,.F.) 
-	Static oFont4 := TFont():New("MS Sans Serif",,026,,.T.,,,,,.F.,.F.)
-*/
 	nProxIt := 0
 	aPerg := {}
 	cPerg := "EXPETQ"
@@ -66,7 +60,7 @@ User Function Exped2()
 	@ 025, 155 SAY oLblResp PROMPT "Separação da Carga: " SIZE 100, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 025, 250 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	GridRom()
-	@ 010, 341 BUTTON oBtnCarreg PROMPT "Carregar" SIZE 051, 013 OF oDlg1 ACTION (carregam()) PIXEL
+	@ 010, 341 BUTTON oBtnCarreg PROMPT "Carregar" SIZE 051, 013 OF oDlg1 ACTION (TelaCarga()) PIXEL
 	IF  LEN(aDadosRoms)==0
 		oBtnCarreg:disable()
 	EndIf
@@ -88,8 +82,6 @@ Static Function GridRom()
 	Static aColsEx := {}
 	Static aFields := {}
 	cQry := ""
-	//Static	aDados := {}
-	//Public oMSNewGe1
 	
 	AADD(aFields,{"Romaneio" ,"ROMAN"    ,"" ,9 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Item" ,"ITEM"    ,"" ,3 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
@@ -141,12 +133,6 @@ TCQUERY cQry NEW ALIAS "TRC"
 		aColsEx[nLin,08] := aDadosRoms[i][8]
 		aColsEx[nLin,Len(aFields)+1] := .F.
 	Next
-
-	//oMSNewGe1 := MsNewGetDados():New( 057, 005, 250, 396,, "AllwaysTrue", "AllwaysTrue", "+Field1+Field2",,, 999, "AllwaysTrue", "", "AllwaysTrue", oDlg1, aFields, aColsEx)
-	//oMSNewGe1 :=TCBrowse():New( 057, 005, 250, 396,, "AllwaysTrue", "AllwaysTrue", "+Field1+Field2",,, 999, "AllwaysTrue", "", "AllwaysTrue", oDlg1, aFields, aColsEx)
-	//oMSNewGe1:oBrowse:refresh()
-	//oMsNewGe1:Refresh()
-	//oMSNewGe1:oBrowse:setfocus()
 	
 oMSNewGe1 := TCBrowse():New(057, 005, 395, 185,,{'Romaneio','Item','Rota','Veiculo','Data Saida','Data Inicio', 'Status'},{35,20,130,30,45,45,40},oDlg1,,,,,,,oFont1,,,,,.F.,,.T.,,.F.,,,.T.)
 oMSNewGe1 :AddColumn(TCColumn():New("ROMANEIO"	, {|| aColsEx[oMSNewGe1:nAt,01]},"@!",,,"CENTER", 35,.F.,.F.,,{|| .F. },,.F., ) )
@@ -159,8 +145,6 @@ oMSNewGe1 :AddColumn(TCColumn():New("STATUS"	, {|| aColsEx[oMSNewGe1:nAt,07]},"@
 
 oMSNewGe1:nLinhas := 1
 oMSNewGe1:SetArray(aColsEx)
-//oMSNewGe1:lUseDefaultColors := .F.
-//oMSNewGe1:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
 oMSNewGe1:Refresh()
 
 
@@ -179,7 +163,7 @@ Return( Nil )
 ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
-Static Function carregam(nItem)
+Static Function carregam()
 
 	Static aFdOutrRom := {}
 	Static aFdVenc := {}
@@ -204,7 +188,7 @@ Static Function carregam(nItem)
 	Static nPesoRom := 0
 	Static nPesoPedTot := 0 
 	Static TRC2 := {}
-	
+
 	pos := oMSNewGe1:nAt
 	cNumRom :=  trim(oMSNewGe1:aArray[pos][1])
 	if nItem = 2  //campo Item 2 (proximo)
@@ -219,6 +203,7 @@ Static Function carregam(nItem)
 		nProxIt := val(trim(oMSNewGe1:aArray[pos][2]))
 		cRomIt	:= trim(oMSNewGe1:aArray[pos][2])
 	EndIF
+
 	cRota	:= trim(oMSNewGe1:aArray[pos][3])
 	cVeic	:= trim(oMSNewGe1:aArray[pos][4])
 	//cMotori	:= trim(oMSNewGe1:aCols[pos][5])
@@ -300,22 +285,17 @@ While !TRC2->(Eof())
 		nPesoRom })
 		
 		//dDtLoteOk,; //incluir no vetor caso for informar proximo lote a carregar
-	//Alert(cProdGrid)
 	TRC2->(DbSkip())
 EndDo
 
 TRC2->(DbCloseArea())
-
-//MONTAR TELA DE CARREGAMENTO DO ROMANEIO
-TelaCarga()
-
 
 Return
 
 //***********************************************
 //  Grid da tela inicial - Ordem de Produção
 //***********************************************
-Static Function TelaCarga()
+Static Function TelaCarga(It)
 	 
 	Static oDlg2
 	Static BmpLogo
@@ -335,14 +315,14 @@ Static Function TelaCarga()
 	Public nLinG2
 	Public nLinh
 	Public nTamProd
-
-//Parametros TFonte ("Tipo Fonte", ,Tamanho Fonte , , ,Italico (.T./.F.))
-//oFont1      := TFont():New("Arial",09,20,     ,.T.,,,,,.F.)
+	Static nItem
 
 	Public oGetCodBar
 	Public cGetCodBar := Space(13)
 	Public oCbxFinalizados
 	Public lCbxFinalizados := .T.
+
+	nItem := It 
 	HrInicio := time()
 	HrFim := ""
 	cStatus := ""
@@ -377,7 +357,6 @@ Static Function TelaCarga()
 //aInfo := { 1=Linha inicial, 2=Coluna Inicial, 3=Linha Final, 4=Coluna Final, Separação X, Separação Y, Separação X da borda (Opcional), Separação Y da borda (Opcional) }
 	aInfo := { aSize[ 1 ], aSize[ 2 ], aSize[ 3 ], aSize[ 4 ], 5 , 5 , 5 , 5 }
 
-
 	//DEFINE FONTE DE ACORDO COM TAMANHO DA TELA
 	if aSize[3] > 900 .and. aSize[4] > 400
 		oFontGrid := oFont5
@@ -410,6 +389,8 @@ Static Function TelaCarga()
 
 //Passamos agora todas as informações para o calculo das dimenções://MsObjSize( aInfo, aObjects, Mantem Proporção , Disposição Horizontal )
 	aPosObj := MsObjSize( aInfo, aObjects, .T. , .F. )
+
+	Carregam()
 
 ////Define MsDialog oDialog TITLE "Titulo" STYLE DS_MODALFRAME From aSize[7],0 To aSize[6],aSize[5] OF oMainWnd PIXEL
  //Se não utilizar o MsAdvSize, pode-se utilizar a propriedade lMaximized igual a T para maximizar a janela
@@ -523,8 +504,8 @@ Next
 	//TButton():New( 208, 052, "Nr Linhas", oDlg2,{|| alert(oBrowse:nLen) },40,010,,,.F.,.T.,.F.,,.F.,,,.F. )
 	//TButton():New( 208, 002, "Linhas visiveis", oDlg2,{|| alert(oBrowse:nRowCount()) },40,010,,,.F.,.T.,.F.,,.F.,,,.F.)
 
-//oBrowse := {}
-//oBrwFinaliz := {}
+oBrowse := {}
+
 // Cria Browse
 oBrowse := TCBrowse():New(040,10,nColG1,nLinG1-50,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
 //oBrowse := TCBrowse():New(040,020,500,450,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
@@ -548,10 +529,9 @@ oBrwFinaliz :AddColumn(TCColumn():New("QUANT."	, {|| aColsConc[oBrwFinaliz:nAt,0
 
 oBrwFinaliz:nLinhas := nLinh
 oBrwFinaliz:SetArray(aColsConc)
-oBrwFinaliz:lUseDefaultColors := .F.
-oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
+//oBrwFinaliz:lUseDefaultColors := .F.
+//oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
 oBrwFinaliz:Refresh()
-
 
 oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}
 oBrwFinaliz:bGotFocus :=  {||oGetCodBar:SetFocus()}
@@ -927,7 +907,8 @@ if Alltrim(cPassW)  == "plinc123"
 	SZ1->(MsUnlock())
 	oDlg2:End()
 	//GridRom()
-	carregam(2)
+	//carregam(2)
+	TelaCarga(2)
 else
 	Alert("Senha Incorreta!")
 	oDlgPwd:End()
@@ -1241,10 +1222,11 @@ Static Function FardosConf(nTipoFunc)
 		MSGINFO("Excluídos do romaneio "+ Str(nQtdExclui) +" fardos registrados.")
 		conout("TELAEXPED: Excluídos do romaneio "+ Str(nQtdExclui) +" fardos registrados.")
 		
-		MontaGridFardo()
+		//MontaGridFardo()
 		
 		if cNumRom <>'' //para verificar se rotina FARDOS() foi aberto fora ou dentro da rotina de carregamento.
-			GridCarga()
+			Carregam() 
+			GridCarga() // alterado porque o GridCarga foi mudado para apenas preencher e não mais buscar dados.
 		EndIf
 		oDlg4:end()
 	else
@@ -1412,7 +1394,7 @@ Static Function GETDCLR(nLinha)
 	Local nCor2 := 16777215 //branco
 
 	if len(aColsExCg) > 0
-		if Alltrim(aColsExCg[nLinha][5])<>"" 
+		if Alltrim(aColsExCg[nLinha][5])<>"" .and. nlinha <= len(aColsExCg)
 			If val(aColsExCg[nLinha][6])>0  .and. aColsExCg[nLinha][6]<>"" //_nExced
 				nRet := nCor4
 			Else 
@@ -1429,7 +1411,7 @@ Return nRet
 Static Function GETDCLR2(nLinha)
 	Local nRet := 0
 	Local nCor3 := 16776960 // Verde Claro - RGB(0,255,255) //Local nCor3 := 65280 //VERDE
-	Local nCor4 :=  5070329 //fVERMELHO
+	Local nCor4 := 5070329 //fVERMELHO
 	Local nCor2 := 16777215 
 	 
 	nRet := nCor3
@@ -1536,7 +1518,7 @@ Static Function MudaItRom()
 		
 		oDlgPwd2:End()
 		oDlg2:End()
-		carregam(2)
+		TelaCarga(2)
 
 	else
 		Alert("Senha Incorreta!")
@@ -1555,7 +1537,6 @@ Return
 
 Static Function AtuaRom()
 
-	//Local I
 	Static TRCA
 	
 	aColsEx := {}
@@ -1575,7 +1556,6 @@ TCQUERY cQry NEW ALIAS "TRCA"
 	aDadosRom :={}
 	
 	While !TRCA->(Eof())
-		//Aadd(aDadosRoms,{ TRCA->Z1_NUM,;
 		Aadd(aColsEx,{ TRCA->Z1_NUM,;
 			TRCA->MITEM,;
 			TRCA->Z1_DESCRI,;
@@ -1589,22 +1569,6 @@ TCQUERY cQry NEW ALIAS "TRCA"
 	End
 
 	TRCA->(DbCloseArea())
-
-	/*	
-	For I:= 1 To Len(aDadosRoms)
-		AADD(aColsEx,Array(Len(aFields)+1))
-		nLin := Len(aColsEx)
-		aColsEx[nLin,01] := aDadosRoms[i][1]
-		aColsEx[nLin,02] := aDadosRoms[i][2]
-		aColsEx[nLin,03] := aDadosRoms[i][3]
-		aColsEx[nLin,04] := aDadosRoms[i][4]
-		aColsEx[nLin,05] := aDadosRoms[i][5]
-		aColsEx[nLin,06] := aDadosRoms[i][6]
-		aColsEx[nLin,07] := aDadosRoms[i][7]
-		aColsEx[nLin,08] := aDadosRoms[i][8]
-		aColsEx[nLin,Len(aFields)+1] := .F.
-	Next 
-*/	
 
 	oMSNewGe1:SetArray(aColsEx)
 	oMsNewGe1:Refresh()
