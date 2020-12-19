@@ -90,7 +90,7 @@ Static Function GridRom()
 	AADD(aFields,{"Data Saida" ,"DTSAIDA"    ,"" ,10 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Data Saida" ,"DTINICIO"    ,"" ,10 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
 	AADD(aFields,{"Status" ,"STATUS"    ,"" ,20 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
-	AADD(aFields,{"Item" ,"PROX.ITEM"    ,"" ,3 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
+	AADD(aFields,{"Item" ,"PESO"    ,"" ,3 ,0, ,"û","C","" ,"V",  ,  ,".F."} )
  
 //CONSULTA DE DADOS PARA O GRID
 cQry := "SELECT A.Z1_NUM, A.Z1_ROTA, A.Z1_DESCRI, A.Z1_DTSAIDA, LTRIM(A.Z1_VEICULO) AS Z1_VEICULO, A.Z1_DTFECH, "
@@ -187,6 +187,9 @@ Static Function carregam()
 	Static nQtdCarr := 0
 	Static nPesoRom := 0
 	Static nPesoPedTot := 0 
+	Static nQtdVen :=0
+	Static nQtdPend :=0
+	Static nPesoPedTot := 0
 	Static TRC2 := {}
 
 	pos := oMSNewGe1:nAt
@@ -249,6 +252,8 @@ While !TRC2->(Eof())
 	nPesoRom :=  TRC2->B1_PESO*TRC2->QTDROM
 	nPesoPed := TRC2->B1_PESO*TRC2->QTDVEN
 	nQtdCarr := nQtdCarr + TRC2->QTDROM  //Total Quantidade carregada
+	nQtdVen  := nQtdVen + TRC2->QTDVEN
+	nQtdPend := nQtdPend + (TRC2->QTDVEN-TRC2->QTDROM)
 	
 	nPesoCarr:= nPesoCarr + nPesoRom  //Total peso carregado
 	nPesoPedTot := nPesoPedTot + nPesoPed
@@ -416,10 +421,17 @@ Static Function TelaCarga(It)
 	@ 002, nColG1+265 BUTTON oBtnApont PROMPT "PAUSAR" SIZE 040, 015 OF oDlg2 ACTION (PausaRom()) PIXEL  
 	@ 002, nColG1+310 BUTTON oBtnFinaliz PROMPT "FINALIZAR" SIZE 040, 015 OF oDlg2 ACTION (finalizaSenha()) PIXEL
 	@ 030, 010 SAY oLblPend PROMPT "PENDENTES"   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 030, nColG1+200 SAY oLblPeso PROMPT "PESO: "   SIZE 060, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 030, nColG1+210 SAY oLblTotPeso PROMPT str(nPesoCarr)   SIZE 060, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 030, nColG1+300 SAY oLblTotal PROMPT "TOTAL: " SIZE 100, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 030, nColG1+306 SAY oTxtValTot PROMPT str(nQtdCarr) OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
+	@ 027, 200 SAY oLblQtdVen PROMPT "Qtde Total:"   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 027, 220 SAY oLblTotQtd PROMPT str(nQtdVen)   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 027, 330 SAY oLblQtdVen PROMPT "Qtde:"   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 027, 342 SAY oLblTotQtd PROMPT str(nQtdPend)   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	//@ 027, 300 SAY oLblPesVen PROMPT "Peso:"   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	//@ 027, 330 SAY oLblTotPesVen PROMPT str(nPesoPedTot)   SIZE 060, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
+	@ 030, nColG1+020 SAY oLblConc PROMPT "CONCLUÍDOS"   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	//@ 030, nColG1+200 SAY oLblPeso PROMPT "Peso: "   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	//@ 030, nColG1+210 SAY oLblTotPeso PROMPT str(nPesoCarr)   SIZE 060, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
+	@ 027, nColG1+280 SAY oLblTotal PROMPT "Qtde: " SIZE 100, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 027, nColG1+290 SAY oTxtValTot PROMPT str(nQtdCarr) OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
 	GridCarga()	
 	ACTIVATE MSDIALOG oDlg2 CENTERED	
 
