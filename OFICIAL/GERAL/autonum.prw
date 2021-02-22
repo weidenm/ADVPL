@@ -84,7 +84,8 @@ User Function SC5NUM()
 	cUlt := ""
 	
 	cQuery:= "SELECT MAX(C5_NUM) MAXCOD FROM SC5010"
-	cQuery+= " WHERE  D_E_L_E_T_=''  AND C5_NUM < '200000' " 
+	cQuery+= " WHERE  D_E_L_E_T_='' "
+	//cQuery+= AND C5_NUM < '200000' " 
 			
 	TCQuery cQuery Alias ULTPED New
 

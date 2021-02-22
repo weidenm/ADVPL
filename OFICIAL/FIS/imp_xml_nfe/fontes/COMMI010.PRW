@@ -1449,7 +1449,7 @@ Static Function ExecTela(nlOpc,clCodFor,clLoja,clNota,clSerie,olLBox)
 							cMens +="Usuário: " +SDS->DS_USERPRE+ENTER
 							cMens +="Ocorrencia: Pré-nota " +SDS->(DS_DOC+"/"+DS_SERIE)+" do fornecedor " +SDS->(DS_FORNEC+"/"+DS_LOJA) +" gerada e pronta para classificar."+ENTER
 				//ENVIA E-MAIL
-							U_EnvMail('fiscal@produtosplinc.com.br','Pre-nota de entrada gerada' ,cMens)
+							////U_EnvMail('fiscal@produtosplinc.com.br','Pre-nota de entrada gerada' ,cMens)
 				 					
 						EndIf
 					EndIf
@@ -2348,7 +2348,7 @@ User Function ReadXML(cFile,lJob)
 
 	Default lJob := .T.
 
-	//conout(time()+"inicio comi010")
+	conout(time()+"inicio comi010")
 	If !File(cStartPath +cFile)
 		If lJob
 			ConOut(Replicate("=",80))
@@ -2701,7 +2701,7 @@ User Function ReadXML(cFile,lJob)
 					//ENVIA E-MAIL
 //					U_EnvMail('informatica@produtosplinc.com.br',cEmailAdm+";"+cEmailErro,'',aStatus[2],' Importacao XML NFe entrada com Erros' ,"")
 						//U_EnvMail('ti.plinc@gmail.com','Importacao XML NFe entrada com Erros' ,cEmailErro+' '+aStatus[2])
-						U_EnvMail('fiscal@produtosplinc.com.br','Importacao XML NFe entrada com Erros' ,cEmailErro+' '+aStatus[2])
+						////U_EnvMail('fiscal@produtosplinc.com.br','Importacao XML NFe entrada com Erros' ,cEmailErro+' '+aStatus[2])
 					
 						ConOut(Replicate("=",80))
 						ConOut("ReadXML Error:")
@@ -2801,7 +2801,7 @@ User Function ReadXML(cFile,lJob)
 							cEmailErro +="Arquivo: " +cFile+ENTER
 							cEmailErro +="Ocorrencia: " +If(cTipoNF $ "N,C","fornecedor ","cliente ") +cCodigo +"/" +cLoja+" sem cadastro de Produto X " +If(cTipoNF $ "N,C","Fornecedor","Cliente")+" para o codigo " +cProduto+"-"+cDescPro +"."+ENTER
 						//	U_EnvMail('ti.plinc@gmail.com','Importacao XML NFe entrada com Erros' ,cEmailErro+' '+aStatus[2])
-							U_EnvMail('fiscal@produtosplinc.com.br','Importacao XML NFe entrada com Erros' ,cEmailErro+' '+aStatus[2])
+					////		U_EnvMail('fiscal@produtosplinc.com.br','Importacao XML NFe entrada com Erros' ,cEmailErro+' '+aStatus[2])
 							
 							cErroGeral +="Arquivo: " +cFile+ENTER
 							cErroGeral +="Ocorrencia: " +If(cTipoNF $ "N,C","fornecedor ","cliente ") +cCodigo +"/" +cLoja+" sem cadastro de Produto X " +If(cTipoNF $ "N,C","Fornecedor","Cliente")+" para o codigo " +cProduto+"-"+cDescPro +"."+ENTER						

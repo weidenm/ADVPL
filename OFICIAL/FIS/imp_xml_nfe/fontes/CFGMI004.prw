@@ -76,7 +76,7 @@ For nX := 1 To Len(aFiles)
 Next nX
 
 if cErroGeral <> ""
-		U_EnvMail('fiscal@produtosplinc.com.br','Geral Erros ImportaXML - '+ time() ,cErroGeral)
+		////U_EnvMail('fiscal@produtosplinc.com.br','Geral Erros ImportaXML - '+ time() ,cErroGeral)
 	//	U_EnvMail('sistemas@produtosplinc.com.br','Geral Erros ImportaXML - '+ time() ,cErroGeral)
 else
 		Conout("Não existe arquivos para importar.")

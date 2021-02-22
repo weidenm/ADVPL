@@ -9,85 +9,42 @@
 
 User Function MTA410()        
 
- if SC6->C6_FILIAL <> "01" .or. SC5->C5_TIPO <> "N"
- //  Alert("Não executou")
-   Return .t. 
- EndIf
+/*
+   if SC6->C6_FILIAL <> "01" .or. SC5->C5_TIPO <> "N"
+      Return .t. 
+   EndIf
 
- //Alert("Executou")
-
-nPosQuant := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_QTDVEN"})
-nPosQtdlb := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_QTDLIB"})
-_nPOSValor:= aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_VALOR"})  // valor final
-cFilial   := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_FILIAL"})
+   nPosQuant := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_QTDVEN"})
+   nPosQtdlb := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_QTDLIB"})
+   _nPOSValor:= aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_VALOR"})  // valor final
+   cFilial   := aScan(aHeader,{|x| Upper(AllTrim(x[2]))=="C6_FILIAL"})
 
 
-_nTotalpedido := 0
-_TotalQuant := 0
+   _nTotalpedido := 0
+   _TotalQuant := 0
 
-   FOR _I := 1 TO LEN(ACOLS)
-
-  //alert(SC6->C6_FILIAL)
-
+      FOR _I := 1 TO LEN(ACOLS)
          _QTDPED:=ACOLS[_I][nPosQuant]
-      
-            _QTDLIB:=ACOLS[_I][nPosQtdlb]
-         
+         _QTDLIB:=ACOLS[_I][nPosQtdlb]
          _nValor:=ACOLS[_I][_nPOSValor]
-
          _TAM:=LEN(ACOLS[_I])     
          _DELETADO:=ACOLS[_I][_TAM]     //verifica se não é uma linha deletada
 
-         if !_DELETADO 
-            acols[_I][nPosQtdlb]:= acols[_I][nPosQuant]
-            _nTotalpedido := _nTotalpedido + _nValor
-            _TotalQuant := _TotalQuant + _QTDPED
-            
-         endif
+            if !_DELETADO 
+               acols[_I][nPosQtdlb]:= acols[_I][nPosQuant]
+               _nTotalpedido := _nTotalpedido + _nValor
+               _TotalQuant := _TotalQuant + _QTDPED
+               
+            endif
 
-   NEXT
- 
- M->C5_VOLUME1 := _TotalQuant
- GETDREFRESH() 
- 
+      NEXT
+   
+   M->C5_VOLUME1 := _TotalQuant
+   GETDREFRESH() 
+ */
+
+
  /*
-_cCliente := M->C5_CLIENTE
-_cLoja    := M->C5_LOJACLI
-
-dbSelectArea("SA1")   // CLIENTES
-dbSetOrder(1)
-dbSeek(xFilial("SA1")+_cCliente+_cLoja,.F.)
-
-dbSelectArea("SM0")
-cCodFil := M0_CODFIL
-
-//_dDataent  := M->C5_ENTREGA
-//_cBloqueio := M->C5_BLQPED
-//_cLibblq   := M->C5_LIBBLQ
-
-// *******************************************************
-// ****  VALIDAÇÃO DE PEDIDO BLOQUEADO POR CRÉDITO  ******
-// *******************************************************
-
- _dStatus := ""
- 
-IF M->C5_TIPO == "N" .and. SA1->A1_RISCO == "E"
-
-    IF Alltrim(SA1->A1_DSTATUS) <> ""
-	   dbSelectArea("SX5")
-	   dbSetOrder(1)
-        dbSeek(xFilial("SX5")+"Z1"+SA1->A1_DSTATUS)
-        _dStatus := SX5->X5_DESCRI
-    EndIf
-
-//cCodFil := M0_CODFIL
-
-    MsgInfo("Pedido bloqueado por crédito - Risco E. "+CHR(13)+;
-              "Motivo:"+ _dStatus )
-
-    Return(.F.)         
-
-ENDIF
 
 // VERIFICO SE TEM MAIS DE UM PEDIDO PARA O MESMO DIA
 // PARA POSICIONAR NO REGISTRO ANTERIOR  /*
@@ -128,106 +85,46 @@ Return .T.
 
 User Function mta410t()   
 
-SetPrvt("_cFilial,_cPedido,")
+   SetPrvt("_cFilial,_cPedido,")
 
-_cFilial:= xFilial()
+   _cFilial:= xFilial()
 
-if _cFilial <> "01" .or. SC5->C5_TIPO <> "N"
-  // Alert("Não executou T")
-   Return .T.
-   
- EndIf
- //  Alert("Executou T")
+   if _cFilial <> "01" .or. SC5->C5_TIPO <> "N"
+      Return .T.
+   EndIf
 
-_cPedido    := SC5->C5_NUM
-//_dDtentrega := SC5->C5_ENTREGA
-//_cTpcobranc := SC5->C5_COBRANC
-//_cRomaneio  := SC5->C5_ROMANE
-//_cTransport := SC5->C5_TRANSP
-//_clibblq    := SC5->C5_LIBBLQ
-
-dbSelectArea("SC5")
-dbSetOrder(1)
-dbSeek(xFilial("SC5")+_cPedido,.T.)
-If Found()
-   //While C5_FILIAL == xFilial("SC5") .AND. C5_NUM == _cPedido
-   While C5_FILIAL == "01" .AND. C5_NUM == _cPedido
-   
-         RecLock("SC5",.F.)
-         Replace C5_LIBEROK With "S"
-         If C5_TPFRETE != "F"
-            Replace C5_TPFRETE With "C"
-         Endif
-         MsUnLock()
-         dbSkip()
-   End
-Endif
-
-dbSelectArea("SC9")
-dbSetOrder(1)
-dbSeek(xFilial("SC9")+_cPedido,.T.)
-If Found()
-   //While C9_FILIAL == xFilial("SC9") .AND. C9_PEDIDO == _cPedido
-   While C9_FILIAL == "01" .AND. C9_PEDIDO == _cPedido
-     
-         RecLock("SC9",.F.)
-         Replace C9_OK With "    "
-         Replace C9_BLEST   With  "  "
-         //Replace C9_BLCRED  With  "  "
-         Replace C9_BLOQUEI With  "  "
-         //REPLACE C9_ENTREGA WITH _dDtentrega
-         //REPLACE C9_COBRANC WITH _cTpcobranc
-         //Replace C9_ROMANE  With _cRomaneio
-         //REPLACE C9_LIBBLQ  WITH _clibblq
-         MsUnLock()
-         dbSkip()
-   End
-Endif
-
- //REFAZ CALCULOS DOS TOTAIS DO ROMANEIO
-/*
-IF LEN(ALLTRIM(_cRomaneio)) > 0
-
-   nQuantos    := 0
-   nTotval     := 0
-   nTotbolet   := 0
-   nTotordpag  := 0
-   nTotoutros  := 0
+   _cPedido    := SC5->C5_NUM
 
    dbSelectArea("SC5")
-   dbSetOrder(6)
-   dbSeek(xFilial("SC5")+_cRomaneio,.T.)
-
-   DO WHILE C5_FILIAL == xFilial("SC5") .AND. C5_ROMANE == _cRomaneio .AND. .NOT. EOF()
-      cDoc    := C5_NUM
-      nValor      :=0
-      dbSelectArea("SC6")
-      dbSetOrder(1)
-      dbSeek(xFilial("SC6")+cdoc,.T.)
-      If Found()
-         While C6_NUM == cdoc .AND. .NOT. EOF()
-            nValor   := nValor   + C6_VALOR
-            nTotval  := nTotval  + C6_VALOR
+   dbSetOrder(1)
+   dbSeek(xFilial("SC5")+_cPedido,.T.)
+   If Found()
+      While C5_FILIAL == "01" .AND. C5_NUM == _cPedido
+      
+            RecLock("SC5",.F.)
+            Replace C5_LIBEROK With "S"
+            If C5_TPFRETE != "F"
+               Replace C5_TPFRETE With "C"
+            Endif
+            MsUnLock()
             dbSkip()
-         End
-      endif
+      End
+   Endif
 
-      DO CASE
-      CASE SC5->C5_COBRANC == "0" // REMESSA
-         nTotoutros  := nTotoutros + nValor
-      CASE SC5->C5_COBRANC == "1" // BOLETO
-         nTotbolet   := nTotbolet + nValor
-      CASE SC5->C5_COBRANC == "3" // ORDEM PAGAMENTO
-         nTotordpag  := nTotordpag + nValor
-      ENDCASE
-
-      nQuantos++
-      dbSelectArea("SC5")
-      DBSKIP()
-   ENDDO
-
-ENDIF
-*/
+   dbSelectArea("SC9")
+   dbSetOrder(1)
+   dbSeek(xFilial("SC9")+_cPedido,.T.)
+   If Found()
+      While C9_FILIAL == "01" .AND. C9_PEDIDO == _cPedido
+            RecLock("SC9",.F.)
+            Replace C9_OK      With  "  "
+            Replace C9_BLEST   With  "  "
+            //Replace C9_BLCRED  With  "  "
+            Replace C9_BLOQUEI With  "  "
+            MsUnLock()
+            dbSkip()
+      End
+   Endif
 
 Return
 

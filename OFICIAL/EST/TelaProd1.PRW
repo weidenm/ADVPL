@@ -328,8 +328,8 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 		cGrupo := SB1->B1_GRUPO
 		//cEan14	:= "27896769801890"
 
-		if Alltrim(SC2->C2_PROGRAM) <> ""
-			cLoteEtq:= SC2->C2_PROGRAM
+		if Alltrim(SC2->C2_LOTE) <> ""
+			cLoteEtq:= SC2->C2_LOTE
 		Else
 			cLoteEtq:= DataLoteEtq()
 		EndIf
@@ -444,7 +444,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 						MSCBSAY(55,13,cDataVal,"N","1","2,2")
 						MSCBSAY(50,8,"Lote: ","N","1","2,2")				
 				
-						IF Alltrim(cGrupo) =="1209"
+						IF Alltrim(cGrupo) =="1209" .or. Alltrim(cGrupo) =="1203"
 							MSCBSAY(61,8,lote,"N","1","2,2")  //Formato DDMMAA+IT
 						Else
 							MSCBSAY(61,8,cLoteEtq,"N","1","2,2") //Formato dia do ano DDD (3 digitos)

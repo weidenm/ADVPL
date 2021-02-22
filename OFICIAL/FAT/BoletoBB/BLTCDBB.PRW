@@ -69,10 +69,11 @@ User Function BLTCDBB()
 			DbSelectArea("QSA1")
 			DbCloseArea()
 		EndIf        
-		
+		//CLIENTES QUE NÃO GERAM BOLETO
 		cQuery := "SELECT A1_COD, A1_LOJA "
 		cQuery += "FROM "+RetSqlName("SA1")+" A INNER JOIN "+RetSqlName("SE1")+" B ON A.A1_COD = B.E1_CLIENTE "
 		cQuery += "WHERE B.E1_FILIAL = '"+xFilial("SE1")+"' AND B.D_E_L_E_T_ = '' AND A.A1_BOLETO = '2' AND B.E1_NUM BETWEEN '"+MV_PAR02+"' AND '"+MV_PAR03+"' "
+		cQuery += " AND B.E1_SERIE BETWEEN '"+MV_PAR04+"' AND '"+MV_PAR05+"' "
 		cQuery += " group by  A1_COD, A1_LOJA"
 		cQuery := ChangeQuery(cQuery)
 		conout(cQuery)
@@ -221,7 +222,7 @@ Static Function MontaRel()
 		DbSetOrder(1)
 	//VALIDAÇÃO DE AUTORIZAÇÃO NFE
 	If SF2->(dbSetOrder(1), dbSeek(xFilial("SF2")+SE1->E1_NUM+SE1->E1_PREFIXO+SE1->E1_CLIENTE+SE1->E1_LOJA))
-	    If Empty(SF2->F2_CHVNFE)
+	    If Empty(SF2->F2_CHVNFE) .and. Alltrim(SF2->F2_SERIE)$'2|4'
               Msgalert("NF-e "+SE1->E1_NUM +" ainda não transmitida ou não autorizada! Verifique status no Monitor>Faixa.")
               SE1->(Dbskip())
               loop 
