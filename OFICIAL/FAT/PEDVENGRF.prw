@@ -522,7 +522,12 @@ Return
 //***
 Static Function ImprimeCabe()
  
+	Local HoraImpr := Time()
+	Local DataImpr := dtoC(Ddatabase)
+
+			
  	oPrn:SayBitmap(nLin,0020,cBitMap,0300,0300)			//LinIni, ColIni,Imagem,ColFim,LinFim Imprime logo da Empresa: comprimento X altura
+	oPrn:Say(nLin-20,300, "Impresso em "+DataImpr+" "+HoraImpr,oFont08)  
 	oPrn:Say(nLin,1950, "PEDIDO Nº "+OemToAnsi(TRBC->Pedido),oFont12N)  //050
 	nLin += 30
 	nLin += 20
@@ -561,7 +566,7 @@ Static Function ImprimeCabe()
 			oPrn:Say(nLin,0300,"End.Entrega:",oFont10N)
 			oPrn:Say(nLin,0550,OemToAnsi(TRBC->cEndEnt),		   oFont10N)
 			dDataEmiss:=Dtoc(ddatabase)
-			oPrn:Say(nLin,2050,"Data: "+ OemToAnsi(DdataEmiss),oFont09N) //050
+			oPrn:Say(nLin,2050,"Data: "+ OemToAnsi(dDataEmiss),oFont09N) //050
 
 		
 		//Data e hora impressão

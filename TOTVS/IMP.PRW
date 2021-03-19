@@ -33,7 +33,6 @@ User Function IMP3()
 	Public cDataFim := MV_PAR04
 	//	Public cAtualizProd := MV_PAR05
 //		Public cAtualizaCli := MV_PAR06
-
      
 	conexao()
 
@@ -43,27 +42,25 @@ Return Nil
  
 Static Function conexao()
 
-
 	cData := Dtoc(date())
-
 	cHora := time()
 	Public DataHora := cData + " " + cHora
   
 	conout("iniciando importacao "+DataHora)
-//Processa({|| gravaPedido(1)},"Aguarde...","Separando Pedidos...")	
-Processa({||AtualizaPedido(1)},"Aguarde...","Atualizando Pedidos...")
-
+ 
+	If MV_PAR07 == 1
+		Processa({||AtualizaPedido(1)},"Aguarde...","Atualizando Pedidos...")
+	EndIf
 		
-If MV_PAR05 == 1
-//	Processa({|| gravaMotorista()},"Aguarde...","Separando Veiculos e Motoristas...")
-	Processa({||AtualizaMotorista()},"Aguarde...","Atualizando Motoristas...") //- Alterado para TOTVS2
-	Processa({||AtualizaVeiculo()},"Aguarde...","Atualizando Veiculos...") //- Alterado para TOTVS2
-//	Processa({|| gravaProduto()},"Aguarde...","Separando Produtos...")
-	Processa({||AtualizaProduto()},"Aguarde...","Atualizando Produtos...") //- Alterado para TOTVS2
-	Processa({||ImportaCabTab()},"Aguarde...","Importando Tabela...")  
-	Processa({||ImportaItensTab()},"Aguarde...","Importando itens de Tabela...")  
-	
-EndIf
+	If MV_PAR05 == 1
+	//	Processa({|| gravaMotorista()},"Aguarde...","Separando Veiculos e Motoristas...")
+		Processa({||AtualizaMotorista()},"Aguarde...","Atualizando Motoristas...") //- Alterado para TOTVS2
+		Processa({||AtualizaVeiculo()},"Aguarde...","Atualizando Veiculos...") //- Alterado para TOTVS2
+	//	Processa({|| gravaProduto()},"Aguarde...","Separando Produtos...")
+		Processa({||AtualizaProduto()},"Aguarde...","Atualizando Produtos...") //- Alterado para TOTVS2
+		Processa({||ImportaCabTab()},"Aguarde...","Importando Tabela...")  
+		Processa({||ImportaItensTab()},"Aguarde...","Importando itens de Tabela...")  	
+	EndIf
 	
 	If MV_PAR06 == 1
 	//	Processa({|| gravaCliente()},"Aguarde...","Separando Clientes...")
@@ -71,26 +68,13 @@ EndIf
 		//Processa({||AtualizaRoman()},"Aguarde...","Atualizando num. romaneio...") 
 	EndIf
 
-Return
-
-//Abrindo Arquivos do Ambiente (Origem)
-	TCCONTYPE("TCPIP")
-	
-	nCon1 := TCLink("MSSQL/DADOS12","192.168.2.1")  //BASE OFICIAL
-
-	If nCon1 < 0
-		Alert("Nao Foi Possivel Realizar a Conexao com o SRVPP01/DADOS12.")
-		//Return
+	If MV_PAR08 = 2
+		Processa({||AtualizaPedido(2)},"Aguarde...","Atualizando Pedidos Manuais...")
 	EndIf
+		
 
-	TCSETCONN(nCon1) //SETA CONEXÃO PARA OFICIAL E IMPORTA PARA FILIAL.
-	
-Processa({|| gravaPedido(2)},"Aguarde...","Separando Pedidos...")	
-Processa({||AtualizaPedido(2)},"Aguarde...","Atualizando Pedidos...")
 
-	nCon2 := TCLink("MSSQL/TESTE11","192.168.2.1")  //BASE TESTE
-    TCUnlink(nCon1)
-	TCSETCONN(nCon2) 
+Return
 
 /*
 ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
@@ -108,7 +92,7 @@ Processa({||AtualizaPedido(2)},"Aguarde...","Atualizando Pedidos...")
 */
 
 //Insere registros não existentes
-Static Function AtualizaPedido()
+Static Function AtualizaPedido(emp)
 
 	dbSelectArea("SB1") //PARA NAO GERAR ERRO DE WORK AREA
 	
@@ -133,6 +117,7 @@ Static Function AtualizaPedido()
 		dbCloseArea()
 	EndIf
 	
+	if emp == 1
 		cQuery := "SELECT C5_FILIAL,C5_NUM,C5_TIPO,substring(LC.COD_CLIENTE,1,6) as C5_CLIENTE,substring(LC.COD_CLIENTE,7,2) as C5_LOJACLI, substring(LC.COD_CLIENTE,1,6) as C5_CLIENT, substring(LC.COD_CLIENTE,7,2) as C5_LOJAENT,"
 		cQuery += " C5_TIPOCLI,C5_CONDPAG,C5_TABELA,C5_VEND1,C5_COMIS1, C5_DESC1,C5_EMISSAO,C5_VOLUME1,C5_PBRUTO,C5_PESOL,C5_ESPECI1,C5_OBS, C5_MENNOTA,C5_MENPAD,C5_TIPLIB,C5_DESCONT,C5_TXMOEDA,C5_TPCARGA,C5_NUMLDX,"
 		cQuery += " C5_ROMANEI, C5_ROMIT,C5_DTSAIDA,C5_TPFRETE,C5_IMPRESS FROM SRVPP01.DADOS12.dbo.SC5010 A  "
@@ -143,7 +128,21 @@ Static Function AtualizaPedido()
 		cQuery += " 	AND substring(LC.COD_CLIENTE,1,6) COLLATE Latin1_General_BIN  IN (SELECT A1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SA1010 WHERE D_E_L_E_T_ ='' )"
 		//cQuery += " AND C5_NUM NOT IN (SELECT C5_NUM FROM SRVPP01.DADOS12.dbo.SC5010 WHERE D_E_L_E_T_='' GROUP BY C5_NUM HAVING COUNT(*) > 1) "   //Não importa duplicados
 		cQuery += " ORDER BY C5_NUM "
+	Else
+		If emp == 2
 
+			cQuery := "SELECT C5_FILIAL,C5_NUM,C5_TIPO, C5_CLIENTE, C5_LOJACLI, C5_CLIENT,  C5_LOJAENT,"
+			cQuery += " C5_TIPOCLI,C5_CONDPAG,C5_TABELA,C5_VEND1,C5_COMIS1, C5_DESC1,C5_EMISSAO,C5_VOLUME1,C5_PBRUTO,C5_PESOL,C5_ESPECI1,C5_OBS, C5_MENNOTA,C5_MENPAD,C5_TIPLIB,C5_DESCONT,C5_TXMOEDA,C5_TPCARGA,C5_NUMLDX,"
+			cQuery += " C5_ROMANEI, C5_ROMIT,C5_DTSAIDA,C5_TPFRETE,C5_IMPRESS FROM SRVPP01.DADOS12.dbo.SC5010  "
+			cQuery += "  WHERE D_E_L_E_T_ = '' AND C5_NUM < '900000'  AND C5_EMISSAO >= '"+ cDataIni +"' and C5_EMISSAO <= '"+ cDataFim +"' "
+			cQuery += "  AND C5_NUM >= '"+ cPedIni +"' and C5_NUM <= '"+ cPedFim +"' "
+			cQuery += " AND C5_EMISSAO >'"+ dtos(ddatabase-30) +"' " //and C5_FILIAL='01'"
+			cQuery += " 	AND C5_CLIENTE  IN (SELECT A1_COD FROM SRVPP03.DADOSTOTVS11.dbo.SA1010 WHERE D_E_L_E_T_ ='' )"
+			cQuery += " AND C5_NUM NOT IN (SELECT C5_NUM FROM SRVPP01.DADOS12.dbo.SC5010 WHERE D_E_L_E_T_='' GROUP BY C5_NUM HAVING COUNT(*) > 1) "   //Não importa duplicados
+			cQuery += " ORDER BY C5_NUM "
+
+		EndIf
+	EndIf
 
 	TCQuery cQuery Alias CABPED New
 	
@@ -231,12 +230,23 @@ Static Function AtualizaPedido()
 					dbCloseArea()
 			EndIf
 
-			cQuery := "  SELECT VLR_TABELA AS C6_PRUNIT, ISNULL(PER_DESCACRES,C6_DESCONT) AS C6_DESCONT,C6_FILIAL,C6_NUM,C6_ITEM,C6_PRODUTO,C6_UM,C6_QTDVEN, ISNULL(LI.VLR_VENDA, C6_PRCVEN) AS  C6_PRCVEN, "
-			cQuery += " C6_VALOR,C6_SEGUM,C6_TES,C6_UNSVEN, C6_LOCAL,C6_CF,C6_QTDENT,C6_QTDENT2,C6_CLI,C6_VALDESC,C6_ENTREG,C6_LOJA,C6_COMIS1,C6_DESCRI, C5_TABELA, "
-			cQuery += " C6_CLASFIS, C6_NUMLDX, C6_SUGENTR FROM (SRVPP01.DADOS12.dbo.SC6010 A INNER JOIN SRVPP01.DADOS12.dbo.SC5010 B ON A.C6_NUM = B.C5_NUM) "
-			cQuery += " LEFT OUTER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C6_CLI+A.C6_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
-			cQuery += " LEFT OUTER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFITE LI ON LC.NUM_PEDIDO = LI.NUM_PEDIDO AND A.C6_PRODUTO = LI.COD_PRODUTO COLLATE Latin1_General_BIN "
-			cQuery += " WHERE A.D_E_L_E_T_ = '' AND  B.D_E_L_E_T_ = '' AND C6_NUM = '"+ Pedido +"'
+			if emp = 1
+				cQuery := "  SELECT VLR_TABELA AS C6_PRUNIT, ISNULL(PER_DESCACRES,C6_DESCONT) AS C6_DESCONT,C6_FILIAL,C6_NUM,C6_ITEM,C6_PRODUTO,C6_UM,C6_QTDVEN, ISNULL(LI.VLR_VENDA, C6_PRCVEN) AS  C6_PRCVEN, "
+				cQuery += " C6_VALOR,C6_SEGUM,C6_TES,C6_UNSVEN, C6_LOCAL,C6_CF,C6_QTDENT,C6_QTDENT2,C6_CLI,C6_VALDESC,C6_ENTREG,C6_LOJA,C6_COMIS1,C6_DESCRI, C5_TABELA, "
+				cQuery += " C6_CLASFIS, C6_NUMLDX, C6_SUGENTR FROM (SRVPP01.DADOS12.dbo.SC6010 A INNER JOIN SRVPP01.DADOS12.dbo.SC5010 B ON A.C6_NUM = B.C5_NUM) "
+				cQuery += " LEFT OUTER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFCAB LC ON str(A.C6_NUMLDX)+A.C6_CLI+A.C6_LOJA = str(LC.NUM_PEDIDO)+LC.COD_CLIENTE COLLATE Latin1_General_BIN "
+				cQuery += " LEFT OUTER JOIN  SRVPP01.LANDIX_FLX.dbo.TAFITE LI ON LC.NUM_PEDIDO = LI.NUM_PEDIDO AND A.C6_PRODUTO = LI.COD_PRODUTO COLLATE Latin1_General_BIN "
+				cQuery += " WHERE A.D_E_L_E_T_ = '' AND  B.D_E_L_E_T_ = '' AND C6_NUM = '"+ Pedido +"'
+			else
+				if emp == 2
+
+					cQuery := "  SELECT  C6_PRUNIT,  C6_DESCONT,C6_FILIAL,C6_NUM,C6_ITEM,C6_PRODUTO,C6_UM,C6_QTDVEN,  C6_PRCVEN, "
+					cQuery += " C6_VALOR,C6_SEGUM,C6_TES,C6_UNSVEN, C6_LOCAL,C6_CF,C6_QTDENT,C6_QTDENT2,C6_CLI,C6_VALDESC,C6_ENTREG,C6_LOJA,C6_COMIS1,C6_DESCRI, C5_TABELA, "
+					cQuery += " C6_CLASFIS, C6_NUMLDX, C6_SUGENTR FROM (SRVPP01.DADOS12.dbo.SC6010 A INNER JOIN SRVPP01.DADOS12.dbo.SC5010 B ON A.C6_NUM = B.C5_NUM) "
+					cQuery += " WHERE A.D_E_L_E_T_ = '' AND  B.D_E_L_E_T_ = '' AND C6_NUM = '"+ Pedido +"'
+
+				EndIf
+			EndIf
 
 			//conout(cQuery)
 			TCQuery cQuery Alias ITENSPED New

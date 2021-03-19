@@ -113,7 +113,7 @@ User Function SIGATEC()
 	NumOP := OP->C2_NUM
 	cTurma := pswret(1)[1][12]
 
-	DEFINE MSDIALOG oDlg TITLE "Etiquetamento e apontamento de Produção  v.2020-11 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
+	DEFINE MSDIALOG oDlg TITLE "Etiquetamento e apontamento de Produção  v.2021-03 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
 
 	@ 000, 004 BITMAP BmpLogo SIZE 150, 050 OF oDlg1 FILENAME "\\srvpp08\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
 	@ 008, 090 SAY oSay1 PROMPT "OP:" SIZE 022, 017 OF oDlg FONT oFont4 COLORS 0, 16777215 PIXEL
@@ -182,11 +182,8 @@ User Function Grid()
 			TR->B1_DESC,;
 			TR->SALDO,;
 			TR->QTDAPONT})
-	
 		TR->(DbSkip())
-	
 	End
-
 	TR->(DbCloseArea())
 
 	For I:= 1 To Len(aDados)
@@ -232,19 +229,27 @@ User Function PrintEtq()
 	Static oGetQuant
 	Static nGetQuant := 0
 	Static oSay1
-	Static oSayDescProd
+	Static oSayDescProd 
+	Static oSayLote
+	Static oGetLote 
 	Static oSayQuant
+	Static oSayValid
+	Static oGetValid
+	Static cGetLote := Space(8)
+	Static dValid := STOD("")
 	pos := oMSNewGe1:nAt
 	cOPetq := oMSNewGe1:aCols[pos][1]+oMSNewGe1:aCols[pos][2]
-
 	
-
-	DEFINE MSDIALOG oDlg1 TITLE "Impressão de etiquetas" FROM 000, 000  TO 130, 450 COLORS 0, 16777215 PIXEL
+	DEFINE MSDIALOG oDlg1 TITLE "Impressão de etiquetas" FROM 000, 000  TO 180, 450 COLORS 0, 16777215 PIXEL
 	@ 007, 003 SAY oSay1 PROMPT "Produto:" SIZE 032, 017 OF oDlg1 FONT oFont1 COLORS 0, 16777215 PIXEL
 	@ 007, 038 SAY oSayDescProd PROMPT trim(oMSNewGe1:aCols[pos][3]) + " - " + trim(oMSNewGe1:aCols[pos][4])  SIZE 237, 010 OF oDlg1 FONT oFont1 COLORS 0, 16777215 PIXEL
 	@ 028, 004 SAY oSayQuant PROMPT "Quantidade:" SIZE 036, 007 OF oDlg1 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 025, 058 MSGET oGetQuant VAR nGetQuant SIZE 089, 012 OF oDlg1 COLORS 0, 16777215 FONT oFont1 PIXEL PICTURE "@E 999,999" VALID nGetQuant > 0.00
-	DEFINE SBUTTON oBtnOK FROM 047, 192 TYPE 01 OF oDlg1 ENABLE ACTION (EtiqOP(nGetQuant,cOPetq,Alltrim(pswret(1)[1][12])),oDlg1:End())
+	@ 025, 045 MSGET oGetQuant VAR nGetQuant SIZE 089, 012 OF oDlg1 COLORS 0, 16777215 FONT oFont1 PIXEL PICTURE "@E 999,999" VALID nGetQuant > 0.00
+	@ 045, 004 SAY oSayLote PROMPT "Lote:" SIZE 036, 007 OF oDlg1 FONT oFont1 COLORS 0, 16777215 PIXEL	
+	@ 045, 045 MSGET oGetLote VAR cGetLote SIZE 132, 010 OF oDlg1 COLORS 0, 16777215  PIXEL  
+	@ 065, 004 SAY oSayValid PROMPT "Validade:" SIZE 036, 007 OF oDlg1 FONT oFont1 COLORS 0, 16777215 PIXEL	
+	@ 065, 045 MSGET oGetValid VAR dValid SIZE 050, 010 OF oDlg1 COLORS 0, 16777215  PIXEL
+	DEFINE SBUTTON oBtnOK FROM 065, 192 TYPE 01 OF oDlg1 ENABLE ACTION (EtiqOP(nGetQuant,cOPetq,Alltrim(pswret(1)[1][12])),oDlg1:End())
 
 	ACTIVATE MSDIALOG oDlg1 CENTERED
 
@@ -284,6 +289,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 	nQtdTotal := 0
 	aProd := {}
 	cLoteEtq:= ""  
+	cLoteData := ""
 	
 //Validação de quantidade permitida a imprimir por vez.
 	IF SUBSTR(SB1->B1_GRUPO,1,2)<>'13'
@@ -328,11 +334,13 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 		cGrupo := SB1->B1_GRUPO
 		//cEan14	:= "27896769801890"
 
-		if Alltrim(SC2->C2_LOTE) <> ""
-			cLoteEtq:= SC2->C2_LOTE
-		Else
-			cLoteEtq:= DataLoteEtq()
-		EndIf
+
+		cLoteEtq := cGetLote
+		cLoteData := DataLoteEtq() //loTE COM DATA EM IMAG
+		
+		//	if Alltrim(SC2->C2_LOTE) <> ""
+		//		cLoteEtq:= SC2->C2_LOTE
+		//EndIF
 
 		cQry := "SELECT Z3_NUMOP,Z3_ITEMOP,MAX(Z3_NUMERAC) NUM FROM SZ3010"
 		cQry += " WHERE Z3_NUMOP = '" + Substr(cOP,1,6) + "' AND Z3_ITEMOP='" + Substr(cOP,7,2)+"'"
@@ -354,7 +362,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 		TCQUERY cQry NEW ALIAS "ULDOC"
 		if ULDOC->DOC <> '0'
 			_cDoc := 'P'+ strzero(val(SUBSTR(ULDOC->DOC,2,7))+1,7) //calcula o próximo numero de documento
-		ELSE
+		Else
 			_cDoc := 'P0000001'
 		EndIf
 		
@@ -369,8 +377,8 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 	//	cDataFab := dtoc(date())
 		cDataFab :=Dtoc(dDataBase)
 		
-		IF  Alltrim(cGrupo) =="1209" //Suco
-			cDataVal := dtoc(dDataBase+180) //Validade 4 meses
+		if !Empty(dValid)       //IF  Alltrim(cGrupo) =="1209" //Suco
+			cDataVal :=  dtoc(dValid) //dtoc(dDataBase+180) //Validade 4 meses
 			//mesval := strzero(val(substring(dtos(ddatabase),5,2))+6)  //Teste de código que aproxime da lógica do datador
 			//cDataVal:= substring(dtoc(ddatabase),1,3)+mesval+
 		Else
@@ -429,32 +437,40 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 							//MSCBSAYBAR(05,05,cEan14,"N","MB01",12,.F.,.F.,.F.,,4,4,.F.)  
 					MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO - CODIGO DE BARRAS OFICIAL
 							
-					if Alltrim(cGrupo) $ "1207" //.or. Alltrim(cCodProd) == "PA8215"
+					if Alltrim(cGrupo) $ "1207" // (Massinha 30 KG)
 						//MSCBSAYBAR ( 05, 20 , cCodBarProd , 'N',"MB01",06,,.T.,,,2,2) //EAN14 OFICIAL												
 						MSCBSAYBAR ( 05, 17 , cCodBarProd , 'N',"MB04",08,,.T.,,,2,2) // BARRAS DO PRODUTO
 					EndIf
 					
-					//Imprime data de fabricação, validade e lote no grupo 1204, 1205,1203
-					if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
+					//Imprime data de fabricação, validade e lote no grupo 1204 (PlincShow), 1205 (Pimentinha),1203 (Geladinho), 1209 (Suco)
+					if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209")) 
 						MSCBSAY(01,30,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","3","1,0")
 						MSCBSAY(50,22,"Turma: "+ Turma,"N","1","2,2")
-						MSCBSAY(50,18,"F: ","N","1","2,2")
-						MSCBSAY(55,18,cDataFab,"N","1","2,2")
+
+						if  Alltrim(cGrupo) <> "1203" //Geladinho 
+							MSCBSAY(50,18,"F: ","N","1","2,2")
+							MSCBSAY(55,18,cDataFab,"N","1","2,2")
+						EndIf
+
 						MSCBSAY(50,13,"V: ","N","1","2,2")
 						MSCBSAY(55,13,cDataVal,"N","1","2,2")
+
 						MSCBSAY(50,8,"Lote: ","N","1","2,2")				
-				
-						IF Alltrim(cGrupo) =="1209" .or. Alltrim(cGrupo) =="1203"
-							MSCBSAY(61,8,lote,"N","1","2,2")  //Formato DDMMAA+IT
-						Else
+						if Alltrim(cLoteEtq)<> ""
 							MSCBSAY(61,8,cLoteEtq,"N","1","2,2") //Formato dia do ano DDD (3 digitos)
+						Else
+							MSCBSAY(61,8,cLoteData,"N","1","2,2") //Formato dia do ano DDD (3 digitos)
 						EndIf
+
+						//IF Alltrim(cGrupo) =="1209" .or. Alltrim(cGrupo) =="1203"
+						//	MSCBSAY(61,8,lote,"N","1","2,2")   
+						//EndIf
 					Else
 						MSCBSAY(01,30,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","3","1,0")
 						MSCBSAY(50,22,"Turma: "+ Turma,"N","1","2,2")
 						MSCBSAY(50,15,"Fabricacao: ","N","1","2,2")
 						MSCBSAY(50,10,cDataFab,"N","1","2,2")
-						MSCBSAY(50,06, _cDoc,"N","1","2,2")
+					//	MSCBSAY(50,06, _cDoc,"N","1","2,2")
 					EndIf
 						
 					MSCBEND()
@@ -471,7 +487,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 							MSCBSAY(50,17,cDataVal,"N","1","2,2")
 							MSCBSAY(50,09,"Fabricacao: ","N","1","2,2")
 							MSCBSAY(50,06,cDataFab,"N","1","2,2")
-							MSCBSAY(50,03, _cDoc,"N","1","2,2")
+						//	MSCBSAY(50,03, _cDoc,"N","1","2,2")
 							MSCBEND()
 							nPcte += 1
 						EndDo
@@ -492,17 +508,22 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 						if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
 							MSCBSAY(05,05,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")  //30
 							MSCBSAY(48,13,"Turma: "+ Turma,"N","B","17,13")  //22
-							MSCBSAY(48,18,"F: ","N","B","17,13") //18
-							MSCBSAY(53,18,cDataFab,"N","B","17,13") //18
+							if  Alltrim(cGrupo) <> "1203" //Geladinho 
+								MSCBSAY(48,18,"F: ","N","B","17,13") //18
+								MSCBSAY(53,18,cDataFab,"N","B","17,13") //18
+							EndIf
+
 							MSCBSAY(48,23,"V: ","N","B","17,13")   //13
 							MSCBSAY(53,23,cDataVal,"N","B","17,13")  //13
+						
 							MSCBSAY(48,28,"Lote: ","N","B","17,13")  //8
-							
-							IF  Alltrim(cGrupo) =="1209"
-								MSCBSAY(48,32,lote,"N","B","17,13")  //Formato DDMMAA+IT
+
+							if Alltrim(cLoteEtq)<> ""
+								MSCBSAY(48,32,cLoteEtq,"N","1","2,2") //Formato dia do ano DDD (3 digitos)
 							Else
-								MSCBSAY(48,32,cLoteEtq,"N","B","17,13") //Formato dia do ano DDD (3 digitos)
-							EndIf
+								MSCBSAY(48,32,cLoteData,"N","1","2,2") //Formato dia do ano DDD (3 digitos)
+							EndIf						
+							
 						else
 							MSCBSAY(05,02,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")
 							MSCBSAY(48,14,"Turma: "+ Turma,"N","B","17,13")
@@ -555,6 +576,13 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 					SZ3->Z3_DOCSD3 :=  _cDoc
 					SZ3->Z3_DATA   := dDatabase
 					SZ3->Z3_LETRA  := Turma
+					SZ3->Z3_LOTE := cLoteEtq
+					if !empty(dtoc(dValid))
+						SZ3->Z3_DTVALID := dValid
+					else 
+						SZ3->Z3_DTVALID:= dDataBase+180
+					EndIf
+					
 					SZ3->(MsUnlock())
 					nApontSucess := nApontSucess + 1
 				//Else
@@ -1585,18 +1613,31 @@ Static Function quantDocSZ3(Doc,OP, Ini,Fim)
 	
 Return(Quant)
 
+
+//------------------------------------
+//---   Monta Lote com Data       ----
+//------------------------------------
 Static Function DataLoteEtq()
-	nAno = Year(date())
-	
+	nAno := Year(date())
+	cAnoLote := ""
+	//cValToChar(Year(date()))
+
 	cDtIni = ctod('31/12/'+ cValToChar(nAno-1))
 	dDtFim = date()
 	cDias = cValToChar(DateDiffDay(cDtIni, dDtFim))
 	
-	if (len(cDias) < 3)
+/*	if (len(cDias) < 3)
 		cDias = '0' + cValToChar(cDias)
 	endif
-	
-	cDataLote = cValToChar(cDias)
+*/	
+	if len(cValToChar(nAno))>2
+		cAnoLote := substring(cValToChar(nAno),3,2)
+	Else
+		cAnoLote := cValToChar(nAno)
+	EndIf
+
+	cDataLote = cValToChar(cDias)+cAnoLote
+
 return (cDataLote)
 
 
