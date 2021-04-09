@@ -21,8 +21,16 @@
 ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
 */
 
-//User Function ApontaProd()
+
+
 User Function SIGATEC()
+
+ u_ApontaProd()
+
+Return
+
+
+User Function ApontaProd()
  	//DECLARAR COMO STATIC TODAS VARIAVEIS DE PARÂMETRO DE FUNÇÃO.
 	Static NumOP
 	Static _NumOP
@@ -519,9 +527,9 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 							MSCBSAY(48,28,"Lote: ","N","B","17,13")  //8
 
 							if Alltrim(cLoteEtq)<> ""
-								MSCBSAY(48,32,cLoteEtq,"N","1","2,2") //Formato dia do ano DDD (3 digitos)
+								MSCBSAY(48,32,cLoteEtq,"N","B","17,13") //Formato dia do ano DDD (3 digitos)
 							Else
-								MSCBSAY(48,32,cLoteData,"N","1","2,2") //Formato dia do ano DDD (3 digitos)
+								MSCBSAY(48,32,cLoteData,"N","B","17,13") //Formato dia do ano DDD (3 digitos)
 							EndIf						
 							
 						else
@@ -675,6 +683,16 @@ Static Function ImpSub(cTipoEtq)
 		cGrupo 		:= SB1->B1_GRUPO
 		cDescProd	:= SB1->B1_DESC
 	//EndIF
+
+		cLoteEtq := cLoteSub
+		cLoteData := DataLoteEtq() //loTE COM DATA EM IMAG
+
+		if !Empty(dValid)       
+			cDataVal :=  dtoc(dValid) 
+		Else
+			cDataVal := dtoc(dDataBase+180) //Validade 6 meses
+		EndIf
+
 	
 	if  MSGYESNO("Deseja realmente imprimir etiqueta para o produto "+SB1->B1_DESC+"?", "Confirmação")
 
@@ -731,7 +749,7 @@ Static Function ImpSub(cTipoEtq)
 			Numerac := Numerac + 1
 			cNumFardo := strzero(Numerac,4)
 			cb1 := left(Alltrim(cOP)+cNumFardo,12)
-									
+
 			if _nImpress = 1
 						MSCBBEGIN(1,6)
 						MSCBSAYBAR ( 05, 05 , cb1 , 'N',"MB04",08,,.T.,,,3,2.5) // LOTE (OP) + FARDO
@@ -746,18 +764,27 @@ Static Function ImpSub(cTipoEtq)
 						if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
 							MSCBSAY(01,30,Alltrim(cProduto)+ "-"+Alltrim(SB1->B1_DESC),"N","3","1,0")
 							MSCBSAY(73,22, cMot,"N","3","2,0")
-							//MSCBSAY(50,18,"F: ","N","1","2,2")
-						//	MSCBSAY(55,18,cDataFab,"N","1","2,2")
-							MSCBSAY(50,13,"V: ","N","1","2,2")
-							MSCBSAY(55,13,dtoc(dValid),"N","1","2,2")
-							MSCBSAY(50,8,"Lote: ","N","1","2,2")
 							
-						// ALTERAR ESSA PARTE DO CODIGO PARA MOSTRAR O LOTE DA ETIQUETA SE FOR DIGITADO. SE NÃO FOR, MOSTRAR O CÓDIGO DO LOTE
-							IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209" 
-								MSCBSAY(61,8, cEtqSub,"N","1","2,2")  //Formato DDMMAA+IT
-							Else
-								MSCBSAY(61,8,cLoteSub,"N","1","2,2") //Formato dia do ano DDD (3 digitos) 
+							if AllTri(cGrupo)<> "1203"
+								MSCBSAY(50,18,"F: ","N","1","2,2")
+								MSCBSAY(55,18,cDataFab,"N","1","2,2")
 							EndIf
+							
+							MSCBSAY(50,13,"V: ","N","1","2,2")
+							MSCBSAY(55,13,cDataVal,"N","1","2,2")
+							
+							MSCBSAY(50,8,"Lote: ","N","1","2,2")
+							if Alltrim(cLoteEtq)<> ""
+								MSCBSAY(61,8,cLoteEtq,"N","1","2,2") //Formato dia do ano DDD (3 digitos)
+							Else
+								MSCBSAY(61,8,cLoteData,"N","1","2,2") //Formato dia do ano DDD (3 digitos)
+							EndIf
+
+						//	IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"    //Substituido pelo codigo de lote acima.
+						//		MSCBSAY(61,8, cEtqSub,"N","1","2,2")  //Formato DDMMAA+IT
+						//	Else
+						//		MSCBSAY(61,8,cLoteSub,"N","1","2,2") //Formato dia do ano DDD (3 digitos) 
+						//	EndIf
 						Else
 							MSCBSAY(01,30,Alltrim(cProduto)+ "-"+Alltrim(SB1->B1_DESC),"N","3","1,0")
 							MSCBSAY(73,22, cMot,"N","3","2,0")
@@ -780,7 +807,7 @@ Static Function ImpSub(cTipoEtq)
 								MSCBSAY(07,08,"Lote: "+cLoteSub,"N","2","0.8,0")
 								MSCBSAY(03,28,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","2","1,0")
 								MSCBSAY(50,22,"Validade: ","N","1","2,2")
-								MSCBSAY(50,17,dtoc(dValid),"N","1","2,2")
+								MSCBSAY(50,17,cDataVal,"N","1","2,2")
 							//	MSCBSAY(50,09,"Fabricacao: ","N","1","2,2")
 							//	MSCBSAY(50,06,cDataFab,"N","1","2,2")
 							//Imprime motivo de Substituição
@@ -801,21 +828,31 @@ Static Function ImpSub(cTipoEtq)
 							EndIf
 			//	Alert("Impr.1")			
 							//Imprime data de fabricação, validade e lote no grupo 1204, 1205,1203
-							if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
+							if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  
 								MSCBSAY(05,05,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")  //30
 								MSCBSAY(50,12,"Turma: "+ cTurma,"N","B","17,13")  //22
-								MSCBSAY(50,16,"F: ","N","B","17,13") //18
-								MSCBSAY(55,16,cDataFab,"N","B","17,13") //18
+								
+								if  Alltrim(cGrupo) <> "1203" //Geladinho 
+									MSCBSAY(50,16,"F: ","N","B","17,13") //18
+									MSCBSAY(55,16,cDataFab,"N","B","17,13") //18
+								EndIf
+
 								MSCBSAY(73,25, cMot,"N","B","20,30")
 								MSCBSAY(50,21,"V: ","N","B","17,13")   //13
 								MSCBSAY(55,21,cDataVal,"N","B","17,13")  //13
 								MSCBSAY(50,26,"Lote: ","N","B","17,13")  //8
-			//	Alert("Impr.2")							
-								IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"
-									MSCBSAY(61,26,lote,"N","B","17,13")  //Formato DDMMAA+IT
-								Else
+	
+								if Alltrim(cLoteEtq)<> ""
 									MSCBSAY(61,26,cLoteEtq,"N","B","17,13") //Formato dia do ano DDD (3 digitos)
-								EndIf
+								Else
+									MSCBSAY(61,26,cLoteData,"N","B","17,13") //Formato dia do ano DDD (3 digitos)
+								EndIf	
+
+							//	IF Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"
+						//			MSCBSAY(61,26,lote,"N","B","17,13")  //Formato DDMMAA+IT
+						//		Else
+						//			MSCBSAY(61,26,cLoteEtq,"N","B","17,13") //Formato dia do ano DDD (3 digitos)
+						//		EndIf
 							else
 			//	Alert("Impr.3")					
 								MSCBSAY(05,02,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")

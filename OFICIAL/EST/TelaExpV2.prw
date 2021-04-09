@@ -105,7 +105,22 @@ cQry := ChangeQuery(cQry)
 TCQUERY cQry NEW ALIAS "TRC"
 
 	aDadosRom :={}
-	
+
+/*	//Carregamento Decrescente
+	While !TRC->(Eof())
+		Aadd(aDadosRoms,{ TRC->Z1_NUM,;
+			TRC->MITEM,;
+			TRC->Z1_DESCRI,;
+			TRC->Z1_VEICULO,;
+			stod(TRC->Z1_DTSAIDA),;
+			stod(TRC->Z1_EXPINI),;
+			TRC->Z1_STATUS,;
+			TRC->PROXIT})
+		TRC->(DbSkip())
+	End
+*/
+
+
 	While !TRC->(Eof())
 		Aadd(aDadosRoms,{ TRC->Z1_NUM,;
 			TRC->MITEM,;
@@ -192,7 +207,8 @@ Static Function carregam()
 	Static nPesoPedTot := 0
 	Static TRC2 := {}
 
-	pos := oMSNewGe1:nAt
+//Posicionamento de item de carregamento decrescente
+/*	pos := oMSNewGe1:nAt
 	cNumRom :=  trim(oMSNewGe1:aArray[pos][1])
 	if nItem = 2  //campo Item 2 (proximo)
 		//cRomIt	:= val(trim(oMSNewGe1:aCols[pos][8]))
@@ -206,11 +222,30 @@ Static Function carregam()
 		nProxIt := val(trim(oMSNewGe1:aArray[pos][2]))
 		cRomIt	:= trim(oMSNewGe1:aArray[pos][2])
 	EndIF
+*/
+
+//Posicionamento de item de carregamento crescente
+	
+	pos := oMSNewGe1:nAt
+	cNumRom :=  trim(oMSNewGe1:aArray[pos][1])
+	if nItem = 2  //campo Item 2 (proximo)
+		//cRomIt	:= val(trim(oMSNewGe1:aCols[pos][8]))
+		//if nProxIt == 1
+		//	nProxIt := val(trim(oMSNewGe1:aArray[pos][2]))
+		//else
+			nProxIt := nProxIt + 1
+		//EndIf
+		cRomIt := strzero(nProxIt,2,0)
+	else
+		nProxIt := val(trim(oMSNewGe1:aArray[pos][2]))
+		cRomIt	:= trim(oMSNewGe1:aArray[pos][2])
+	EndIF
 
 	cRota	:= trim(oMSNewGe1:aArray[pos][3])
 	cVeic	:= trim(oMSNewGe1:aArray[pos][4])
 	//cMotori	:= trim(oMSNewGe1:aCols[pos][5])
 	cDtSaida := oMSNewGe1:aArray[pos][5]
+
 	
 
 //PRODUTO POR ITEM DE ROMANEIO PARA CARREGAMENTO
@@ -326,7 +361,10 @@ Static Function TelaCarga(It)
 	Public cGetCodBar := Space(13)
 	Public oCbxFinalizados
 	Public lCbxFinalizados := .T.
-
+	
+	nQtdPend := 0
+	nQtdVen := 0
+	
 	nItem := It 
 	HrInicio := time()
 	HrFim := ""
@@ -408,7 +446,6 @@ Static Function TelaCarga(It)
 	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 0, 0 TO nLinTela-170, nColTela-70 COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
 	@ 002, 003 SAY oLblNum PROMPT cNumRom + "-" +cRomIt   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 007, 050 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
-	@ 005, 100 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
 	@ 002, 250 GROUP oGroup1 TO 020, 600 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
 	@ 004, 255 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 004, 290 SAY oTxtVeic PROMPT 	cVeic SIZE 040, 011 OF oGroup1 FONT oFont3 COLORS 0, 16777215 PIXEL
@@ -416,7 +453,7 @@ Static Function TelaCarga(It)
 	@ 004, 340 SAY oTxtRota PROMPT cRota SIZE 200, 011 OF oGroup1 FONT oFont1 COLORS 0, 16777215 PIXEL 
 	@ 004, 460 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 004, 500 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
-	@ 002, nColG1+175 BUTTON oBtnResumo PROMPT "PROX. ITEM" SIZE 040, 015 OF oDlg2 ACTION  ItemSenha() PIXEL	
+	@ 002, nColG1+175 BUTTON oBtnNext PROMPT "PROX. ITEM" SIZE 040, 015 OF oDlg2 ACTION  ItemSenha() PIXEL	
 	@ 002, nColG1+220 BUTTON oBtnExc PROMPT "EXC.FARDOS" SIZE 040, 015 OF oDlg2 ACTION (retfardos()) PIXEL
 	@ 002, nColG1+265 BUTTON oBtnApont PROMPT "PAUSAR" SIZE 040, 015 OF oDlg2 ACTION (PausaRom()) PIXEL  
 	@ 002, nColG1+310 BUTTON oBtnFinaliz PROMPT "FINALIZAR" SIZE 040, 015 OF oDlg2 ACTION (finalizaSenha()) PIXEL
@@ -432,8 +469,12 @@ Static Function TelaCarga(It)
 	//@ 030, nColG1+210 SAY oLblTotPeso PROMPT str(nPesoCarr)   SIZE 060, 011 OF oDlg2 FONT oFont1 COLORS 0, 16777215 PIXEL
 	@ 027, nColG1+280 SAY oLblTotal PROMPT "Qtde: " SIZE 100, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 027, nColG1+290 SAY oTxtValTot PROMPT str(nQtdCarr) OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 005, 100 MSGET oGetCodBar VAR cGetCodBar SIZE 132, 010 OF oDlg2 COLORS 0, 16777215  ON CHANGE (IncluiLeitor()) PIXEL
 	GridCarga()	
 	ACTIVATE MSDIALOG oDlg2 CENTERED	
+
+//oBtnNext:bGotFocus :=  {||oGetCodBar:SetFocus()}
+
 
 Return
 
@@ -441,7 +482,7 @@ Static Function GridCarga()
 
 Local I	
 Static aFieldsCg := {}
-Static aColsExCg  
+Public aColsExCg  
 Static aColsConc 
 Public oBrowse := {}
 Public oBrwFinaliz := {}
@@ -520,8 +561,7 @@ oBrowse := {}
 
 // Cria Browse
 oBrowse := TCBrowse():New(040,10,nColG1,nLinG1-50,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
-//oBrowse := TCBrowse():New(040,020,500,450,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE','REGISTRADO','RESTANTE','EXCEDENTE','MOTIVO FALTA'},{10,50,50,50,50,50,50,50},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
-oBrowse:AddColumn(TCColumn():New("PRODUTO"	, {|| aColsExCg[oBrowse:nAt,01]},"@!",,,"CENTER", nCod,.F.,.F.,,{|| .F. },,.F., ) )
+oBrowse:AddColumn(TCColumn():New("PRODUTO"	,	  {|| aColsExCg[oBrowse:nAt,01]},"@!",,,"CENTER", 50,.F.,.F.,,{|| .F. },,.F., ) )
 oBrowse:AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsExCg[oBrowse:nAt,02]},"@!",,,"CENTER", nTamDesc,.F.,.F.,,{|| .F. },,.F., ) )
 oBrowse:AddColumn(TCColumn():New("QUANTIDADE"	, {|| aColsExCg[oBrowse:nAt,03]},"@E 9999",,,"CENTER"  , 040,.F.,.F.,,,,.F., ) )
 oBrowse:AddColumn(TCColumn():New("REGISTRADO"	, {|| aColsExCg[oBrowse:nAt,04]},"@E 9999",,,"CENTER", 040,.F.,.T.,,,,.F., ) )
@@ -535,7 +575,8 @@ oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
 oBrowse:Refresh()
 
 oBrwFinaliz := TCBrowse():New(040,nColG1+20,nColG2-30,nLinG2-50,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE'},{20,200,005},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
-oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", nCod,.F.,.F.,,{|| .F. },,.F., ) )
+//oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", nCod,.F.,.F.,,{|| .F. },,.F., ) )
+oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", 50,.F.,.F.,,{|| .F. },,.F., ) )
 oBrwFinaliz :AddColumn(TCColumn():New("DESCRIÇÃO"	, {|| aColsConc[oBrwFinaliz:nAt,02]},"@!",,,"CENTER", nTamProd,.F.,.F.,,{|| .F. },,.F., ) )
 oBrwFinaliz :AddColumn(TCColumn():New("QUANT."	, {|| aColsConc[oBrwFinaliz:nAt,03]},"@E 9999",,,"CENTER"  , 005,.F.,.F.,,,,.F., ) )
 
@@ -545,6 +586,7 @@ oBrwFinaliz:SetArray(aColsConc)
 //oBrwFinaliz:SetBlkBackColor({|| GETDCLR2(oBrwFinaliz:nAt)})
 oBrwFinaliz:Refresh()
 
+//oBtnNext:bGotFocus :=  {||oGetCodBar:SetFocus()}
 oBrowse:bGotFocus :=  {||oGetCodBar:SetFocus()}
 oBrwFinaliz:bGotFocus :=  {||oGetCodBar:SetFocus()}
 oGetCodBar:SetFocus()
@@ -912,15 +954,17 @@ if Alltrim(cPassW)  == "plinc123"
 	//	ENVMAILEXP('plinc.logistica@gmail.com',cAssunto ,cEmailErro)
 		//ENVMAILEXP('vendas@produtosplinc.com.br',cAssunto ,cEmailErro)
 		U_ENVMAILEXP('sistemas@produtosplinc.com.br',cAssunto ,cEmailErro)
+		SZ1->(MsUnlock())
+		oDlg2:End()
+		TelaCarga(2) //Chama proximo item
+
 	Else
 		MSGINFO("Não encontrado romaneio. Verificar com administrador.")
-		conout("TELAEXPED: Não encontrado romaneio" +cNumRom+cRomIt +" para finalizar.")
+		oDlg2:End()
+		GridRom() //Grid inicial com relacao
 	EndIf
-	SZ1->(MsUnlock())
-	oDlg2:End()
-	//GridRom()
-	//carregam(2)
-	TelaCarga(2)
+
+	
 else
 	Alert("Senha Incorreta!")
 	oDlgPwd:End()
@@ -1405,6 +1449,7 @@ Static Function GETDCLR(nLinha)
 	Local nCor4 :=  5070329 //fVERMELHO
 	Local nCor2 := 16777215 //branco
 
+/*	
 	if len(aColsExCg) > 0
 		if Alltrim(aColsExCg[nLinha][5])<>"" .and. nlinha <= len(aColsExCg)
 			If val(aColsExCg[nLinha][6])>0  .and. aColsExCg[nLinha][6]<>"" //_nExced
@@ -1415,6 +1460,17 @@ Static Function GETDCLR(nLinha)
 		else
 			nRet := nCor4
 		EndIF
+	EndIf
+	*/
+	nRet := nCor2
+	if len(aColsExCg) > 0
+	//	if Alltrim(aColsExCg[nLinha][5])<>"" .and. nlinha <= len(aColsExCg)
+			If val(aColsExCg[nLinha][6])>0 
+				nRet := nCor4
+			Endif
+		//else
+		//	nRet := nCor4
+	//	EndIF
 	EndIf
 	
 Return nRet
@@ -1530,7 +1586,7 @@ Static Function MudaItRom()
 		
 		oDlgPwd2:End()
 		oDlg2:End()
-		TelaCarga(2)
+		TelaCarga(2) //Chama próximo item
 
 	else
 		Alert("Senha Incorreta!")
