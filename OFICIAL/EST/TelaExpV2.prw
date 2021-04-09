@@ -831,9 +831,10 @@ Static Function atual()
 	//oBrowse:nLinhas := nLinh
 	oBrowse:SetArray(aColsExCg)
 	oBrowse:lUseDefaultColors := .F.
+	oBrowse:Refresh()
 	oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
 	oBrowse:Refresh()
-		
+	
 	//oBrwFinaliz:nLinhas := nLinh
 	oBrwFinaliz:SetArray(aColsConc)
 	//oBrwFinaliz:lUseDefaultColors := .F.
@@ -1463,7 +1464,7 @@ Static Function GETDCLR(nLinha)
 	EndIf
 	*/
 	nRet := nCor2
-	if len(aColsExCg) > 0
+	if !empty(aColsExCg) //if len(aColsExCg) > 0
 	//	if Alltrim(aColsExCg[nLinha][5])<>"" .and. nlinha <= len(aColsExCg)
 			If val(aColsExCg[nLinha][6])>0 
 				nRet := nCor4
