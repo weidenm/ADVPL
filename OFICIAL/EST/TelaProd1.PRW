@@ -455,7 +455,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 						MSCBSAY(01,30,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","3","1,0")
 						MSCBSAY(50,22,"Turma: "+ Turma,"N","1","2,2")
 
-						if  Alltrim(cGrupo) <> "1203" //Geladinho 
+						if  Alltrim(cGrupo) = "1209"  //Suco   //Alltrim(cGrupo) <> "1203" //Geladinho 
 							MSCBSAY(50,18,"F: ","N","1","2,2")
 							MSCBSAY(55,18,cDataFab,"N","1","2,2")
 						EndIf
@@ -516,7 +516,7 @@ Static Function EtiqOP(_nQuant,_cOP,_cTurma )
 						if ((Alltrim(cGrupo) =="1204" .OR. Alltrim(cGrupo) =="1205" .OR. Alltrim(cGrupo) =="1203"  .OR. Alltrim(cGrupo) =="1209"))  // .and. Alltrim(cUM)== "CX")
 							MSCBSAY(05,05,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")  //30
 							MSCBSAY(48,13,"Turma: "+ Turma,"N","B","17,13")  //22
-							if  Alltrim(cGrupo) <> "1203" //Geladinho 
+							if  Alltrim(cGrupo) = "1209" //Suco    //Alltrim(cGrupo) <> "1203" //Geladinho 
 								MSCBSAY(48,18,"F: ","N","B","17,13") //18
 								MSCBSAY(53,18,cDataFab,"N","B","17,13") //18
 							EndIf
@@ -765,7 +765,7 @@ Static Function ImpSub(cTipoEtq)
 							MSCBSAY(01,30,Alltrim(cProduto)+ "-"+Alltrim(SB1->B1_DESC),"N","3","1,0")
 							MSCBSAY(73,22, cMot,"N","3","2,0")
 							
-							if AllTri(cGrupo)<> "1203"
+							if AllTri(cGrupo) = "1209"
 								MSCBSAY(50,18,"F: ","N","1","2,2")
 								MSCBSAY(55,18,cDataFab,"N","1","2,2")
 							EndIf
@@ -832,7 +832,7 @@ Static Function ImpSub(cTipoEtq)
 								MSCBSAY(05,05,Alltrim(cCodProd)+ "-"+Alltrim(cDescProd),"N","C","50,12")  //30
 								MSCBSAY(50,12,"Turma: "+ cTurma,"N","B","17,13")  //22
 								
-								if  Alltrim(cGrupo) <> "1203" //Geladinho 
+								if  Alltrim(cGrupo) = "1209" //Suco
 									MSCBSAY(50,16,"F: ","N","B","17,13") //18
 									MSCBSAY(55,16,cDataFab,"N","B","17,13") //18
 								EndIf

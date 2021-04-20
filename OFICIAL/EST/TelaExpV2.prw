@@ -266,12 +266,24 @@ cQry += "  GROUP BY A.Z1_NUM,  A.Z1_ITEM, A.C6_PRODUTO, B1_GRUPO, B1_ORDEM, B1_D
 cQry += "  ORDER BY B1_ORDEM,C6_PRODUTO "
 */
 
+/*
 cQry := " SELECT  Z3_ROMANEI AS Z1_NUM,  Z1_ITEM, Z3_PRODUTO AS C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, 0 AS QTDVEN, QTDROM "
 cQry += " FROM  EXP_ROMITFARDOS B INNER JOIN  SB1010 AS D ON B.Z3_PRODUTO = D.B1_COD WHERE  B.Z3_ROMANEI='"+cNumRom+"' AND Z1_ITEM='"+cRomIt+"' "
 cQry += " AND Z3_PRODUTO NOT IN (SELECT C6_PRODUTO FROM EXP_ROMITPEDIDO WHERE Z1_NUM='"+cNumRom+"' AND Z1_ITEM='"+cRomIt+"' )" 
 cQry += " UNION SELECT A.Z1_NUM,  A.Z1_ITEM, A.C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, A.QTDPED AS QTDVEN, QTDROM "
 cQry += " FROM EXP_ROMITPEDIDO A LEFT OUTER JOIN EXP_ROMITFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO AND A.Z1_ITEM=B.Z1_ITEM "
 cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD WHERE  A.Z1_NUM='"+cNumRom+"' AND A.Z1_ITEM='"+cRomIt+"' " 
+cQry += " ORDER BY B1_ORDEM,C6_PRODUTO "
+*/
+
+cQry := " SELECT  Z3_ROMANEI AS Z1_NUM,  Z1_ITEM, Z3_PRODUTO AS C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, 0 AS QTDVEN, QTDROM "
+cQry += " FROM  EXP_ROMITFARDOS B INNER JOIN  SB1010 AS D ON B.Z3_PRODUTO = D.B1_COD WHERE  B.Z3_ROMANEI='"+cNumRom+"' "
+cQry += " AND Z1_ITEM IN (SELECT MIN(Z1_ITEM) FROM SZ1010 WHERE Z1_NUM='"+cNumRom+"' AND Z1_EXPFIM = '' AND Z1_ITEM >= '"+STRZERO(nProxIt,2)  +"' )"
+cQry += " AND Z1_ITEM+Z3_PRODUTO NOT IN (SELECT Z1_ITEM+C6_PRODUTO FROM EXP_ROMITPEDIDO WHERE Z1_NUM='"+cNumRom+"' )" 
+cQry += " UNION SELECT A.Z1_NUM,  A.Z1_ITEM, A.C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, A.QTDPED AS QTDVEN, QTDROM "
+cQry += " FROM EXP_ROMITPEDIDO A LEFT OUTER JOIN EXP_ROMITFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO AND A.Z1_ITEM=B.Z1_ITEM "
+cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD WHERE  A.Z1_NUM='"+cNumRom+"' " 
+cQry += "  AND A.Z1_ITEM IN  (SELECT MIN(Z1_ITEM) FROM SZ1010 WHERE Z1_NUM='"+cNumRom+"' AND Z1_EXPFIM = '' AND Z1_ITEM >= '"+STRZERO(nProxIt,2)  + "' ) "
 cQry += " ORDER BY B1_ORDEM,C6_PRODUTO "
 
 
@@ -475,7 +487,6 @@ Static Function TelaCarga(It)
 
 //oBtnNext:bGotFocus :=  {||oGetCodBar:SetFocus()}
 
-
 Return
 
 Static Function GridCarga()
@@ -573,6 +584,7 @@ oBrowse:SetArray(aColsExCg)
 oBrowse:lUseDefaultColors := .F.
 oBrowse:SetBlkBackColor({|| GETDCLR(oBrowse:nAt)})
 oBrowse:Refresh()
+
 
 oBrwFinaliz := TCBrowse():New(040,nColG1+20,nColG2-30,nLinG2-50,,{'','PRODUTO','DESCRIÇÃO','QUANTIDADE'},{20,200,005},oDlg2,,,,,,,oFontGrid,,,,,.F.,,.T.,,.F.,,,.T.)
 //oBrwFinaliz :AddColumn(TCColumn():New("PRODUTO"	, {|| aColsConc[oBrwFinaliz:nAt,01]},"@!",,,"CENTER", nCod,.F.,.F.,,{|| .F. },,.F., ) )
@@ -1466,7 +1478,7 @@ Static Function GETDCLR(nLinha)
 	nRet := nCor2
 	if !empty(aColsExCg) //if len(aColsExCg) > 0
 	//	if Alltrim(aColsExCg[nLinha][5])<>"" .and. nlinha <= len(aColsExCg)
-			If val(aColsExCg[nLinha][6])>0 
+			If val(aColsExCg[nLinha][6]) > 0  
 				nRet := nCor4
 			Endif
 		//else
