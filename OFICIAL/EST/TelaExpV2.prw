@@ -1299,9 +1299,13 @@ Static Function FardosConf(nTipoFunc)
 		conout("TELAEXPED: Excluídos do romaneio "+ Str(nQtdExclui) +" fardos registrados.")
 		
 		//MontaGridFardo()
+
+/*  //Rodar apenas quando for exclusão de fardos do proprio romaneio
 		oDlg2:end()
 		TelaRom := cNumRom
 		TelaCarga()
+*/
+
 	 //	if cNumRom <>'' //para verificar se rotina FARDOS() foi aberto fora ou dentro da rotina de carregamento.
 	//		Carregam() 
 	//		GridCarga() // alterado porque o GridCarga foi mudado para apenas preencher e não mais buscar dados.
