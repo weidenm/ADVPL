@@ -455,7 +455,7 @@ Static Function TelaCarga(It)
 ///******************************************************************************
 //****************         MONTAGEM DA TELA            ************************
 //*****************************************************************************
-	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 0, 0 TO nLinTela-170, nColTela-70 COLORS 0, 16777215 PIXEL Style DS_MODALFRAME
+	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 0, 0 TO nLinTela-170, nColTela-70 COLORS 0, 16777215 PIXEL //Style DS_MODALFRAME
 	@ 002, 003 SAY oLblNum PROMPT cNumRom + "-" +cRomIt   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 007, 050 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
 	@ 002, 250 GROUP oGroup1 TO 020, 600 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
@@ -466,7 +466,7 @@ Static Function TelaCarga(It)
 	@ 004, 460 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 004, 500 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 002, nColG1+175 BUTTON oBtnNext PROMPT "PROX. ITEM" SIZE 040, 015 OF oDlg2 ACTION  ItemSenha() PIXEL	
-	@ 002, nColG1+220 BUTTON oBtnExc PROMPT "EXC.FARDOS" SIZE 040, 015 OF oDlg2 ACTION (retfardos()) PIXEL
+	//@ 002, nColG1+220 BUTTON oBtnExc PROMPT "EXC.FARDOS" SIZE 040, 015 OF oDlg2 ACTION (retfardos()) PIXEL
 	@ 002, nColG1+265 BUTTON oBtnApont PROMPT "PAUSAR" SIZE 040, 015 OF oDlg2 ACTION (PausaRom()) PIXEL  
 	@ 002, nColG1+310 BUTTON oBtnFinaliz PROMPT "FINALIZAR" SIZE 040, 015 OF oDlg2 ACTION (finalizaSenha()) PIXEL
 	@ 030, 010 SAY oLblPend PROMPT "PENDENTES"   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -1077,8 +1077,6 @@ Static Function DevolFardos()
 	@ 029, 065 SAY oSayGrav1 PROMPT nItens Picture "@E 999" SIZE 015, 015 OF oDlg4 FONT oFont1 COLORS 0, 16777215 PIXEL
 	@ 010, 342 BUTTON oBtnCancel PROMPT "Confirmar" SIZE 051, 013 OF oDlg4  ACTION (FardosConf(2),oGetCodBarFd:SetFocus()) PIXEL
 	
-//	oBtnResumo:disable()
-	oGetCodBarFd:SetFocus()
 	ACTIVATE MSDIALOG oDlg4 CENTERED
 
 Return
@@ -1137,10 +1135,18 @@ Static Function IncluiGridLeitor(nTipoRet)
 		dbseek(xfilial("SZ3")+substr(Alltrim(cEtiqueta),1,8)+substr(cEtiqueta,9,4)) //ALTERADO 28/07/15
 	//VERIFICA SE EXISTE O ITEM NO PRODUTO.
 	
+
 		if SZ3->(found())  //.AND. if SZ3->Z3_ROMANEI==cNumRom //retirado verifica romaneio para funcionar fora do romaneio.
-		
+
+
 			If  Trim(SZ3->Z3_ROMANEI) <> "" .or. SZ3->Z3_REG='D' //CASO FARDO FOR ENCONTRADO*
 			
+					
+				if nTipoRet = 1 .and. Z3_ROMANEI <> cNumRom
+					Alert("Este fardo não pertence ao romaneio "+Alltrim(cNumRom) +"."+ ENTER +"Favor utilizar a rotina Devolução para retornar para estoque.")
+					Return
+				EndIF
+
 				cCodProd := SZ3->Z3_PRODUTO
 				
 				dbSelectArea("SB1")
@@ -1221,6 +1227,7 @@ Static Function FardosConf(nTipoFunc)
 	cRomDev := ""
 	_aFardDev := {}
 	x := 0
+
 //_aFardDev[n][1] = Produto  
 //_aFardDev[n][2] = Romaneio   
 //_aFardDev[n][3] = Quantidade  
@@ -1292,11 +1299,13 @@ Static Function FardosConf(nTipoFunc)
 		conout("TELAEXPED: Excluídos do romaneio "+ Str(nQtdExclui) +" fardos registrados.")
 		
 		//MontaGridFardo()
-		
-		if cNumRom <>'' //para verificar se rotina FARDOS() foi aberto fora ou dentro da rotina de carregamento.
-			Carregam() 
-			GridCarga() // alterado porque o GridCarga foi mudado para apenas preencher e não mais buscar dados.
-		EndIf
+		oDlg2:end()
+		TelaRom := cNumRom
+		TelaCarga()
+	 //	if cNumRom <>'' //para verificar se rotina FARDOS() foi aberto fora ou dentro da rotina de carregamento.
+	//		Carregam() 
+	//		GridCarga() // alterado porque o GridCarga foi mudado para apenas preencher e não mais buscar dados.
+	//	EndIf
 		oDlg4:end()
 	else
 		MSGINFO("Não existe item lido para excluir.")
@@ -1478,6 +1487,7 @@ Static Function GETDCLR(nLinha)
 	nRet := nCor2
 	if !empty(aColsExCg) //if len(aColsExCg) > 0
 	//	if Alltrim(aColsExCg[nLinha][5])<>"" .and. nlinha <= len(aColsExCg)
+			//If val(aColsExCg[nLinha][6]) > 0 
 			If val(aColsExCg[nLinha][6]) > 0  
 				nRet := nCor4
 			Endif
