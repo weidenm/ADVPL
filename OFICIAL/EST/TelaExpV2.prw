@@ -32,6 +32,8 @@ User Function Exped2()
 	//Static cNumRom := ""
 	Static Hoje := dtos(ddatabase)
 	Static oDlg1
+	static oDlg2
+
 	Static BmpLogo
 	Static oBtnCarreg
 	Static pos, I 
@@ -349,11 +351,10 @@ Return
 //***********************************************
 Static Function TelaCarga(It)
 	 
-	Static oDlg2
+	
 	Static BmpLogo
 	//Static oBtnAponta
 	//Static oBtnImprimir
-
 
 	Public oFontGrid
 	Public nTamCod
@@ -633,6 +634,21 @@ Static Function IncluiLeitor()
 		dbSelectArea("SZ3")
 		DbSetOrder(1)
 		dbGotop()
+/*
+		//verifica se é do tipo Reinfardamento
+		IF substr(Alltrim(cGetCodBar),1,8) == "99000099"
+			dbseek(xfilial("SZ3")+"99****99"+substr(Alltrim(cGetCodBar),9,4))
+		
+		//verifica se é do tipo devolução
+		ElseIF substr(Alltrim(cGetCodBar),1,8) == "55000055"
+			dbseek(xfilial("SZ3")+"55****55"+substr(Alltrim(cGetCodBar),9,4))
+
+		// se não for Reinfardamento e nem devolução
+		Else
+			dbseek(xfilial("SZ3")+substr(Alltrim(cGetCodBar),1,12))
+		EndIf
+*/
+		//Z3_FILIAL+Z3_NUMOP+Z3_ITEMOP+Z3_NUMERAC+Z3_TURMA
 		dbseek(xfilial("SZ3")+substr(Alltrim(cGetCodBar),1,12))
 		//Verifica se fardo foi encontrado
 		if SZ3->(found())
@@ -1075,7 +1091,7 @@ Static Function DevolFardos()
 	MontaGridFardo()
 	@ 029, 010 SAY oSayGrav PROMPT "ITENS:" SIZE 060, 015 OF oDlg4 FONT oFont1 COLORS 0, 16777215 PIXEL
 	@ 029, 065 SAY oSayGrav1 PROMPT nItens Picture "@E 999" SIZE 015, 015 OF oDlg4 FONT oFont1 COLORS 0, 16777215 PIXEL
-	@ 010, 342 BUTTON oBtnCancel PROMPT "Confirmar" SIZE 051, 013 OF oDlg4  ACTION (FardosConf(2),oGetCodBarFd:SetFocus()) PIXEL
+	@ 010, 342 BUTTON oBtnCancel PROMPT "Confirmar" SIZE 051, 013 OF oDlg4  ACTION (FardosConf(2),oDlg4:End()) PIXEL
 	
 	ACTIVATE MSDIALOG oDlg4 CENTERED
 
@@ -1299,18 +1315,18 @@ Static Function FardosConf(nTipoFunc)
 		conout("TELAEXPED: Excluídos do romaneio "+ Str(nQtdExclui) +" fardos registrados.")
 		
 		//MontaGridFardo()
+		//if TYPE(oDlg2) != "U"
+		//oDlg2:end()
+		//endif
 
-/*  //Rodar apenas quando for exclusão de fardos do proprio romaneio
-		oDlg2:end()
+
 		TelaRom := cNumRom
 		TelaCarga()
-*/
-
 	 //	if cNumRom <>'' //para verificar se rotina FARDOS() foi aberto fora ou dentro da rotina de carregamento.
 	//		Carregam() 
 	//		GridCarga() // alterado porque o GridCarga foi mudado para apenas preencher e não mais buscar dados.
 	//	EndIf
-		oDlg4:end()
+		//oDlg4:end()
 	else
 		MSGINFO("Não existe item lido para excluir.")
 		
@@ -1634,7 +1650,8 @@ Static Function AtuaRom()
 
 	Static TRCA
 	
-	aColsEx := {}
+	aColsEx := {} 
+	
 
 //CONSULTA DE DADOS PARA O GRID
 cQry := "SELECT A.Z1_NUM, A.Z1_ROTA, A.Z1_DESCRI, A.Z1_DTSAIDA, LTRIM(A.Z1_VEICULO) AS Z1_VEICULO, A.Z1_DTFECH, "
