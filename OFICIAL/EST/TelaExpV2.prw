@@ -57,7 +57,7 @@ User Function Exped2()
 	cPerg := "EXPETQ"
 	Pergunte(cPerg,.F.)
 
-	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2 2020-12 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
+	DEFINE MSDIALOG oDlg1 TITLE "Carregamento V2.1 2021-05 - PLINC " FROM 000, 000  TO 500, 800 COLORS 0, 16777215 PIXEL
     @ 000, 004 BITMAP BmpLogo SIZE 143, 045 OF oDlg1 FILENAME "\\srvpp08\Microsiga\protheus_data\system\logoRel.bmp" NOBORDER PIXEL
 	@ 025, 155 SAY oLblResp PROMPT "Separação da Carga: " SIZE 100, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 025, 250 SAY oTxtResp PROMPT pswret(1)[1][2] SIZE 060, 011 OF oDlg1 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -208,33 +208,18 @@ Static Function carregam()
 	Static nQtdPend :=0
 	Static nPesoPedTot := 0
 	Static TRC2 := {}
-
-//Posicionamento de item de carregamento decrescente
-/*	pos := oMSNewGe1:nAt
-	cNumRom :=  trim(oMSNewGe1:aArray[pos][1])
-	if nItem = 2  //campo Item 2 (proximo)
-		//cRomIt	:= val(trim(oMSNewGe1:aCols[pos][8]))
-		if nProxIt == 1
-			nProxIt := val(trim(oMSNewGe1:aArray[pos][2]))
-		else
-			nProxIt := nProxIt - 1
-		EndIf
-		cRomIt := strzero(nProxIt,2,0)
-	else
-		nProxIt := val(trim(oMSNewGe1:aArray[pos][2]))
-		cRomIt	:= trim(oMSNewGe1:aArray[pos][2])
-	EndIF
-*/
+	Static cItemRom := ""
 
 //Posicionamento de item de carregamento crescente
 	
 	pos := oMSNewGe1:nAt
 	cNumRom :=  trim(oMSNewGe1:aArray[pos][1])
-	if nItem = 2  //campo Item 2 (proximo)
+	if nItem = 2  // 2= Chamada botão "PROX ITEM"
 		//cRomIt	:= val(trim(oMSNewGe1:aCols[pos][8]))
 		//if nProxIt == 1
 		//	nProxIt := val(trim(oMSNewGe1:aArray[pos][2]))
 		//else
+	
 			nProxIt := nProxIt + 1
 		//EndIf
 		cRomIt := strzero(nProxIt,2,0)
@@ -248,36 +233,10 @@ Static Function carregam()
 	//cMotori	:= trim(oMSNewGe1:aCols[pos][5])
 	cDtSaida := oMSNewGe1:aArray[pos][5]
 
+IF ChkFile("TRC2",.f.) 
+		TRC2->(DbCloseArea())
+EndIf	
 	
-
-//PRODUTO POR ITEM DE ROMANEIO PARA CARREGAMENTO
-/*  //SQL QUE BUSCA GERAL DO ROMANEIO
-cQry := " SELECT ISNULL(D.B1_GRUPO,'') B1_GRUPO, ISNULL(A.C6_PRODUTO,'') C6_PRODUTO, ISNULL(B.Z3_PRODUTO,'') Z3_PRODUTO, ISNULL(D.B1_ORDEM,'') B1_ORDEM "
-cQry += " ,ISNULL(D.B1_PRVALID,0) B1_PRVALID,ISNULL(D.B1_DESC,'') B1_DESC, ISNULL(SUM(A.QTDPED),0) AS QTDVEN,  ISNULL(SUM(QTDROM),0) QTDROM,  ISNULL(SUM(QTDROM),0)*D.B1_PESO AS PESO "
-cQry += " FROM EXP_ROMPEDIDO A LEFT JOIN EXP_ROMFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO "
-cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD"
-cQry += " WHERE  A.Z1_NUM='"+cNumRom+"' "
-cQry += " GROUP BY A.Z1_NUM, A.C6_PRODUTO, A.Z1_EXPINI, B1_GRUPO, Z3_PRODUTO, B1_ORDEM,B1_PRVALID, B1_DESC, B1_PESO"
-cQry += " ORDER BY B1_ORDEM,C6_PRODUTO"  
-*/
-
-/*cQry := "  SELECT A.Z1_NUM,  A.Z1_ITEM, A.C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, SUM(A.QTDPED) AS QTDVEN, SUM(QTDROM) AS QTDROM"
-cQry += " FROM EXP_ROMITPEDIDO A LEFT OUTER JOIN EXP_ROMITFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO AND A.Z1_ITEM=B.Z1_ITEM "
-cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD WHERE  A.Z1_NUM='"+cNumRom+"' AND A.Z1_ITEM='"+cRomIt+"' "
-cQry += "  GROUP BY A.Z1_NUM,  A.Z1_ITEM, A.C6_PRODUTO, B1_GRUPO, B1_ORDEM, B1_DESC, B1_PESO "
-cQry += "  ORDER BY B1_ORDEM,C6_PRODUTO "
-*/
-
-/*
-cQry := " SELECT  Z3_ROMANEI AS Z1_NUM,  Z1_ITEM, Z3_PRODUTO AS C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, 0 AS QTDVEN, QTDROM "
-cQry += " FROM  EXP_ROMITFARDOS B INNER JOIN  SB1010 AS D ON B.Z3_PRODUTO = D.B1_COD WHERE  B.Z3_ROMANEI='"+cNumRom+"' AND Z1_ITEM='"+cRomIt+"' "
-cQry += " AND Z3_PRODUTO NOT IN (SELECT C6_PRODUTO FROM EXP_ROMITPEDIDO WHERE Z1_NUM='"+cNumRom+"' AND Z1_ITEM='"+cRomIt+"' )" 
-cQry += " UNION SELECT A.Z1_NUM,  A.Z1_ITEM, A.C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, A.QTDPED AS QTDVEN, QTDROM "
-cQry += " FROM EXP_ROMITPEDIDO A LEFT OUTER JOIN EXP_ROMITFARDOS B ON A.Z1_NUM = B.Z3_ROMANEI AND A.C6_PRODUTO=B.Z3_PRODUTO AND A.Z1_ITEM=B.Z1_ITEM "
-cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD WHERE  A.Z1_NUM='"+cNumRom+"' AND A.Z1_ITEM='"+cRomIt+"' " 
-cQry += " ORDER BY B1_ORDEM,C6_PRODUTO "
-*/
-
 cQry := " SELECT  Z3_ROMANEI AS Z1_NUM,  Z1_ITEM, Z3_PRODUTO AS C6_PRODUTO, D.B1_GRUPO, D.B1_ORDEM, D.B1_DESC, D.B1_PESO, 0 AS QTDVEN, QTDROM "
 cQry += " FROM  EXP_ROMITFARDOS B INNER JOIN  SB1010 AS D ON B.Z3_PRODUTO = D.B1_COD WHERE  B.Z3_ROMANEI='"+cNumRom+"' "
 cQry += " AND Z1_ITEM IN (SELECT MIN(Z1_ITEM) FROM SZ1010 WHERE Z1_NUM='"+cNumRom+"' AND Z1_EXPFIM = '' AND Z1_ITEM >= '"+STRZERO(nProxIt,2)  +"' )"
@@ -288,13 +247,17 @@ cQry += " INNER JOIN  SB1010 AS D ON A.C6_PRODUTO = D.B1_COD WHERE  A.Z1_NUM='"+
 cQry += "  AND A.Z1_ITEM IN  (SELECT MIN(Z1_ITEM) FROM SZ1010 WHERE Z1_NUM='"+cNumRom+"' AND Z1_EXPFIM = '' AND Z1_ITEM >= '"+STRZERO(nProxIt,2)  + "' ) "
 cQry += " ORDER BY B1_ORDEM,C6_PRODUTO "
 
-
 cQry := ChangeQuery(cQry)
 TCQUERY cQry NEW ALIAS "TRC2"
 
-DBSelectArea("SZ3")
-aDadosC := {}
+conout(cQry)
 
+cItemRom := TRC2->Z1_ITEM
+nProxIt := val(TRC2->Z1_ITEM) //Busca item atual em aberto como referência para o próximo
+
+//DBSelectArea("SZ3")
+
+aDadosC := {}
 While !TRC2->(Eof())  
 
 	nQtdFardo := TRC2->QTDROM //Quantidade carregada no romaneio
@@ -342,8 +305,7 @@ While !TRC2->(Eof())
 	TRC2->(DbSkip())
 EndDo
 
-TRC2->(DbCloseArea())
-
+	
 Return
 
 //***********************************************
@@ -385,11 +347,12 @@ Static Function TelaCarga(It)
 	nCod := 0
 	#define DS_MODALFRAME 128 //Desabilita fechar tela pelo X
 
-
 //	Static lInicioCarg
 //	lInicioCarg := .f.
 	Public cEmailErro :=""
 	Public cAssunto :=""
+
+
 
 // Local aSize := {}
  //Local bOk := {|| }
@@ -448,6 +411,18 @@ Static Function TelaCarga(It)
 
 	Carregam()
 
+	if Alltrim(cItemRom) = ""
+		PausaRom()
+		Return
+	EndIf
+	//Caso existir tela aberta anteriormente ela é finalizada.
+	if ! empty(oDlg2) 
+	//	alert("fechou")
+		oDlg2:end()
+	endif
+	//Se não existir próximo item fecha a tela de Carregamento.
+
+
 ////Define MsDialog oDialog TITLE "Titulo" STYLE DS_MODALFRAME From aSize[7],0 To aSize[6],aSize[5] OF oMainWnd PIXEL
  //Se não utilizar o MsAdvSize, pode-se utilizar a propriedade lMaximized igual a T para maximizar a janela
  //oDialog:lMaximized := .T. //Maximiza a janela
@@ -457,7 +432,8 @@ Static Function TelaCarga(It)
 //****************         MONTAGEM DA TELA            ************************
 //*****************************************************************************
 	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 0, 0 TO nLinTela-170, nColTela-70 COLORS 0, 16777215 PIXEL //Style DS_MODALFRAME
-	@ 002, 003 SAY oLblNum PROMPT cNumRom + "-" +cRomIt   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	@ 002, 003 SAY oLblNum PROMPT cNumRom + "-" +cItemRom   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
+	//@ 002, 003 SAY oLblNum PROMPT cNumRom + "-" +cRomIt   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 007, 050 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
 	@ 002, 250 GROUP oGroup1 TO 020, 600 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
 	@ 004, 255 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -487,17 +463,17 @@ Static Function TelaCarga(It)
 	ACTIVATE MSDIALOG oDlg2 CENTERED	
 
 //oBtnNext:bGotFocus :=  {||oGetCodBar:SetFocus()}
-
 Return
+
 
 Static Function GridCarga()
 
 Local I	
 Static aFieldsCg := {}
-Public aColsExCg  
+Static aColsExCg //Public aColsExCg  
 Static aColsConc 
-Public oBrowse := {}
-Public oBrwFinaliz := {}
+Static oBrowse := {} //Public oBrowse := {}
+Static oBrwFinaliz := {} //Public oBrwFinaliz := {}
 	
 //******************************************************************************
 //****************         MONTAGEM DOS DADOS           ************************

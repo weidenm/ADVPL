@@ -708,9 +708,9 @@ Static Function ImpSub(cTipoEtq)
 		if Alltrim(cLoteSub) <> ""
 			IF Alltrim(cCodProd) <> ""
 				if cMot = "D"
-					cOP := "55"+ strzero(val(cLoteSub),4) +"55" //alterado 16/07/18
+					cOP := "55"+ strzero(val(substring(cLoteSub,1,4)),4) +"55" //alterado 29/05/2021
 				Else
-					cOP := "99"+ strzero(val(cLoteSub),4) +"99" //alterado 11/04/16
+					cOP := "99"+ strzero(val(substring(cLoteSub,1,4),4) +"99" //alterado 29/05/2021
 				EndIf
 			Else
 				MSGINFO("Preencha o cod. produto.")
