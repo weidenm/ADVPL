@@ -433,7 +433,6 @@ Static Function TelaCarga(It)
 //*****************************************************************************
 	DEFINE MSDIALOG oDlg2 TITLE "Carregamento Romaneio "+cNumRom FROM 0, 0 TO nLinTela-170, nColTela-70 COLORS 0, 16777215 PIXEL //Style DS_MODALFRAME
 	@ 002, 003 SAY oLblNum PROMPT cNumRom + "-" +cItemRom   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
-	//@ 002, 003 SAY oLblNum PROMPT cNumRom + "-" +cRomIt   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 007, 050 SAY oSay3 PROMPT "Codigo de Barras :" SIZE 051, 011 OF oDlg2 COLORS 0, 16777215 PIXEL
 	@ 002, 250 GROUP oGroup1 TO 020, 600 PROMPT "" OF oDlg2 COLOR 0, 16777215 PIXEL
 	@ 004, 255 SAY oLblVeic PROMPT "Veículo:" SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -443,7 +442,7 @@ Static Function TelaCarga(It)
 	@ 004, 460 SAY oLblSaida PROMPT "Saída:"   SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 004, 500 SAY oTxtSaida PROMPT cDtSaida SIZE 060, 011 OF oGroup1 FONT oFont2 COLORS 0, 16777215 PIXEL
 	@ 002, nColG1+175 BUTTON oBtnNext PROMPT "PROX. ITEM" SIZE 040, 015 OF oDlg2 ACTION  ItemSenha() PIXEL	
-	//@ 002, nColG1+220 BUTTON oBtnExc PROMPT "EXC.FARDOS" SIZE 040, 015 OF oDlg2 ACTION (retfardos()) PIXEL
+	@ 002, nColG1+220 BUTTON oBtnExc PROMPT "EXC.FARDOS" SIZE 040, 015 OF oDlg2 ACTION (retfardos()) PIXEL
 	@ 002, nColG1+265 BUTTON oBtnApont PROMPT "PAUSAR" SIZE 040, 015 OF oDlg2 ACTION (PausaRom()) PIXEL  
 	@ 002, nColG1+310 BUTTON oBtnFinaliz PROMPT "FINALIZAR" SIZE 040, 015 OF oDlg2 ACTION (finalizaSenha()) PIXEL
 	@ 030, 010 SAY oLblPend PROMPT "PENDENTES"   SIZE 060, 011 OF oDlg2 FONT oFont2 COLORS 0, 16777215 PIXEL
@@ -501,10 +500,10 @@ For I:= 1 To Len(aDadosC)
 
 		aColsExCg[nLin,01] := aDadosC[i][1]
 		aColsExCg[nLin,02] := aDadosC[i][2]
-		aColsExCg[nLin,03] := Transform(aDadosC[i][3],"@E 9999") 	//Quantidade
-		aColsExCg[nLin,04] := Transform(aDadosC[i][4],"@E 9999")	//Registrado 	 
-		aColsExCg[nLin,05] := Transform(aDadosC[i][5],"@E 9999")	//Restante  
-		aColsExCg[nLin,06] := Transform(aDadosC[i][6],"@E 9999")	//Excedente
+		aColsExCg[nLin,03] := aDadosC[i][3] //Transform(aDadosC[i][3],"@E 9999") 	//Quantidade
+		aColsExCg[nLin,04] := aDadosC[i][4]  //Transform(aDadosC[i][4],"@E 9999")	//Registrado 	 
+		aColsExCg[nLin,05] := aDadosC[i][5] //Transform(aDadosC[i][5],"@E 9999")	//Restante  
+		aColsExCg[nLin,06] := aDadosC[i][6] //Transform(aDadosC[i][6],"@E 9999")	//Excedente
 		aColsExCg[nLin,07] := aDadosC[i][7]
 		aColsExCg[nLin,08] := aDadosC[i][8]
 		aColsExCg[nLin,09] := Transform(aDadosC[i][9],"@E 9999")  
@@ -729,18 +728,85 @@ Static Function atual()
 
 	Local nLin := 0
 	Local lGrid1 := .f.
+	Local nQuant := 0
+	Local nRegistr := 0
+	Local nRest := 0 
+	Local nExced := 0
+
 	//dbSelectArea("SZ3")
 	//dbGotop()
 	//dbseek(xfilial("SZ3")+substr(Alltrim(cGetCodBar),1,8)+substr(cGetCodBar,9,4)) //ALTERADO 28/07/15
 
+
 //Atualiza Grid 1 - Itens Pendentes
+	For nLin:= 1 To Len(aColsExCg)  //Array que guarda dados do Grid
+
+		if VALTYPE(aColsExCg[nLin,03])="N" 
+			nQuant :=  aColsExCg[nLin,03] 
+		Else
+			nQuant :=  val(aColsExCg[nLin,03])
+		EndIF
+
+		if VALTYPE(aColsExCg[nLin,04])="N" 
+			nRegistr :=  aColsExCg[nLin,04]
+		Else
+			nRegistr :=  val(aColsExCg[nLin,04])
+		EndIF
+
+		if VALTYPE(aColsExCg[nLin,05])="N" 
+			nRest :=  aColsExCg[nLin,05]
+		Else
+			nRest :=  val(aColsExCg[nLin,05])
+		EndIF
+
+		if VALTYPE(aColsExCg[nLin,06])="N" 
+			nExced :=   aColsExCg[nLin,06]  
+		Else
+			nExced :=  val(aColsExCg[nLin,06]) 
+		EndIF
+
+		if	Trim(aColsExCg[nLin,01]) == Trim(cCodProdBar) 
+			
+			lGrid1 = .t.
+
+			aColsExCg[nLin,04] :=  Transform(nRegistr+1,"@E 9999")  
+			
+			if nRegistr<=nQuant
+				aColsExCg[nLin,05] :=  Transform(nRest-1,"@E 9999")  //str(val(aColsExCg[nLin,05])-1)				
+			else
+				aColsExCg[nLin,06] := Transform(nExced+1,"@E 9999")  //str(val(aColsExCg[nLin,06])+1)
+			EndIf
+			
+			if  nRest=0 .and. nExced=0
+				AADD(aColsConc,Array(Len(aFieldsCg)+1))
+				Linew := Len(aColsConc)
+				aColsConc[Linew,01] := aColsExCg[nLin,01]  //Produto
+				aColsConc[Linew,02] := aColsExCg[nLin,02]  //Descrição
+				aColsConc[Linew,03] := aColsExCg[nLin,03]  //Quantidade total
+				aColsConc[Linew,04] := aColsExCg[nLin,04]  //Registrado
+				aColsConc[Linew,05] := aColsExCg[nLin,05]  //Restante
+				aColsConc[Linew,06] := aColsExCg[nLin,06]  //Excedente
+				aColsConc[Linew,07] := aColsExCg[nLin,07]  //Motivo Falta
+				aColsConc[Linew,08] := aColsExCg[nLin,08]  //Grupo
+				lConcAtu := .t.
+			EndIf
+			exit
+		EndIf
+	Next
+
+/*
 	For nLin:= 1 To Len(aColsExCg)  //Array que guarda dados do Grid
 		
 		if	Trim(aColsExCg[nLin,01]) == Trim(cCodProdBar) 
 			
 			lGrid1 = .t.
-			aColsExCg[nLin,04] :=  Transform(val(aColsExCg[nLin,04])+1,"@E 9999") //str(val(aColsExCg[nLin,04])+1)
-			
+			if VALTYPE(aColsExCg[nLin,04])="N" 
+				aColsExCg[nLin,04] :=  Transform(aColsExCg[nLin,04]+1,"@E 9999")  
+			else
+			 	aColsExCg[nLin,04] :=  Transform(val(aColsExCg[nLin,04])+1,"@E 9999")  
+			EndIf
+
+
 			if val(aColsExCg[nLin,04])<=val(aColsExCg[nLin,03])
 				aColsExCg[nLin,05] :=  Transform(val(aColsExCg[nLin,05])-1,"@E 9999")  //str(val(aColsExCg[nLin,05])-1)				
 			else
@@ -763,7 +829,7 @@ Static Function atual()
 			exit
 		EndIf
 	Next
-
+*/
 	//Atualiza Grid 2 - Itens Concluídos, caso produto não estiver no Grid 1.
 	if lGrid1 = .f. //Caso produto não esteja no primeiro grid, procurar o mesmo no segundo grid (concluídos)
 		For nLin:= 1 To Len(aColsConc)   //Array que guarda dados do Grid
@@ -798,11 +864,14 @@ Static Function atual()
 	//Exclui registros concluídos de array do Grid Pendentes
 	nLin := 1			
 	While nLin <= Len(aColsExCg) 
-		if	aColsExCg[nLin,03] == aColsExCg[nLin,04]
-			ADEL(aColsExCg, nLin)
-			ASIZE(aColsExCg,Len(aColsExCg)-1)
-			nLin := 1 
-			Loop
+		
+		if 	valtype(aColsExCg[nLin,03]) = valtype(aColsExCg[nLin,04])
+			if	aColsExCg[nLin,03] = aColsExCg[nLin,04]
+				ADEL(aColsExCg, nLin)
+				ASIZE(aColsExCg,Len(aColsExCg)-1)
+				nLin := 1 
+				Loop
+			EndIf
 		EndIf
 		nLin++
 	EndDo
@@ -1467,29 +1536,27 @@ Static Function GETDCLR(nLinha)
 	Local nCor4 :=  5070329 //fVERMELHO
 	Local nCor2 := 16777215 //branco
 
-/*	
-	if len(aColsExCg) > 0
-		if Alltrim(aColsExCg[nLinha][5])<>"" .and. nlinha <= len(aColsExCg)
-			If val(aColsExCg[nLinha][6])>0  .and. aColsExCg[nLinha][6]<>"" //_nExced
-				nRet := nCor4
-			Else 
-				nRet := nCor3 
-			Endif
-		else
-			nRet := nCor4
-		EndIF
-	EndIf
-	*/
-	nRet := nCor2
 	if !empty(aColsExCg) //if len(aColsExCg) > 0
-	//	if Alltrim(aColsExCg[nLinha][5])<>"" .and. nlinha <= len(aColsExCg)
-			//If val(aColsExCg[nLinha][6]) > 0 
-			If val(aColsExCg[nLinha][6]) > 0  
-				nRet := nCor4
-			Endif
-		//else
-		//	nRet := nCor4
-	//	EndIF
+
+		
+			If valtype(aColsExCg[nLinha][6])="N" 
+				if aColsExCg[nLinha][6] > 0
+					nRet := nCor4
+				Else	
+					nRet := nCor2
+				Endif
+			else
+				if valtype(aColsExCg[nLinha][6])="C" 
+					if val(aColsExCg[nLinha][6]) > 0
+						nRet := nCor4
+					Else	
+						nRet := nCor2
+					Endif
+				Else
+					nRet := nCor2
+				EndIf
+			EndIf	
+	
 	EndIf
 	
 Return nRet
